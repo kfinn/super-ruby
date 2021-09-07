@@ -27,5 +27,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'tty-config', '~> 0.3.2'
-  # spec.add_dependency "rails", "~> 6.1.4", ">= 6.1.4.1"
+  spec.add_dependency 'activemodel', '~> 6.1', '>= 6.1.4.1'
+  spec.add_dependency 'activesupport', '~> 6.1', '>= 6.1.4.1'
+  spec.add_dependency 'zeitwerk', '~> 2.4', '>= 2.4.2'
 end

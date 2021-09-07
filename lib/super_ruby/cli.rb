@@ -17,5 +17,17 @@ module SuperRuby
       puts "v#{SuperRuby::VERSION}"
     end
     map %w(--version -v) => :version
+
+    desc 'evaluate FILE', 'Evaluate the specified Super program'
+    method_option :help, aliases: '-h', type: :boolean,
+                         desc: 'Display usage information'
+    def evaluate(file)
+      if options[:help]
+        invoke :help, ['evaluate']
+      else
+        require_relative 'commands/evaluate'
+        SuperRuby::Commands::Evaluate.new(file, options).execute
+      end
+    end
   end
 end
