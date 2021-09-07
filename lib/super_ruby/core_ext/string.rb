@@ -8,7 +8,8 @@ class String
     SUPER_WHITESPACE_CHARACTERS.include? self
   end
 
-  SUPER_WORDBREAK_PUNCTUATION_CHARACTERS = Set.new(["{", "}", "(", ")", "[", "]", ";", ":", ",", "."]).freeze
+  SUPER_CONTROL_FLOW_PUNCTUATION = ["{", "}", "(", ")", "[", "]", ";", ":", ",", ].freeze
+  SUPER_WORDBREAK_PUNCTUATION_CHARACTERS = Set.new([*SUPER_CONTROL_FLOW_PUNCTUATION, "."]).freeze
   def is_super_wordbreak_punctuation?
     SUPER_WORDBREAK_PUNCTUATION_CHARACTERS.include? self
   end
@@ -40,6 +41,11 @@ class String
   ])
   def is_super_punctuation?
     !SUPER_NON_PUNCTUATION_CHARACTERS.include? self
+  end
+
+  def is_super_operator?
+    is_super_punctuation? &&
+      !SUPER_CONTROL_FLOW_PUNCTUATION.include?(self)
   end
 
   SUPER_WORDBREAK_CHARACTERS = Set.new([*SUPER_WORDBREAK_PUNCTUATION_CHARACTERS, *SUPER_WHITESPACE_CHARACTERS]).freeze

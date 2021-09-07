@@ -1,6 +1,7 @@
 require "active_support"
 require "active_model"
 
+require "super_ruby/core_ext/enumerator"
 require "super_ruby/core_ext/string"
 
 require "zeitwerk"

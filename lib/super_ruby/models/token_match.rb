@@ -3,18 +3,17 @@ module SuperRuby
     def consume!(character, &block)
       return self if character.is_super_whitespace?
 
-
-      concrete_match_klass =
+      concrete_match_class =
         if character.is_super_identifier_start? 
-          IdentifierTokenMatch
+          TokenMatches::Identifier
         elsif character.is_super_integer_literal_start?
-          IntegerLiteralTokenMatch
+          TokenMatches::IntegerLiteral
         elsif character.is_super_string_literal_terminator?
-          StringLiteralTokenMatch
+          TokenMatches::StringLiteral
         else
-          PunctuationTokenMatch
+          TokenMatches::Punctuation
         end
-      concrete_match_klass.new.consume!(character, &block)
+      concrete_match_class.new.consume!(character, &block)
     end
   end
 end
