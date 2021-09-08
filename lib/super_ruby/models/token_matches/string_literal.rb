@@ -1,14 +1,16 @@
 module SuperRuby
   module TokenMatches
     class StringLiteral
-      def consume!(character,  &block)
+      def self.matches_first_character?(character)
+        character.super_string_literal_terimator?
+      end
+
+      def consume!(character, &block)
         text << character
-        if terminated?
-          yield Token.new text: text, match: self
-          TokenMatch.new
-        else
-          self
-        end
+        return self unless terminated?
+
+        yield Token.new self
+        TokenMatch.new
       end
 
       def terminated?
@@ -19,7 +21,7 @@ module SuperRuby
       end
 
       def text
-        @text ||= ""
+        @text ||= ''
       end
     end
   end

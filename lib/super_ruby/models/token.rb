@@ -1,6 +1,5 @@
 module SuperRuby
-  class Token
-    include ActiveModel::Model
-    attr_accessor :text, :match
+  Token = Struct.new(:match) do
+    delegate :text, to: :match
   end
 end

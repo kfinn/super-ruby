@@ -1,17 +1,16 @@
 module SuperRuby
   class TokenMatch
     def consume!(character, &block)
-      return self if character.is_super_whitespace?
+      return self if character.super_whitespace?
 
       concrete_match_class =
-        if character.is_super_identifier_start? 
-          TokenMatches::Identifier
-        elsif character.is_super_integer_literal_start?
-          TokenMatches::IntegerLiteral
-        elsif character.is_super_string_literal_terminator?
-          TokenMatches::StringLiteral
-        else
-          TokenMatches::Punctuation
+        [
+          TokenMatches::Indent,
+          TokenMatches::Dedent,
+          TokenMatches::StringLiteral,
+          TokenMatches::Symbol
+        ].find do |match_class|
+          match_class.matches_first_character? character
         end
       concrete_match_class.new.consume!(character, &block)
     end

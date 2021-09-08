@@ -1,55 +1,25 @@
 class String
-  def is_super_dot?
-    self == "."
+  def super_whitespace?
+    self.squish.blank?
   end
 
-  SUPER_WHITESPACE_CHARACTERS = Set.new([" ", "\t", "\r", "\n", "\f", "\v"]).freeze
-  def is_super_whitespace?
-    SUPER_WHITESPACE_CHARACTERS.include? self
+  SUPER_INDENT_CHARACTERS = Set.new(["{", "(", "["]).freeze
+  def super_indent?
+    SUPER_INDENT_CHARACTERS.include? self
   end
 
-  SUPER_CONTROL_FLOW_PUNCTUATION = ["{", "}", "(", ")", "[", "]", ";", ":", ",", ].freeze
-  SUPER_WORDBREAK_PUNCTUATION_CHARACTERS = Set.new([*SUPER_CONTROL_FLOW_PUNCTUATION, "."]).freeze
-  def is_super_wordbreak_punctuation?
-    SUPER_WORDBREAK_PUNCTUATION_CHARACTERS.include? self
+  SUPER_DEDENT_CHARACTERS = Set.new(["}", ")", "]"]).freeze
+  def super_dedent?
+    SUPER_DEDENT_CHARACTERS.include? self
   end
 
-  SUPER_IDENTIFIER_START_CHARACTERS = Set.new([*"A".."Z", *"a".."z", "_"]).freeze
-  def is_super_identifier_start?
-    SUPER_IDENTIFIER_START_CHARACTERS.include? self
+  SUPER_CONTROL_FLOW_CHARACTERS = Set.new([*SUPER_INDENT_CHARACTERS, *SUPER_DEDENT_CHARACTERS]).freeze
+  def super_control_flow?
+    SUPER_CONTROL_FLOW_CHARACTERS.include? self
   end
 
-  SUPER_INTEGER_LITERAL_START_CHARACTERS = Set.new([*"0".."9"]).freeze
-  def is_super_integer_literal_start?
-    SUPER_INTEGER_LITERAL_START_CHARACTERS.include? self
-  end
-
-  SUPER_INTEGER_LITERAL_CHARACTERS = Set.new([*SUPER_INTEGER_LITERAL_START_CHARACTERS, "_"]).freeze
-  def is_super_integer_literal?
-    SUPER_INTEGER_LITERAL_CHARACTERS.include? self
-  end
-
-  SUPER_STRING_LITERAL_TERMINATOR_CHARACTERS = Set.new(["\""]).freeze
-  def is_super_string_literal_terminator?
-    SUPER_STRING_LITERAL_TERMINATOR_CHARACTERS.include? self
-  end
-
-  SUPER_NON_PUNCTUATION_CHARACTERS = Set.new([
-    *SUPER_WHITESPACE_CHARACTERS,
-    *SUPER_IDENTIFIER_START_CHARACTERS,
-    *SUPER_INTEGER_LITERAL_START_CHARACTERS
-  ])
-  def is_super_punctuation?
-    !SUPER_NON_PUNCTUATION_CHARACTERS.include? self
-  end
-
-  def is_super_operator?
-    is_super_punctuation? &&
-      !SUPER_CONTROL_FLOW_PUNCTUATION.include?(self)
-  end
-
-  SUPER_WORDBREAK_CHARACTERS = Set.new([*SUPER_WORDBREAK_PUNCTUATION_CHARACTERS, *SUPER_WHITESPACE_CHARACTERS]).freeze
-  def is_super_wordbreak?
-    SUPER_WORDBREAK_CHARACTERS.include? self
+  SUPER_STRING_LITERAL_TERMINATORS = Set.new(['"', "'"]).freeze
+  def super_string_literal_terimator?
+    SUPER_STRING_LITERAL_TERMINATORS.include? self
   end
 end

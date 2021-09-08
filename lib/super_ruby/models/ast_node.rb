@@ -1,27 +1,20 @@
 module SuperRuby
   class AstNode
-    AST_NODES_BY_PRIORITY = [
-      AstNodes::BinaryOperatorApplication,
-      AstNodes::Sequence,
-      AstNodes::IntegerLiteral
-    ]
-
     def self.from_tokens(tokens)
-      expressions = []
+      children = []
       while !tokens.empty?
-        AST_NODES_BY_PRIORITY.each do |ast_node_class|
-          if ast_node_class.can_build_from_tokens? tokens
-            expressions << ast_node_class.from_tokens(tokens)
-            break;
-          end
+        token = tokens.peek
+        case token.match
+        when TokenMatches::Dedent
+          break
+        when TokenMatches::Indent
+          children << AstNodes::List.from_tokens(tokens)
+        else
+          children << AstNodes::Atom.from_tokens(tokens)
         end
       end
       
-      if expressions.size == 1
-        expressions.first
-      else
-        Sequence.new expressions: expressions
-      end
+      children
     end
   end
 end

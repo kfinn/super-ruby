@@ -1,11 +1,13 @@
 module SuperRuby
   module TokenMatches
-    class IntegerLiteral
+    class Symbol
+      def self.matches_first_character?(_character)
+        true
+      end
+
       def consume!(character, &block)
-        if character.is_super_dot?
-          IntegerLiteralFollowedByDot.new(before_dot_text: text)
-        elsif !character.is_super_integer_literal?
-          yield Token.new text: text, match: self
+        if character.super_whitespace? || character.super_control_flow?
+          yield Token.new self
           TokenMatch.new.consume! character, &block
         else
           text << character
@@ -14,7 +16,7 @@ module SuperRuby
       end
 
       def text
-        @text ||= ""
+        @text ||= ''
       end
     end
   end
