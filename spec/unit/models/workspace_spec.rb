@@ -52,6 +52,7 @@ module SuperRuby
           expect(workspace.evaluate.value).to eq 12
         end
       end
+
       context 'with a program including multiple defined identifiers' do
         let(:super_code) do
           <<~SUPER
@@ -64,6 +65,22 @@ module SuperRuby
 
         it 'is the defined value' do
           expect(workspace.evaluate.value).to eq 12
+        end
+      end
+
+      context 'with a program including an indirect send' do
+        let(:super_code) do
+          <<~SUPER
+            (define source 24)
+            (define intermediate source)
+            (define result_key result)
+            (define (send result_key) (send (send intermediate)))
+            (send result)
+          SUPER
+        end
+
+        it 'is the defined value' do
+          expect(workspace.evaluate.value).to eq 24
         end
       end
     end
