@@ -14,5 +14,7 @@ module SuperRuby
         end
       concrete_match_class.new.consume!(character, &block)
     end
+
+    def flush!; end
   end
 end

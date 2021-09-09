@@ -4,11 +4,9 @@ module SuperRuby
       let(:tokens) do
         source_file_lexer.each_token
       end
-      let(:source_file_lexer) { SourceFileLexer.new source_file: mock_source_file }
-      let(:mock_source_file) do
-        instance_double(SourceFile).tap do |it|
-          allow(it).to receive(:open_file).and_yield(StringIO.new(super_code))
-        end
+      let(:source_file_lexer) { Lexer.new source_string }
+      let(:source_string) do
+        SourceString.new super_code
       end
 
       context 'with an Integer literal' do

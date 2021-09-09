@@ -1,16 +1,15 @@
 module SuperRuby
   class SourceFile
-    include ActiveModel::Model
-
-    attr_accessor :filename
-
-    delegate :each_token, to: :source_file_lexer
-    def source_file_lexer
-      @source_file_lexer ||= SourceFileLexer.new self
+    def initialize(filename)
+      @filename = filename
     end
+    
+    attr_reader :filename
 
-    def open_file
-      File.open(filename) { |file| yield file }
+    def each_char(&block)
+      File.open filename do |file|
+        file.each_char(&block)
+      end
     end
   end
 end

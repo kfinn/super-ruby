@@ -9,16 +9,5 @@ module SuperRuby
         TokenMatch.new
       end
     end
-
-    class Indent < ControlFlow
-      def self.matches_first_character?(character)
-        character.super_indent?
-      end
-    end
-    class Dedent < ControlFlow
-      def self.matches_first_character?(character)
-        character.super_dedent?
-      end
-    end
   end
 end

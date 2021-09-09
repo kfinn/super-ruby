@@ -15,6 +15,10 @@ module SuperRuby
         end
       end
 
+      def flush!
+        yield Token.new self
+      end
+
       def text
         @text ||= ''
       end

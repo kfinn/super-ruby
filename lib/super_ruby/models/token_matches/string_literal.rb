@@ -23,6 +23,10 @@ module SuperRuby
       def text
         @text ||= ''
       end
+
+      def flush!
+        raise 'reached end of code with an unterminated string literal'
+      end
     end
   end
 end
