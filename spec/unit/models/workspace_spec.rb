@@ -74,7 +74,10 @@ module SuperRuby
             (define source 24)
             (define intermediate source)
             (define result_key result)
-            (define (send result_key) (send (send intermediate)))
+            (define
+              (send result_key)
+              (send (send intermediate))
+            )
             (send result)
           SUPER
         end
