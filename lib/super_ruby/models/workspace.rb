@@ -10,28 +10,12 @@ module SuperRuby
     end
 
     def evaluate
-      within_workspace do
-        expressions.last.value
-      end
+      expressions.each { |expression| expression.evaluate!(root_scope) }
+      expressions.last.value.resolve_within(root_scope)
     end
 
-    def within_workspace(&block)
-      self.class.within_workspace(self, &block)
-    end
-
-    def self.current_workspace
-      raise 'attempting to evaluate expressions without a current workspace' unless @current_workspace.present?
-      @current_workspace
-    end
-
-    def self.within_workspace(workspace)
-      previous_workspace = @current_workspace
-      begin
-        @current_workspace = workspace
-        yield
-      ensure
-        @current_workspace = previous_workspace
-      end
+    def root_scope
+      @root_scope ||= Scope.new
     end
   end
 end

@@ -26,6 +26,19 @@ module SuperRuby
       def initialize(children)
         @children = children
       end
+
+      def evaluate!(scope)
+        if children.size == 3 && children.first.is_define?
+          children[1].evaluate!(Scope.new(scope))
+          identifier = children[1].value
+          raise "invalid identifier: #{identifier}" unless identifier.kind_of?(Values::Identifier)
+          scope.define! identifier, children[2]
+        end
+      end
+
+      def is_define?
+        false
+      end
     end
   end
 end

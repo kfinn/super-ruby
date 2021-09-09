@@ -8,21 +8,25 @@ module SuperRuby
       delegate :text, to: :token
 
       def value
-        evaluate! unless instance_variable_defined?(:@value)
+        raise "attempting to take the value of an unevaluated expression" unless instance_variable_defined?(:@value)
         @value
       end
 
-      def evaluate!
+      def evaluate!(scope)
         @value = 
           if token.match.kind_of? TokenMatches::StringLiteral
-            text[1..-2].gsub("\\\"", '"')
+            Values::Concrete.new(text[1..-2].gsub("\\\"", '"'))
           elsif /\A[0-9][0-9_]*\Z/.match? text
-            text.to_i
+            Values::Concrete.new(text.to_i)
           elsif /\A[0-9][0-9_]*\.[0-9_]*\Z/.match? text
-            text.to_f
+            Values::Concrete.new(text.to_f)
           else
-            workspace.resolve_identifier text
+            Values::Identifier.new(text)
           end
+      end
+
+      def is_define?
+        token.match.kind_of?(TokenMatches::Symbol) && text == 'define'
       end
     end
   end

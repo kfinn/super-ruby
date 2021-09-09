@@ -7,21 +7,21 @@ module SuperRuby
       context 'with a program containing only an int literal' do
         let(:super_code) { '1' }
         it 'is the int literal' do
-          expect(workspace.evaluate).to eq 1
+          expect(workspace.evaluate.value).to eq 1
         end
       end
 
       context 'with a program containing only a float literal' do
         let(:super_code) { '0.5' }
         it 'is the float literal' do
-          expect(workspace.evaluate).to eq 0.5
+          expect(workspace.evaluate.value).to eq 0.5
         end
       end
 
       context 'with a program containing only a string literal' do
         let(:super_code) { '"ffff\""'}
         it 'is the unescaped string literal' do
-          expect(workspace.evaluate).to eq 'ffff"'
+          expect(workspace.evaluate.value).to eq 'ffff"'
         end
       end
 
@@ -36,7 +36,34 @@ module SuperRuby
         end
 
         it 'is the value of the final expression' do
-          expect(workspace.evaluate).to eq 7
+          expect(workspace.evaluate.value).to eq 7
+        end
+      end
+
+      context 'with a program including a defined identifier' do
+        let(:super_code) do
+          <<~SUPER
+            (define result 12)
+            result
+          SUPER
+        end
+
+        it 'is the defined value' do
+          expect(workspace.evaluate.value).to eq 12
+        end
+      end
+      context 'with a program including multiple defined identifiers' do
+        let(:super_code) do
+          <<~SUPER
+            (define source 12)
+            (define intermediate source)
+            (define result intermediate)
+            result
+          SUPER
+        end
+
+        it 'is the defined value' do
+          expect(workspace.evaluate.value).to eq 12
         end
       end
     end
