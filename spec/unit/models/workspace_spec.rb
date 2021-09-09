@@ -44,7 +44,7 @@ module SuperRuby
         let(:super_code) do
           <<~SUPER
             (define result 12)
-            result
+            (send result)
           SUPER
         end
 
@@ -56,9 +56,9 @@ module SuperRuby
         let(:super_code) do
           <<~SUPER
             (define source 12)
-            (define intermediate source)
-            (define result intermediate)
-            result
+            (define intermediate (send source))
+            (define result (send intermediate))
+            (send result)
           SUPER
         end
 

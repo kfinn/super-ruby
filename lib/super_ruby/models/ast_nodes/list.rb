@@ -28,16 +28,39 @@ module SuperRuby
       end
 
       def evaluate!(scope)
-        if children.size == 3 && children.first.is_define?
-          children[1].evaluate!(Scope.new(scope))
-          identifier = children[1].value
-          raise "invalid identifier: #{identifier}" unless identifier.kind_of?(Values::Identifier)
-          scope.define! identifier, children[2]
-        end
+        raise "unable to evaluate an empty list" if children.size == 0
+        first_child = children.first
+        first_child.evaluate! scope
+        first_child_value = first_child.value
+        first_child_value_keyword = first_child_value.to_keyword
+        raise "unable to evaluate a list with non-keyword initial argument: #{first_child_value}" unless first_child_value_keyword.present?
+        @value = 
+          case first_child_value_keyword
+          when 'define'
+            second_child = children[1]
+            second_child.evaluate! scope.spawn
+            identifier = second_child.value
+            raise "invalid identifier: #{identifier}" unless identifier.kind_of?(Values::Identifier)
+            raise "invalid identifier: #{identifier}" if identifier.to_keyword.present?
+            scope.define! identifier, children[2]
+            nil
+          when 'send'
+            second_child = children[1]
+            second_child.evaluate! scope.spawn
+            identifier = second_child.value
+            raise "invalid identifier: #{identifier}" unless identifier.kind_of?(Values::Identifier)
+            raise "invalid identifier: #{identifier}" if identifier.to_keyword.present?
+            result_expression = scope.resolve(identifier)
+            result_expression.evaluate! scope.spawn
+            result_expression.value
+          else
+            raise "invalid keyword: #{first_child_value_keyword}"
+          end
       end
 
-      def is_define?
-        false
+      def value
+        raise "attempting to take the value of an unevaluated expression" unless instance_variable_defined?(:@value)
+        @value
       end
     end
   end

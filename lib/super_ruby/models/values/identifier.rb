@@ -20,6 +20,11 @@ module SuperRuby
         expression.evaluate! scope
         expression.value.resolve_within scope
       end
+
+      KEYWORDS = Set.new(["define", "send"]).freeze
+      def to_keyword
+        name if KEYWORDS.include? name
+      end
     end
   end
 end

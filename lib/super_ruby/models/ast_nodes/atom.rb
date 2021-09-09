@@ -24,10 +24,6 @@ module SuperRuby
             Values::Identifier.new(text)
           end
       end
-
-      def is_define?
-        token.match.kind_of?(TokenMatches::Symbol) && text == 'define'
-      end
     end
   end
 end

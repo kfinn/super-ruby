@@ -11,7 +11,7 @@ module SuperRuby
 
     def evaluate
       expressions.each { |expression| expression.evaluate!(root_scope) }
-      expressions.last.value.resolve_within(root_scope)
+      expressions.last.value
     end
 
     def root_scope

@@ -6,6 +6,10 @@ module SuperRuby
       @parent = parent
     end
 
+    def spawn
+      self.class.new(self)
+    end
+
     def bound_receivers
       @bound_receivers ||= {}
     end
