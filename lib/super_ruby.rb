@@ -1,4 +1,4 @@
-require "active_support"
+require "active_support/all"
 require "active_model"
 
 require "super_ruby/core_ext/enumerator"

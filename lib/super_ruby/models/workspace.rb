@@ -9,9 +9,9 @@ module SuperRuby
       @expressions ||= AstNode.from_tokens(Lexer.new(source).each_token)
     end
 
-    def evaluate
-      expressions.each { |expression| expression.evaluate!(root_scope) }
-      expressions.last.value
+    def evaluate!
+      values = expressions.map { |expression| expression.evaluate!(root_scope) }
+      values.last
     end
 
     def root_scope

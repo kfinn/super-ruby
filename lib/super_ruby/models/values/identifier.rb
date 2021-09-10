@@ -14,17 +14,6 @@ module SuperRuby
       def hash
         { name: name }.hash
       end
-
-      def resolve_within(scope)
-        expression = scope.resolve(self)
-        expression.evaluate! scope
-        expression.value.resolve_within scope
-      end
-
-      KEYWORDS = Set.new(["define", "send"]).freeze
-      def to_keyword
-        name if KEYWORDS.include? name
-      end
     end
   end
 end

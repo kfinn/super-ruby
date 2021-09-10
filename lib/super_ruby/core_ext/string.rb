@@ -1,7 +1,7 @@
 class String
   SUPER_WHITESPACE_CHARACTERS = Set.new([" ", "\t", "\v", "\r", "\n"]).freeze
   def super_whitespace?
-    SUPER_WHITESPACE_CHARACTERS.include? self
+    squish == ""
   end
 
   SUPER_INDENT_CHARACTERS = Set.new(["{", "(", "["]).freeze
