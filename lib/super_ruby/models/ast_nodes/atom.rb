@@ -7,7 +7,7 @@ module SuperRuby
 
       delegate :text, to: :token
 
-      def evaluate!(scope)
+      def evaluate!(scope, memory)
         if token.match.kind_of? TokenMatches::StringLiteral
           Values::Concrete.new(Values::Type::STRING, text[1..-2].gsub("\\\"", '"'))
         elsif /\A[0-9][0-9_]*\Z/.match? text

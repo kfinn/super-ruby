@@ -5,9 +5,10 @@ module SuperRuby
         super && list.size == 3
       end
 
-      def evaluate!(scope)
+      def evaluate!(scope, memory)
         identifier = list.second.text
-        value = list.third.evaluate! scope.spawn
+        
+        value = list.third.evaluate! scope.spawn, memory
 
         scope.define! identifier, value
         Values::Void.instance

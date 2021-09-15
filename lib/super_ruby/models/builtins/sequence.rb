@@ -5,8 +5,8 @@ module SuperRuby
         super && list.size == 2
       end
 
-      def evaluate!(scope)
-        list_values = list.second.map { |child| child.evaluate! scope }
+      def evaluate!(scope, memory)
+        list_values = list.second.map { |child| child.evaluate! scope, memory }
         list_values.last
       end
     end

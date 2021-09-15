@@ -15,11 +15,15 @@ module SuperRuby
     end
 
     def evaluate!
-      root_ast_node.evaluate! root_scope
+      root_ast_node.evaluate! root_scope, memory
     end
 
     def root_scope
       @root_scope ||= Scope.new
+    end
+
+    def memory
+      @memory ||= Memory.new
     end
   end
 end

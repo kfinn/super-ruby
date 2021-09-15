@@ -1,32 +1,49 @@
 module SuperRuby
   module Values
     class Type
-      attr_reader :name, :size, :scope
+      attr_reader :size
 
-      def initialize(name, size, scope)
-        @name = name
+      def initialize(size)
         @size = size
-        @scope = scope
       end
 
-      VOID = new("Void", 0, nil)
-      TYPE = new("Type", 8, nil)
-      INTEGER = new("Integer", 8, nil)
-      FLOAT = new("Float", 8, nil)
-      STRING = new("String", 16, nil)
+      VOID = new(0)
+      TYPE = new(8)
+      INTEGER = new(8)
+      FLOAT = new(8)
+      STRING = new(16)
+      POINTER = new(8)
 
       BUILTINS = {
-        'Void' => VOID,
-        'Type' => TYPE,
-        'Integer' => INTEGER,
-        'Float' => FLOAT,
-        'String' => STRING
+        'Void' => Concrete.new(TYPE, VOID),
+        'Type' => Concrete.new(TYPE, TYPE),
+        'Integer' => Concrete.new(TYPE, INTEGER),
+        'Float' => Concrete.new(TYPE, FLOAT),
+        'String' => Concrete.new(TYPE, STRING),
+        'Pointer' => Concrete.new(TYPE, POINTER)
       }.freeze
       def self.builtins
         BUILTINS
       end
 
-      alias to_s name
+      def to_s
+        case self
+        when VOID
+          "Void"
+        when TYPE
+          "Type"
+        when INTEGER
+          "Integer"
+        when FLOAT
+          "Float"
+        when STRING
+          "String"
+        when POINTER
+          "Pointer"
+        else
+          "Unknown"
+        end
+      end
     end
   end
 end

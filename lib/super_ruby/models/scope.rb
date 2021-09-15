@@ -4,7 +4,7 @@ module SuperRuby
       include Singleton
 
       GlobalScopeBuiltIn = Struct.new(:value) do
-        def evaluate!(_scope)
+        def evaluate!(_scope, _memory)
           value
         end
       end
@@ -16,6 +16,10 @@ module SuperRuby
 
       def resolve(identifier)
         BUILTINS[identifier]
+      end
+
+      def spawn
+        Scope.new(self)
       end
     end
 

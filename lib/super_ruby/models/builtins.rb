@@ -1,7 +1,7 @@
 module SuperRuby
   module Builtins
     ALL = [
-      Define, Sequence, Procedure
+      Define, Sequence, Procedure, If
     ].freeze
     def self.all
       ALL

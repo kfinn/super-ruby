@@ -53,7 +53,43 @@ module SuperRuby
         end
 
         it 'performs the function call and returns the result, 3' do
-          expect(workspace.evaluate!). to eq Values::Concrete.new(Values::Type::INTEGER, 3)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 3)
+        end
+      end
+
+      context 'with a small program that has memory allocations' do
+        let(:super_code) do
+          <<~SUPER
+            (sequence(
+              (
+                define
+                x
+                (allocate (size_of Integer))
+              )
+              (
+                define
+                increment
+                (
+                  procedure
+                  (x_pointer)
+                  (assign (dereference x_pointer) (+ (dereference x_pointer) 1))
+                )
+              )
+              (assign (dereference x) 0)
+              (increment x)
+              (define result (dereference x))
+              (free x)
+              result
+            ))
+          SUPER
+        end
+
+        it 'handles allocating, dereferencing, and freeing memory' do
+          result = workspace.evaluate!
+          expect(result.type).to eq Values::Type::INTEGER
+          expect(result.value).to eq 1
+
+          expect(workspace.memory.allocations).to be_empty
         end
       end
 
@@ -64,26 +100,33 @@ module SuperRuby
               (
                 define
                 increment
-                (x)
                 (
-                  assign
-                  (dereference x)
-                  (+ (dereference x) 1)
+                  procedure
+                  (x)
+                  (
+                    assign
+                    (dereference x)
+                    (+ (dereference x) 1)
+                  )
                 )
               )
 
               (
                 define
                 allocate_and_increment
-                (initial_value)
                 (
-                  sequence
+                  procedure
+                  (initial_value)
                   (
-                    (declare x)
-                    (assign x (allocate 8))
-                    (assign (dereference x) initial_value)
-                    (increment x)
-                    (dereference x)
+                    sequence
+                    (
+                      (define x (allocate 8))
+                      (assign (dereference x) initial_value)
+                      (increment x)
+                      (define result (dereference x))
+                      (free x)
+                      result
+                    )
                   )
                 )
               )
@@ -93,8 +136,46 @@ module SuperRuby
           SUPER
         end
 
-        xit 'evalutes the program and returns the correct value of 2' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 2)
+        it 'evalutes the program and returns the correct value of 2' do
+          workspace.evaluate!.tap do |result|
+            expect(result.type).to eq Values::Type::INTEGER
+            expect(result.value).to eq 2
+          end
+          expect(workspace.memory.allocations).to be_empty
+        end
+      end
+
+      context 'with a recursive procedure' do
+        let(:super_code) do
+          <<~SUPER
+            (sequence(
+              (
+                define
+                fib
+                (
+                  procedure
+                  (n)
+                  (
+                    if
+                    (== n 0)
+                    1
+                    (
+                      if
+                      (== n 1)
+                      1
+                      (+ (fib (- n 1)) (fib (- n 2)))
+                    )
+                  )
+                )
+              )
+
+              (fib 6)
+            ))
+          SUPER
+        end
+
+        it 'evaluates the recursive program and returns the correct value' do
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 13)
         end
       end
     end

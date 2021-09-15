@@ -5,8 +5,8 @@ module SuperRuby
         super && list.size == 3
       end
 
-      def evaluate!(scope)
-        Values::Procedure.new(list.second, list.third)
+      def evaluate!(scope, _memory)
+        Values::Procedure.new(list.second, list.third, scope)
       end
     end
   end
