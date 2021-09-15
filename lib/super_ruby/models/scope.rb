@@ -10,12 +10,9 @@ module SuperRuby
       end
 
       BUILTINS = {
-        'Void' => GlobalScopeBuiltIn.new(Values::Type::VOID),
-        'Type' => GlobalScopeBuiltIn.new(Values::Type::TYPE),
-        'Integer' => GlobalScopeBuiltIn.new(Values::Type::INTEGER),
-        'Float' => GlobalScopeBuiltIn.new(Values::Type::FLOAT),
-        'String' => GlobalScopeBuiltIn.new(Values::Type::STRING)
-      }
+        **Values::Type.builtins,
+        **Values::Procedure.builtins
+      }.freeze
 
       def resolve(identifier)
         BUILTINS[identifier]
@@ -36,25 +33,31 @@ module SuperRuby
       @bound_receivers ||= {}
     end
 
-    def bound_types
-      @bound_types ||= {}
-    end
-
     def resolve(identifier)
-      bound_receivers.fetch identifier do
-        raise "unknown identifier: #{identifier}" unless parent.present?
-        parent.resolve(identifier)
+      bound_receivers.fetch(identifier) do |missing_identifier|
+        if parent.present?
+          parent.resolve(missing_identifier)
+        else
+          raise "unknown identifier: #{missing_identifier}"
+        end
       end
     end
 
-    def define_type!(identifier, type)
-      bound_types[identifier] = type
-    end
-
-    def define!(identifier, type, value)
+    def define!(identifier, value)
       raise "redefinition of existing identifier: #{identifier}" if bound_receivers.include? identifier
 
       bound_receivers[identifier] = value
+    end
+
+    def to_s
+      receiver_strings = bound_receivers.map do |identifier, value|
+        "(#{identifier} #{value})"
+      end
+      parent_string =
+        if parent.present?
+          "**#{parent}"
+        end
+      "(#{[*receiver_strings, parent_string].compact.join(" ")})"
     end
   end
 end

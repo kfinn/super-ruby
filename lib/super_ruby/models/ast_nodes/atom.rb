@@ -15,8 +15,12 @@ module SuperRuby
         elsif /\A[0-9][0-9_]*\.[0-9_]*\Z/.match? text
           Values::Concrete.new(Values::Type::FLOAT, text.to_f)
         else
-          Values::Identifier.new(text)
+          scope.resolve(text)
         end
+      end
+
+      def to_s
+        text
       end
     end
   end

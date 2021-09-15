@@ -27,23 +27,24 @@ module SuperRuby
         @children = children
       end
 
-      BUILTINS = [
-        Builtins::Define,
-        Builtins::Send
-      ].freeze
-
-      def typecheck!(scope)
-        raise "unable to evaluate an empty list" if children.size == 0
-        matching_builtin = BUILTINS.find { |builtin| builtin.match? self }
-        raise "unable to evaluate list #{self.children}" unless matching_builtin.present?
-        matching_builtin.new(self).typecheck!(scope)
-      end
-
       def evaluate!(scope)
         raise "unable to evaluate an empty list" if children.size == 0
-        matching_builtin = BUILTINS.find { |builtin| builtin.match? self }
-        raise "unable to evaluate list #{self.children}" unless matching_builtin.present?
-        matching_builtin.new(self).evaluate!(scope)
+        matching_builtin = Builtins.all.find { |builtin| builtin.match? self }
+        return matching_builtin.new(self).evaluate!(scope) if matching_builtin.present?
+
+        matching_procedure = children.first.evaluate! scope
+        if matching_procedure.present?
+          argument_values = children[1..-1].map do |argument_value_expression|
+            argument_value_expression.evaluate! scope.spawn
+          end
+          return matching_procedure.call!(argument_values)
+        end
+
+        raise "unable to evaluate list #{to_s} within scope #{scope}"
+      end
+
+      def to_s
+        "(#{map(&:to_s).join(" ")})"
       end
     end
   end

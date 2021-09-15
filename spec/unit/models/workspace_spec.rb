@@ -5,94 +5,96 @@ module SuperRuby
       let(:source) { SourceString.new super_code }
 
       context 'with a program containing only an int literal' do
-        let(:super_code) { '1' }
+        let(:super_code) do
+          <<~SUPER
+            1
+          SUPER
+        end
         it 'is the int literal' do
           expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 1)
         end
       end
 
       context 'with a program containing only a float literal' do
-        let(:super_code) { '0.5' }
+        let(:super_code) do
+          <<~SUPER
+           0.5
+          SUPER
+        end
         it 'is the float literal' do
           expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::FLOAT, 0.5)
         end
       end
 
-      context 'with a program containing only a string literal' do
-        let(:super_code) { '"ffff\""'}
-        it 'is the unescaped string literal' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::STRING, 'ffff"')
+      context 'with a + operation on two constants' do
+        let(:super_code) { '(+ 1 2)' }
+        it 'adds the two constants' do
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 3)
         end
       end
 
-      context 'with a program containing a sequence of literals' do
+      context 'with a small program that has function calls' do
         let(:super_code) do
           <<~SUPER
-            12
-            1.7
-            "eeee"
-            7
+            (sequence (
+              (
+                define
+                plus_one
+                (
+                  procedure
+                  (x)
+                  (+ x 1)
+                )
+              )
+
+              (plus_one 2)
+            ))
           SUPER
         end
 
-        it 'is the value of the final expression' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 7)
+        it 'performs the function call and returns the result, 3' do
+          expect(workspace.evaluate!). to eq Values::Concrete.new(Values::Type::INTEGER, 3)
         end
       end
 
-      context 'with a program including a defined identifier' do
+      context 'with a small program that has function calls and memory allocation & dereferencing' do
         let(:super_code) do
           <<~SUPER
-            (define result Integer 12)
-            (send result)
+            (sequence (
+              (
+                define
+                increment
+                (x)
+                (
+                  assign
+                  (dereference x)
+                  (+ (dereference x) 1)
+                )
+              )
+
+              (
+                define
+                allocate_and_increment
+                (initial_value)
+                (
+                  sequence
+                  (
+                    (declare x)
+                    (assign x (allocate 8))
+                    (assign (dereference x) initial_value)
+                    (increment x)
+                    (dereference x)
+                  )
+                )
+              )
+
+              (allocate_and_increment 1)
+            ))
           SUPER
         end
 
-        it 'is the defined value' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 12)
-        end
-      end
-
-      context 'with a program including multiple defined identifiers' do
-        let(:super_code) do
-          <<~SUPER
-            (define source 12)
-            (define intermediate (send source))
-            (define result (send intermediate))
-            (send result)
-          SUPER
-        end
-
-        it 'is the defined value' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 12)
-        end
-      end
-
-      context 'with a program including an indirect send' do
-        let(:super_code) do
-          <<~SUPER
-            (define source (send Integer) 24)
-            (define intermediate source)
-            (define result_key result)
-            (define
-              (send result_key)
-              (send (send intermediate))
-            )
-            (send result)
-          SUPER
-        end
-
-        it 'is the defined value' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 24)
-        end
-      end
-
-      context 'with a program that sends a message to an instance of a type' do
-        let(:super_code) do
-          <<~SUPER
-            (define Thing (type 0 ((define thing_value 800))))
-            (define thing)
-          SUPER
+        xit 'evalutes the program and returns the correct value of 2' do
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 2)
         end
       end
     end

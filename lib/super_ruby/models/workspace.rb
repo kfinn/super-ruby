@@ -5,13 +5,17 @@ module SuperRuby
       @source = source
     end
 
-    def expressions
-      @expressions ||= AstNode.from_tokens(Lexer.new(source).each_token)
+    def root_ast_node
+      unless instance_variable_defined?(:@root_ast_node)
+        all_ast_nodes = AstNode.from_tokens(Lexer.new(source).each_token)
+        raise 'attempted to evaluate multiple ast nodes at once' unless all_ast_nodes.size == 1
+        @root_ast_node = all_ast_nodes.first
+      end
+      @root_ast_node
     end
 
     def evaluate!
-      values = expressions.map { |expression| expression.evaluate!(root_scope) }
-      values.last
+      root_ast_node.evaluate! root_scope
     end
 
     def root_scope

@@ -1,6 +1,6 @@
 module SuperRuby
   module Builtins
-    class Base
+    class BaseBuiltin
       attr_reader :list
       delegate :children, to: :list
 

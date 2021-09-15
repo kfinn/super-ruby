@@ -17,6 +17,10 @@ module SuperRuby
       def to_attributes
         { type: type, value: value }
       end
+
+      def to_s
+        "(#{type} #{value})"
+      end
     end
   end
 end
