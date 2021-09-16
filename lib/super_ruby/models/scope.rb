@@ -3,15 +3,9 @@ module SuperRuby
     class GlobalScope
       include Singleton
 
-      GlobalScopeBuiltIn = Struct.new(:value) do
-        def evaluate!(_scope, _memory)
-          value
-        end
-      end
-
       BUILTINS = {
         **Values::Type.builtins,
-        **Values::Procedure.builtins
+        **Builtins.all
       }.freeze
 
       def resolve(identifier)
@@ -62,6 +56,21 @@ module SuperRuby
           "**#{parent}"
         end
       "(#{[*receiver_strings, parent_string].compact.join(" ")})"
+    end
+
+    def extract_argument_values_for_call(procedure, call, caller_scope, memory)
+      argument_value_expressions = call[1..-1]
+      raise 'invalid arguments' unless argument_value_expressions.size == procedure.arguments.size
+
+      argument_values = argument_value_expressions.map do |argument_value_expression|
+        argument_value_expression.evaluate! caller_scope.spawn, memory
+      end
+
+      procedure.arguments
+        .zip(argument_values)
+        .each_with_object(procedure.scope.spawn) do |(argument, argument_value), draft_scope|
+          draft_scope.define! argument, argument_value
+        end
     end
   end
 end

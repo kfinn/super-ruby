@@ -11,6 +11,10 @@ module SuperRuby
       def assign!(data)
         self.data = data
       end
+
+      def to_s
+        "(allocation #{data})"
+      end
     end
 
     def allocate(size)
