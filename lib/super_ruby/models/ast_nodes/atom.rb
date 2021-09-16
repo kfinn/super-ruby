@@ -9,11 +9,11 @@ module SuperRuby
 
       def evaluate!(scope, memory)
         if token.match.kind_of? TokenMatches::StringLiteral
-          Values::Concrete.new(Values::Type::STRING, text[1..-2].gsub("\\\"", '"'))
+          Values::Concrete.new(Builtins::Types::STRING, text[1..-2].gsub("\\\"", '"'))
         elsif /\A[0-9][0-9_]*\Z/.match? text
-          Values::Concrete.new(Values::Type::INTEGER, text.to_i)
+          Values::Concrete.new(Builtins::Types::INTEGER, text.to_i)
         elsif /\A[0-9][0-9_]*\.[0-9_]*\Z/.match? text
-          Values::Concrete.new(Values::Type::FLOAT, text.to_f)
+          Values::Concrete.new(Builtins::Types::FLOAT, text.to_f)
         else
           scope.resolve(text)
         end

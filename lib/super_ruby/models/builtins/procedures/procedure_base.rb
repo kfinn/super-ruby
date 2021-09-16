@@ -51,7 +51,7 @@ module SuperRuby
         end
 
         def scope
-          Scope::GlobalScope.instance
+          Builtins
         end
 
         def to_s

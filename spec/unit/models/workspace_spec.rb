@@ -11,7 +11,7 @@ module SuperRuby
           SUPER
         end
         it 'is the int literal' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 1)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 1)
         end
       end
 
@@ -22,14 +22,14 @@ module SuperRuby
           SUPER
         end
         it 'is the float literal' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::FLOAT, 0.5)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::FLOAT, 0.5)
         end
       end
 
       context 'with a + operation on two constants' do
         let(:super_code) { '(+ 1 2)' }
         it 'adds the two constants' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 3)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 3)
         end
       end
 
@@ -53,7 +53,7 @@ module SuperRuby
         end
 
         it 'performs the function call and returns the result, 3' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 3)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 3)
         end
       end
 
@@ -86,7 +86,7 @@ module SuperRuby
 
         it 'handles allocating, dereferencing, and freeing memory' do
           result = workspace.evaluate!
-          expect(result.type).to eq Values::Type::INTEGER
+          expect(result.type).to eq Builtins::Types::INTEGER
           expect(result.value).to eq 1
 
           expect(workspace.memory.allocations).to be_empty
@@ -138,7 +138,7 @@ module SuperRuby
 
         it 'evalutes the program and returns the correct value of 2' do
           workspace.evaluate!.tap do |result|
-            expect(result.type).to eq Values::Type::INTEGER
+            expect(result.type).to eq Builtins::Types::INTEGER
             expect(result.value).to eq 2
           end
           expect(workspace.memory.allocations).to be_empty
@@ -175,7 +175,7 @@ module SuperRuby
         end
 
         it 'evaluates the recursive program and returns the correct value' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Values::Type::INTEGER, 13)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 13)
         end
       end
     end

@@ -3,7 +3,7 @@ module SuperRuby
     class Procedure
       attr_reader :arguments, :body, :scope
 
-      def initialize(arguments, body, scope=Scope::GlobalScope.instance)
+      def initialize(arguments, body, scope=Builtins)
         @arguments = arguments
         @body = body
         @scope = scope

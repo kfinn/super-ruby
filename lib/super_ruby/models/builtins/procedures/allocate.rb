@@ -5,10 +5,10 @@ module SuperRuby
         arguments :size
 
         body do |scope, memory, size:|
-          raise "Invalid allocate: size must have type Integer, given #{size.type}" unless size.type == Values::Type::INTEGER
+          raise "Invalid allocate: size must have type Integer, given #{size.type}" unless size.type == Builtins::Types::INTEGER
           allocation_id = memory.allocate(size.value)
           Values::Concrete.new(
-            Values::Type::POINTER,
+            Builtins::Types::POINTER,
             allocation_id
           )
         end

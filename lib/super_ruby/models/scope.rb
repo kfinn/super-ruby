@@ -1,25 +1,8 @@
 module SuperRuby
   class Scope
-    class GlobalScope
-      include Singleton
-
-      BUILTINS = {
-        **Values::Type.builtins,
-        **Builtins.all
-      }.freeze
-
-      def resolve(identifier)
-        BUILTINS[identifier]
-      end
-
-      def spawn
-        Scope.new(self)
-      end
-    end
-
     attr_accessor :parent
 
-    def initialize(parent=GlobalScope.instance)
+    def initialize(parent=Builtins)
       @parent = parent
     end
 

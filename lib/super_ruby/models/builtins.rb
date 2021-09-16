@@ -24,9 +24,14 @@ module SuperRuby
         raise "duplicate builtin name: #{name}" if acc.include? name
         acc[name] = builtin_instance
       end
-    end.freeze
-    def self.all
-      ALL
+    end.merge(Types.all).freeze
+    def self.resolve(identifier)
+      raise "unknown identifier: #{identifier}" unless ALL.include? identifier
+      ALL[identifier]
+    end
+
+    def self.spawn
+      Scope.new
     end
   end
 end

@@ -5,7 +5,7 @@ module SuperRuby
         arguments :pointer
 
         body do |scope, memory, pointer:|
-          raise "invalid dereference: pointer must have type Pointer, given #{pointer.type}" unless pointer.type == Values::Type::POINTER
+          raise "invalid dereference: pointer must have type Pointer, given #{pointer.type}" unless pointer.type == Builtins::Types::POINTER
           memory.get(pointer.value)
         end
       end
