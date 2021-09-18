@@ -21,6 +21,15 @@ module SuperRuby
       def to_s
         "(#{type} #{value})"
       end
+
+      def super_send!(list, scope, memory)
+        if type == Builtins::Types::Macro.instance
+          return value.call! list, scope, memory
+        end
+
+        method = list.second.evaluate! type.scope, memory
+        method.value.call! self, list, scope, memory
+      end
     end
   end
 end

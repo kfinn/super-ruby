@@ -2,6 +2,18 @@ module SuperRuby
   class Scope
     attr_accessor :parent
 
+    class EmptyScope
+      include Singleton
+
+      def resolve(identifier)
+        raise "unknown identifier: #{identifier}"
+      end
+    end
+
+    def self.empty
+      EmptyScope.instance
+    end
+
     def initialize(parent=Builtins)
       @parent = parent
     end
@@ -41,8 +53,8 @@ module SuperRuby
       "(#{[*receiver_strings, parent_string].compact.join(" ")})"
     end
 
-    def extract_argument_values_for_call(procedure, call, caller_scope, memory)
-      argument_value_expressions = call[1..-1]
+    def extract_argument_values_for_procedure_call(procedure, list, caller_scope, memory)
+      argument_value_expressions = list[1..-1]
       raise 'invalid arguments' unless argument_value_expressions.size == procedure.arguments.size
 
       argument_values = argument_value_expressions.map do |argument_value_expression|
@@ -55,5 +67,21 @@ module SuperRuby
           draft_scope.define! argument, argument_value
         end
     end
+
+    def extract_argument_values_for_method_call(method, list, caller_scope, memory)
+      argument_value_expressions = list[2..-1]
+      raise 'invalid arguments' unless argument_value_expressions.size == method.arguments.size
+
+      argument_values = argument_value_expressions.map do |argument_value_expression|
+        argument_value_expression.evaluate! caller_scope.spawn, memory
+      end
+
+      method.arguments
+        .zip(argument_values)
+        .each_with_object(method.scope.spawn) do |(argument, argument_value), draft_scope|
+          draft_scope.define! argument, argument_value
+        end
+    end
   end
 end
+

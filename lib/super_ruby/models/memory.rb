@@ -1,25 +1,38 @@
 module SuperRuby
   class Memory
     class Allocation
-      def initialize(size)
-        @data = nil
+      def initialize(type)
+        @type = type
       end
 
-      attr_accessor :data
-      delegate :type, :value, to: :data
+      attr_accessor :type, :value
 
-      def assign!(data)
-        self.data = data
+      def scope
+        @scope ||= type.scope.spawn.tap do |draft_scope|
+          assign_typed_instance = Values::Concrete.new(Builtins::Types::Method.instance, Builtins::Methods::Assign.instance)
+          Builtins::Methods::Assign.names.each do |name|
+            draft_scope.define! name, assign_typed_instance
+          end
+        end
+      end
+
+      def super_send!(list, caller_scope, memory)
+        method = list.second.evaluate! self.scope, memory
+        method.value.call! self, list, caller_scope, memory
+      end
+
+      def assign!(typed_value)
+        self.value = typed_value.value
       end
 
       def to_s
-        "(allocation #{data})"
+        "(allocation #{type} #{value})"
       end
     end
 
-    def allocate(size)
+    def allocate(type)
       next_allocation_id!.tap do |allocation_id|
-        allocations[allocation_id] = Allocation.new(size)
+        allocations[allocation_id] = Allocation.new(type)
       end
     end
 

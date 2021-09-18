@@ -1,17 +1,32 @@
 module SuperRuby
   module Builtins
     module Macros
-      class MacroBase
-        def self.names
-          [atom_text]
+      module MacroBase
+        extend ActiveSupport::Concern
+
+        included do
+          include Singleton
         end
 
-        def self.atom_text
-          name.split("::").last.underscore
+        class_methods do
+          def typed_instance
+            Values::Concrete.new(
+              Types::Macro.instance,
+              instance
+            )
+          end
+
+          def names
+            [atom_text]
+          end
+
+          def atom_text
+            name.split("::").last.underscore
+          end
         end
 
         def to_s
-          "(builtin_procedure #{self.class.atom_text})"
+          "(builtin_macro #{self.class.atom_text})"
         end
       end
     end

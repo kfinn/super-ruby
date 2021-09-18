@@ -9,18 +9,22 @@ module SuperRuby
 
       def to_s
         case self
-        when VOID
+        when Builtins::Types::Void.instance
           "Void"
-        when TYPE
+        when Builtins::Types::Type.instance
           "Type"
-        when INTEGER
+        when Builtins::Types::Integer.instance
           "Integer"
-        when FLOAT
+        when Builtins::Types::Float.instance
           "Float"
-        when STRING
+        when Builtins::Types::String.instance
           "String"
-        when POINTER
+        when Builtins::Types::Pointer.instance
           "Pointer"
+        when Builtins::Types::Procedure.instance
+          "Procedure"
+        when Builtins::Types::Method.instance
+          "Method"
         else
           "Unknown"
         end

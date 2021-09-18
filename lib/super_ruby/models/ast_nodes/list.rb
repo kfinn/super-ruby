@@ -29,8 +29,8 @@ module SuperRuby
 
       def evaluate!(scope, memory)
         raise "unable to evaluate an empty list" if children.size == 0
-        head_value = children.first.evaluate! scope, memory
-        head_value.call! self, scope, memory
+        head_value = children.first.evaluate!(scope, memory)
+        head_value.super_send!(self, scope, memory)
       end
 
       def to_s

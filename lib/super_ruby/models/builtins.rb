@@ -7,24 +7,22 @@ module SuperRuby
       Macros::If
     ].freeze
 
-    PROCEDURES = [
-      Procedures::Allocate,
-      Procedures::Assign,
-      Procedures::Dereference,
-      Procedures::Equals,
-      Procedures::Free,
-      Procedures::Minus,
-      Procedures::Plus,
-      Procedures::SizeOf
-    ].freeze
+    TYPES = [
+      Types::Float,
+      Types::Integer,
+      Types::Pointer,
+      Types::String,
+      Types::Type,
+      Types::Void
+    ]
 
-    ALL = [*MACROS, *PROCEDURES].each_with_object({}) do |builtin, acc|
-      builtin_instance = builtin.new
+    ALL = [*MACROS, *TYPES].each_with_object({}) do |builtin, acc|
+      builtin_instance = builtin.typed_instance
       builtin.names.each do |name|
         raise "duplicate builtin name: #{name}" if acc.include? name
         acc[name] = builtin_instance
       end
-    end.merge(Types.all).freeze
+    end
     def self.resolve(identifier)
       raise "unknown identifier: #{identifier}" unless ALL.include? identifier
       ALL[identifier]

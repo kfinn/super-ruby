@@ -1,7 +1,8 @@
 module SuperRuby
   module Builtins
     module Macros
-      class If < MacroBase
+      class If 
+        include MacroBase
         def call!(list, scope, memory)
           condition = list.second
 

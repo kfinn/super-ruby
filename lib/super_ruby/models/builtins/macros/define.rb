@@ -1,7 +1,8 @@
 module SuperRuby
   module Builtins
     module Macros
-      class Define < MacroBase
+      class Define 
+        include MacroBase
         def call!(list, scope, memory)
           identifier = list.second.text
           

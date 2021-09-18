@@ -9,18 +9,9 @@ module SuperRuby
         @scope = scope
       end
 
-      def call!(list, caller_scope, memory)
-        call_scope = caller_scope.extract_argument_values_for_call(
-          self,
-          list,
-          caller_scope,
-          memory
-        )
-        
-        evaluate! call_scope, memory
+      def call!(scope, memory)
+        body.evaluate! scope, memory
       end
-
-      delegate :evaluate!, to: :body
 
       def to_s
         "(procedure #{arguments})"

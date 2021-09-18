@@ -11,7 +11,7 @@ module SuperRuby
           SUPER
         end
         it 'is the int literal' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 1)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::Integer.instance, 1)
         end
       end
 
@@ -22,14 +22,14 @@ module SuperRuby
           SUPER
         end
         it 'is the float literal' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::FLOAT, 0.5)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::Float.instance, 0.5)
         end
       end
 
-      context 'with a + operation on two constants' do
-        let(:super_code) { '(+ 1 2)' }
+      context 'sending + to an Integer constant with another Integer constant argument' do
+        let(:super_code) { '(1 + 2)' }
         it 'adds the two constants' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 3)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::Integer.instance, 3)
         end
       end
 
@@ -43,17 +43,17 @@ module SuperRuby
                 (
                   procedure
                   (x)
-                  (+ x 1)
+                  (x + 1)
                 )
               )
 
-              (plus_one 2)
+              (plus_one call 2)
             ))
           SUPER
         end
 
         it 'performs the function call and returns the result, 3' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 3)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::Integer.instance, 3)
         end
       end
 
@@ -64,7 +64,7 @@ module SuperRuby
               (
                 define
                 x
-                (allocate (size_of Integer))
+                (Integer new)
               )
               (
                 define
@@ -72,13 +72,13 @@ module SuperRuby
                 (
                   procedure
                   (x_pointer)
-                  (assign (dereference x_pointer) (+ (dereference x_pointer) 1))
+                  ((x_pointer dereference) = ((x_pointer dereference) + 1))
                 )
               )
-              (assign (dereference x) 0)
-              (increment x)
-              (define result (dereference x))
-              (free x)
+              ((x dereference) = 0)
+              (increment call x)
+              (define result (x dereference))
+              (x free)
               result
             ))
           SUPER
@@ -86,7 +86,7 @@ module SuperRuby
 
         it 'handles allocating, dereferencing, and freeing memory' do
           result = workspace.evaluate!
-          expect(result.type).to eq Builtins::Types::INTEGER
+          expect(result.type).to eq Builtins::Types::Integer.instance
           expect(result.value).to eq 1
 
           expect(workspace.memory.allocations).to be_empty
@@ -104,9 +104,9 @@ module SuperRuby
                   procedure
                   (x)
                   (
-                    assign
-                    (dereference x)
-                    (+ (dereference x) 1)
+                    (x dereference)
+                    =
+                    ((x dereference) + 1)
                   )
                 )
               )
@@ -117,28 +117,25 @@ module SuperRuby
                 (
                   procedure
                   (initial_value)
-                  (
-                    sequence
-                    (
-                      (define x (allocate 8))
-                      (assign (dereference x) initial_value)
-                      (increment x)
-                      (define result (dereference x))
-                      (free x)
-                      result
-                    )
-                  )
+                  (sequence(
+                    (define x (Integer new))
+                    ((x dereference) = initial_value)
+                    (increment call x)
+                    (define result (x dereference))
+                    (x free)
+                    result
+                  ))
                 )
               )
 
-              (allocate_and_increment 1)
+              (allocate_and_increment call 1)
             ))
           SUPER
         end
 
         it 'evalutes the program and returns the correct value of 2' do
           workspace.evaluate!.tap do |result|
-            expect(result.type).to eq Builtins::Types::INTEGER
+            expect(result.type).to eq Builtins::Types::Integer.instance
             expect(result.value).to eq 2
           end
           expect(workspace.memory.allocations).to be_empty
@@ -157,25 +154,25 @@ module SuperRuby
                   (n)
                   (
                     if
-                    (== n 0)
+                    (n == 0)
                     1
                     (
                       if
-                      (== n 1)
+                      (n == 1)
                       1
-                      (+ (fib (- n 1)) (fib (- n 2)))
+                      ((fib call (n - 1)) + (fib call (n - 2)))
                     )
                   )
                 )
               )
 
-              (fib 6)
+              (fib call 6)
             ))
           SUPER
         end
 
         it 'evaluates the recursive program and returns the correct value' do
-          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::INTEGER, 13)
+          expect(workspace.evaluate!).to eq Values::Concrete.new(Builtins::Types::Integer.instance, 13)
         end
       end
     end
