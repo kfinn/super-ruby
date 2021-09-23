@@ -9,11 +9,25 @@ module SuperRuby
         end
 
         class_methods do
+          class LazyBytecodeChunk
+            def initialize(macro)
+              @macro = macro
+            end
+
+            attr_reader :macro
+            attr_accessor :llvm_symbol
+
+            def to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
+              self
+            end
+            
+            def super_send!(list, scope, llvm_module, llvm_basic_block)
+              self.llvm_symbol = macro.to_bytecode_chunk!(list, scope, llvm_module, llvm_basic_block)
+            end
+          end
+
           def typed_instance
-            Values::Concrete.new(
-              Types::Macro.instance,
-              instance
-            )
+            LazyBytecodeChunk.new(instance)
           end
 
           def names

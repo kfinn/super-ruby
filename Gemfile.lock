@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/kfinn/ruby-llvm
+  revision: d316ca056df404dabe11a4fca484c5bc6d2050b5
+  specs:
+    ruby-llvm (11.0.1)
+      ffi (~> 1.13.1)
+      rake (>= 12, < 14)
+
 PATH
   remote: .
   specs:
@@ -20,6 +28,7 @@ GEM
       zeitwerk (~> 2.3)
     concurrent-ruby (1.1.9)
     diff-lcs (1.4.4)
+    ffi (1.13.1)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     minitest (5.14.4)
@@ -48,6 +57,7 @@ PLATFORMS
 DEPENDENCIES
   rake (~> 12.0)
   rspec (~> 3.0)
+  ruby-llvm!
   super_ruby!
 
 BUNDLED WITH

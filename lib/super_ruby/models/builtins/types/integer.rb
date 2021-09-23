@@ -4,7 +4,14 @@ module SuperRuby
       class Integer
         include TypeBase
 
-        methods Methods::Plus, Methods::Minus, Methods::Equals
+        size 8
+
+        methods Methods::Plus
+        # methods Methods::Plus, Methods::Minus, Methods::Equals
+
+        def to_llvm_type
+          LLVM::Int
+        end
       end
     end
   end

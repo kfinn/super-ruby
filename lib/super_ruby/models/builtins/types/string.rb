@@ -4,7 +4,7 @@ module SuperRuby
       class String
         include TypeBase
 
-        methods Methods::Plus, Methods::Equals
+        # methods Methods::Plus, Methods::Equals
       end
     end
   end

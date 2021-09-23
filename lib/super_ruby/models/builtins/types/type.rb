@@ -5,6 +5,10 @@ module SuperRuby
         include TypeBase
 
         methods Methods::New
+
+        def to_llvm_type
+          LLVM::Int8
+        end
       end
     end
   end

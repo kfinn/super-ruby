@@ -7,18 +7,28 @@ module SuperRuby
 
       delegate :text, to: :token
 
-      def evaluate!(scope, memory)
-        if token.match.kind_of? TokenMatches::StringLiteral
-          Values::Concrete.new(Builtins::Types::String.instance, text[1..-2].gsub("\\\"", '"'))
-        elsif /\A[0-9][0-9_]*\Z/.match? text
-          Values::Concrete.new(Builtins::Types::Integer.instance, text.to_i)
+      def id
+        @id ||= BytecodeSymbolId.next("atom")
+      end
+
+      def to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
+        if /\A[0-9]([0-9_]*[0-9])?\Z/.match? text
+          Values::BytecodeChunk.new(
+            value_type: Builtins::Types::Integer.instance,
+            llvm_symbol: LLVM::Int(text.to_i)
+          )
         elsif /\A[0-9][0-9_]*\.[0-9_]*\Z/.match? text
-          Values::Concrete.new(Builtins::Types::Float.instance, text.to_f)
+          Values::BytecodeChunk.new(
+            value_type: Builtins::Types::Float.instance,
+            llvm_symbol: LLVM::Double(text.to_f)
+          )
+        elsif token.match.kind_of? TokenMatches::StringLiteral
+          raise "unimplemented"
         else
           scope.resolve(text)
         end
       end
-
+      
       def to_s
         text
       end

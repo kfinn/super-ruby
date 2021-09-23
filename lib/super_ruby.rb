@@ -4,6 +4,9 @@ require "active_model"
 require "super_ruby/core_ext/enumerator"
 require "super_ruby/core_ext/string"
 
+require "llvm/core"
+require "llvm/execution_engine"
+
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
 loader.push_dir 'lib/super_ruby/commands', namespace: SuperRuby

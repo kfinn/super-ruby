@@ -4,13 +4,13 @@ module SuperRuby
       Macros::Define,
       Macros::Sequence,
       Macros::Procedure,
-      Macros::If
+      Macros::If,
+      Macros::Pointer
     ].freeze
 
     TYPES = [
       Types::Float,
       Types::Integer,
-      Types::Pointer,
       Types::String,
       Types::Type,
       Types::Void

@@ -2,17 +2,22 @@ module SuperRuby
   module Builtins
     module Methods
       class Call
-        include MethodBase
-        
-        def call!(super_self, list, caller_scope, memory)
-          call_scope = caller_scope.extract_argument_values_for_method_call(
-            super_self.value,
-            list,
-            caller_scope,
-            memory
-          )
+        def initialize(procedure_type)
+          @procedure_type = procedure_type
+        end
+        attr_reader :procedure_type
 
-          super_self.value.call! call_scope, memory
+        def to_bytecode_chunk!(
+          llvm_module,
+          llvm_basic_block,
+          super_self_bytecode_chunk,
+          arguments_bytecode_chunks
+        )
+          llvm_symbol = llvm_basic_block.call(super_self_bytecode_chunk.llvm_symbol, *arguments_bytecode_chunks.map(&:llvm_symbol))
+          Values::BytecodeChunk.new(
+            value_type: procedure_type.return_type,
+            llvm_symbol: llvm_symbol
+          )
         end
       end
     end

@@ -7,7 +7,7 @@ module SuperRuby
         included do
           include Singleton
 
-          delegate :arguments, :body, to: :class
+          delegate :arguments, :body, :names, to: :class
         end
         
         class_methods do
@@ -31,31 +31,16 @@ module SuperRuby
             end
           end
 
-          def body(&body)
-            if body.present?
-              @body = body
+          def bytecode(&bytecode_builder)
+            if bytecode_builder.present?
+              @bytecode_builder = bytecode_builder
             end
-            @body
           end
-        end
+          attr_reader :bytecode_builder
 
-        def call!(super_self, list, caller_scope, memory)
-          call_scope = caller_scope.extract_argument_values_for_method_call(
-            self,
-            list,
-            caller_scope,
-            memory
-          )
-
-          evaluate! super_self, call_scope, memory
-        end
-
-        def evaluate!(super_self, call_scope, memory)
-          call_scope_arguments = self.class.arguments.each_with_object({}) do |argument, draft_call_scope_arguments|
-            draft_call_scope_arguments[argument.to_sym] = call_scope.resolve(argument)
+          def to_llvm_function_name(type)
+            BytecodeSymbolId.next("builtin_method_#{type.to_s}_#{self.atom_text}")
           end
-
-          body.call(super_self, scope, memory, **call_scope_arguments)
         end
 
         def scope
@@ -63,7 +48,7 @@ module SuperRuby
         end
 
         def to_s
-          "(builtin_procedure #{self.class.atom_text})"
+          "#{self.class.atom_text}"
         end
       end
     end

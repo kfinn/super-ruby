@@ -27,10 +27,9 @@ module SuperRuby
         @children = children
       end
 
-      def evaluate!(scope, memory)
-        raise "unable to evaluate an empty list" if children.size == 0
-        head_value = children.first.evaluate!(scope, memory)
-        head_value.super_send!(self, scope, memory)
+      def to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
+        head_bytecode_chunk = children.first.to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
+        head_bytecode_chunk.super_send!(self, scope, llvm_module, llvm_basic_block)
       end
 
       def to_s

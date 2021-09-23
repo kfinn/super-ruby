@@ -6,27 +6,23 @@ module SuperRuby
 
         included do
           include Singleton
-          delegate :scope, to: :class
+          delegate :size, to: :class
         end
 
         class_methods do
           def typed_instance
-            Values::Concrete.new(
-              Types::Type.instance,
-              instance
+            Values::BytecodeChunk.new(
+              value_type: Type.instance,
+              llvm_symbol: instance
             )
           end
 
           def methods(*methods)
-            methods.each do |method|
-              method.names.each do |name|
-                scope.define! name, Values::Concrete.new(Method.instance, method.instance)
-              end
+            if methods.present?
+              @methods = methods.map(&:instance)
+            else
+              @methods || []
             end
-          end
-
-          def scope
-            @scope ||= Scope.new(Scope.empty)
           end
 
           def atom_text
@@ -36,10 +32,24 @@ module SuperRuby
           def names
             [atom_text]
           end
+
+          def size(size=nil)
+            if size.present?
+              @size = size
+            else
+              @size || 8
+            end
+          end
         end
 
         def to_s
           self.class.atom_text
+        end
+
+        def resolve(identifier)
+          found = self.class.methods.find { |m| m.names.include? identifier }
+           raise "unknown identifier: #{identifier}"  unless found.present?
+           found
         end
       end
     end

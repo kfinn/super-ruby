@@ -3,8 +3,6 @@ module SuperRuby
     module Types
       class Macro
         include TypeBase
-
-        methods Methods::Call
       end
     end
   end

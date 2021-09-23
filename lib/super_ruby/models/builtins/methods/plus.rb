@@ -8,10 +8,18 @@ module SuperRuby
 
         names '+'
 
-        body do |super_self, scope, _memory, other:|
-          Values::Concrete.new(
-            super_self.type,
-            super_self.value + other.value
+        def to_bytecode_chunk!(
+          llvm_module,
+          llvm_basic_block,
+          super_self_bytecode_chunk,
+          arguments_bytecode_chunks
+        )
+          llvm_symbol = llvm_basic_block.add(
+            super_self_bytecode_chunk.llvm_symbol, *arguments_bytecode_chunks.map(&:llvm_symbol)
+          )
+          Values::BytecodeChunk.new(
+            value_type: super_self_bytecode_chunk.value_type,
+            llvm_symbol: llvm_symbol
           )
         end
       end
