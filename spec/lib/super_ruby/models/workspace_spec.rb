@@ -197,6 +197,7 @@ module SuperRuby
                 (
                   procedure
                   ((n Integer))
+                  Integer
                   (
                     if
                     (n == 0)

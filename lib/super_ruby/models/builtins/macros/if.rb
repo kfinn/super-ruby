@@ -17,15 +17,10 @@ module SuperRuby
 
           condition_basic_block.build do |condition_basic_block_builder|
             Workspace.with_current_basic_block_builder(condition_basic_block_builder) do
-              Scope.with_current_scope(scope.spawn) do
+              Scope.with_current_scope(starting_scope.spawn) do
                 condition_bytecode_chunk = list.second.to_bytecode_chunk!
-                condition_comparison_bytecode_chunk = condition_basic_block_builder.icmp(
-                  :ne,
-                  condition_bytecode_chunk,
-                  condition_bytecode_chunk.value_type.call(0)
-                )
                 condition_basic_block_builder.cond(
-                  condition_comparison_bytecode_chunk,
+                  condition_bytecode_chunk.llvm_symbol,
                   then_basic_block,
                   else_basic_block
                 )
@@ -36,7 +31,7 @@ module SuperRuby
           then_bytecode_chunk = nil
           then_basic_block.build do |then_basic_block_builder|
             Workspace.with_current_basic_block_builder(then_basic_block_builder) do
-              Scope.with_current_scope(scope.spawn) do
+              Scope.with_current_scope(starting_scope.spawn) do
                 then_bytecode_chunk = list.third.to_bytecode_chunk!
                 then_basic_block_builder.br(result_basic_block)
               end
@@ -46,7 +41,7 @@ module SuperRuby
           else_bytecode_chunk = nil
           else_basic_block.build do |else_basic_block_builder|
             Workspace.with_current_basic_block_builder(else_basic_block_builder) do
-              Scope.with_current_scope(scope.spawn) do
+              Scope.with_current_scope(starting_scope.spawn) do
                 else_bytecode_chunk = list.fourth.to_bytecode_chunk!
                 else_basic_block_builder.br(result_basic_block)
               end

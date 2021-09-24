@@ -6,7 +6,7 @@ module SuperRuby
 
         size 8
 
-        methods Methods::Plus
+        methods Methods::Plus, Methods::Equals
         # methods Methods::Plus, Methods::Minus, Methods::Equals
 
         def to_llvm_type
