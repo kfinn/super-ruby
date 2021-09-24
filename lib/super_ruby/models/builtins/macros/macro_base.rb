@@ -17,12 +17,12 @@ module SuperRuby
             attr_reader :macro
             attr_accessor :llvm_symbol
 
-            def to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
+            def to_bytecode_chunk!
               self
             end
             
-            def super_send!(list, scope, llvm_module, llvm_basic_block)
-              self.llvm_symbol = macro.to_bytecode_chunk!(list, scope, llvm_module, llvm_basic_block)
+            def super_send!(list)
+              self.llvm_symbol = macro.to_bytecode_chunk!(list)
             end
           end
 

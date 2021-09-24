@@ -11,7 +11,7 @@ module SuperRuby
         @id ||= BytecodeSymbolId.next("atom")
       end
 
-      def to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
+      def to_bytecode_chunk!
         if /\A[0-9]([0-9_]*[0-9])?\Z/.match? text
           Values::BytecodeChunk.new(
             value_type: Builtins::Types::Integer.instance,
@@ -25,7 +25,7 @@ module SuperRuby
         elsif token.match.kind_of? TokenMatches::StringLiteral
           raise "unimplemented"
         else
-          scope.resolve(text)
+          Scope.current_scope.resolve(text)
         end
       end
       

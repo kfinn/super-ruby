@@ -9,12 +9,10 @@ module SuperRuby
         names '+'
 
         def to_bytecode_chunk!(
-          llvm_module,
-          llvm_basic_block,
           super_self_bytecode_chunk,
           arguments_bytecode_chunks
         )
-          llvm_symbol = llvm_basic_block.add(
+          llvm_symbol = Workspace.current_basic_block_builder.add(
             super_self_bytecode_chunk.llvm_symbol, *arguments_bytecode_chunks.map(&:llvm_symbol)
           )
           Values::BytecodeChunk.new(

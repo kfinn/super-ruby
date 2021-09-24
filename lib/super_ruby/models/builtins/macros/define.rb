@@ -3,12 +3,14 @@ module SuperRuby
     module Macros
       class Define 
         include MacroBase
-        def to_bytecode_chunk!(list, scope, llvm_module, llvm_basic_block)
+        def to_bytecode_chunk!(list)
           identifier = list.second.text
 
-          bytecode_chunk = list.third.to_bytecode_chunk! scope.spawn, llvm_module, llvm_basic_block
+          bytecode_chunk = Scope.with_current_scope(Scope.current_scope.spawn) do
+            list.third.to_bytecode_chunk!
+          end
+          Scope.current_scope.define! identifier, bytecode_chunk
 
-          scope.define! identifier, bytecode_chunk
           Values::Void.instance
         end
       end

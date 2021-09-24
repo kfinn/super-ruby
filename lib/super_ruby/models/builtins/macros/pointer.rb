@@ -8,13 +8,8 @@ module SuperRuby
 
         include MacroBase
 
-        def to_bytecode_chunk!(list, scope, llvm_module, llvm_basic_block)
-          target_bytecode_chunk = list.second.to_bytecode_chunk!(
-            scope,
-            llvm_module,
-            llvm_basic_block
-          )
-
+        def to_bytecode_chunk!(list)
+          target_bytecode_chunk = list.second.to_bytecode_chunk!
           Values::BytecodeChunk.new(
             value_type: Builtins::Types::Type.instance,
             llvm_symbol: Builtins::Types::Pointer.new(

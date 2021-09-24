@@ -27,9 +27,9 @@ module SuperRuby
         @children = children
       end
 
-      def to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
-        head_bytecode_chunk = children.first.to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
-        head_bytecode_chunk.super_send!(self, scope, llvm_module, llvm_basic_block)
+      def to_bytecode_chunk!
+        head_bytecode_chunk = children.first.to_bytecode_chunk!
+        head_bytecode_chunk.super_send!(self)
       end
 
       def to_s

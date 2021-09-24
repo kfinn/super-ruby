@@ -1,5 +1,20 @@
 module SuperRuby
   class Scope
+    class << self
+      def current_scope
+        raise unless @current_scope.present?
+        @current_scope
+      end
+
+      def with_current_scope(current_scope)
+        previous_current_scope = @current_scope
+        @current_scope = current_scope
+        yield
+      ensure
+        @current_scope = previous_current_scope
+      end
+    end
+
     attr_accessor :parent
 
     class EmptyScope

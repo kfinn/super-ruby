@@ -5,16 +5,19 @@ module SuperRuby
 
       attr_accessor :value_type, :llvm_symbol
 
-      def super_send!(list, scope, llvm_module, llvm_basic_block)
-        method = list.second.to_bytecode_chunk! value_type, llvm_module, llvm_basic_block
-        argument_value_bytecode_chunks = list[2..-1].map do |argument_expression|
-          argument_expression.to_bytecode_chunk! scope, llvm_module, llvm_basic_block
+      def super_send!(list)
+        method = Scope.with_current_scope(value_type) do
+          list.second.to_bytecode_chunk!
         end
 
-        method.to_bytecode_chunk! llvm_module, llvm_basic_block, self, argument_value_bytecode_chunks
+        argument_value_bytecode_chunks = list[2..-1].map do |argument_expression|
+          argument_expression.to_bytecode_chunk!
+        end
+
+        method.to_bytecode_chunk! self, argument_value_bytecode_chunks
       end
 
-      def to_bytecode_chunk!(scope, llvm_module, llvm_basic_block)
+      def to_bytecode_chunk!
         self
       end
 
