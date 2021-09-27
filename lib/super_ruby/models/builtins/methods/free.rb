@@ -8,7 +8,9 @@ module SuperRuby
           super_self_bytecode_chunk,
           arguments_bytecode_chunks
         )
-          llvm_symbol = Workspace.current_basic_block_builder.free(super_self_bytecode_chunk.llvm_symbol)
+          llvm_symbol = Workspace.current_basic_block_builder do |current_basic_block_builder|
+            current_basic_block_builder.free(super_self_bytecode_chunk.llvm_symbol)
+          end
 
           Values::BytecodeChunk.new(
             value_type: Types::Void,

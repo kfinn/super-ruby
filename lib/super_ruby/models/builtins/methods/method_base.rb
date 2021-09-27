@@ -8,6 +8,10 @@ module SuperRuby
           include Singleton
 
           delegate :arguments, :body, :names, to: :class
+
+          def force!
+            true
+          end
         end
         
         class_methods do

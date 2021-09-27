@@ -3,10 +3,10 @@ module SuperRuby
     describe 'evaluate!' do
       let(:workspace) { Workspace.new source }
       let(:source) { SourceString.new super_code }
-      let(:result) { workspace.evaluate! result_type }
+      let(:result) { workspace.evaluate!(result_type).tap { @evaluated = true } }
       let(:result_type) { LLVM::Int }
 
-      after { result&.dispose }
+      after { @evaluated && result&.dispose }
 
       context 'with a program containing only an int literal' do
         let(:super_code) do
@@ -217,7 +217,7 @@ module SuperRuby
           SUPER
         end
 
-        xit 'evaluates the recursive program and returns the correct value' do
+        it 'evaluates the recursive program and returns the correct value' do
           expect(result.to_i).to eq 13
         end
       end

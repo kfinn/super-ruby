@@ -10,8 +10,9 @@ module SuperRuby
         )
           llvm_symbol =
             Workspace
-            .current_basic_block_builder
-            .load(super_self_bytecode_chunk.llvm_symbol)
+            .current_basic_block_builder do |current_basic_block_builder|
+              current_basic_block_builder.load(super_self_bytecode_chunk.llvm_symbol)
+            end
             
           Values::BytecodeChunk.new(
             value_type: super_self_bytecode_chunk.value_type.target_type,

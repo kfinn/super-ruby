@@ -9,16 +9,21 @@ module SuperRuby
 
         def to_bytecode_chunk!(super_self_bytecode_chunk, arguments_bytecode_chunks)
           llvm_symbol =
-              Workspace
-              .current_basic_block_builder
-              .call(
+            Workspace
+            .current_basic_block_builder do |current_basic_block_builder|
+              current_basic_block_builder.call(
                 super_self_bytecode_chunk.llvm_symbol,
                 *arguments_bytecode_chunks.map(&:llvm_symbol)
               )
+            end
           Values::BytecodeChunk.new(
             value_type: procedure_type.return_type,
             llvm_symbol: llvm_symbol
           )
+        end
+
+        def force!
+          true
         end
       end
     end

@@ -14,7 +14,7 @@ module SuperRuby
         @current_workspace = previous_workspace
       end
 
-      delegate :current_basic_block_builder, :current_basic_block_builder=, :with_current_basic_block_builder, to: :current_workspace
+      delegate :current_basic_block, :current_basic_block_builder, :current_basic_block=, :with_current_basic_block, to: :current_workspace
 
       def current_llvm_module
         current_workspace.llvm_module
@@ -43,10 +43,12 @@ module SuperRuby
             [],
             expected_type
           ) do |main|
-            main.basic_blocks.append.build do |main_basic_block|
-              self.current_basic_block_builder = main_basic_block
-              result = root_ast_node.to_bytecode_chunk!
-              main_basic_block.ret result.llvm_symbol
+            main_basic_block = main.basic_blocks.append
+            result = with_current_basic_block(main_basic_block) do
+              root_ast_node.to_bytecode_chunk!.tap(&:force!)
+            end
+            main_basic_block.build do |main_basic_block_builder|
+              main_basic_block_builder.ret result.llvm_symbol
             end
           end
         end
@@ -67,14 +69,22 @@ module SuperRuby
       @llvm_module ||= LLVM::Module.new('workspace')
     end
 
-    attr_accessor :current_basic_block_builder
+    attr_accessor :current_basic_block
 
-    def with_current_basic_block_builder(current_basic_block_builder)
-      previous_basic_block_builder = self.current_basic_block_builder
-      self.current_basic_block_builder = current_basic_block_builder
+    def current_basic_block_builder
+      result = nil
+      current_basic_block.build do |builder|
+        result = yield builder
+      end
+      result
+    end
+
+    def with_current_basic_block(current_basic_block)
+      previous_basic_block = self.current_basic_block
+      self.current_basic_block = current_basic_block
       yield
     ensure
-      self.current_basic_block_builder = previous_basic_block_builder
+      self.current_basic_block = previous_basic_block
     end
   end
 end

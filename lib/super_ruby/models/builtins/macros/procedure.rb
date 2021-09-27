@@ -24,9 +24,12 @@ module SuperRuby
             BytecodeSymbolId.next("procedure"),
             arguments.to_llvm_type,
             return_type.to_llvm_type
-          ) do |llvm_function, *llvm_arguments|
-            call_scope = Scope.current_scope.spawn
-            llvm_arguments.zip(arguments).each do |llvm_argument, argument|
+          )
+
+          definition_scope = Scope.current_scope
+          lazy_builder = lambda do
+            call_scope = definition_scope.spawn
+            llvm_symbol.params.zip(arguments).each do |llvm_argument, argument|
               llvm_argument.name = argument.name
               call_scope.define!(
                 argument.name,
@@ -38,10 +41,12 @@ module SuperRuby
             end
 
             Scope.with_current_scope(call_scope) do
-              llvm_function.basic_blocks.append.build do |body|
-                Workspace.with_current_basic_block_builder(body) do
-                  return_value = list.fourth.to_bytecode_chunk!.llvm_symbol
-                  Workspace.current_basic_block_builder.ret return_value
+              body_basic_block = llvm_symbol.basic_blocks.append
+              Workspace.with_current_basic_block(body_basic_block) do
+                return_value_bytecode_chunk = list.fourth.to_bytecode_chunk!.tap(&:force!)
+                return_value = return_value_bytecode_chunk.llvm_symbol
+                Workspace.current_basic_block_builder do |current_basic_block_builder|
+                  current_basic_block_builder.ret return_value
                 end
               end
             end
@@ -49,7 +54,8 @@ module SuperRuby
 
           Values::BytecodeChunk.new(
             value_type: Builtins::Types::Procedure.new(arguments, return_type),
-            llvm_symbol: llvm_symbol
+            llvm_symbol: llvm_symbol,
+            lazy_builder: lazy_builder
           )
         end
       end

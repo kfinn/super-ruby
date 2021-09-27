@@ -3,7 +3,7 @@ module SuperRuby
     class BytecodeChunk
       include ActiveModel::Model
 
-      attr_accessor :value_type, :llvm_symbol
+      attr_accessor :value_type, :llvm_symbol, :lazy_builder
 
       def super_send!(list)
         method = Scope.with_current_scope(value_type) do
@@ -15,6 +15,12 @@ module SuperRuby
         end
 
         method.to_bytecode_chunk! self, argument_value_bytecode_chunks
+      end
+
+      def force!
+        return @forced if instance_variable_defined?(:@forced)
+        @forced = true
+        lazy_builder&.call
       end
 
       def to_bytecode_chunk!

@@ -24,6 +24,10 @@ module SuperRuby
             def super_send!(list)
               self.llvm_symbol = macro.to_bytecode_chunk!(list)
             end
+
+            def force!
+              true
+            end
           end
 
           def typed_instance

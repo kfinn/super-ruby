@@ -1,20 +1,28 @@
-# module SuperRuby
-#   module Builtins
-#     module Methods
-#       class Minus
-#         include MethodBase
-#         arguments :other
+module SuperRuby
+  module Builtins
+    module Methods
+      class Minus
+        include MethodBase
+        
+        arguments :other
 
-#         names '-'
+        names '-'
 
-#         body do |super_self, scope, _memory, other:|
-#           raise "Invalid -: mismatched types (#{super_self.type} + #{other.type})" unless super_self.type == other.type
-#           Values::Concrete.new(
-#             super_self.type,
-#             super_self.value - other.value
-#           )
-#         end
-#       end
-#     end
-#   end
-# end
+        def to_bytecode_chunk!(
+          super_self_bytecode_chunk,
+          arguments_bytecode_chunks
+        )
+          llvm_symbol = Workspace.current_basic_block_builder do |current_basic_block_builder|
+            current_basic_block_builder.sub(
+              super_self_bytecode_chunk.llvm_symbol, *arguments_bytecode_chunks.map(&:llvm_symbol)
+            )
+          end
+          Values::BytecodeChunk.new(
+            value_type: super_self_bytecode_chunk.value_type,
+            llvm_symbol: llvm_symbol
+          )
+        end
+      end
+    end
+  end
+end

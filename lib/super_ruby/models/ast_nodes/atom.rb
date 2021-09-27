@@ -25,7 +25,7 @@ module SuperRuby
         elsif token.match.kind_of? TokenMatches::StringLiteral
           raise "unimplemented"
         else
-          Scope.current_scope.resolve(text)
+          Scope.current_scope.resolve(text).tap(&:force!)
         end
       end
       

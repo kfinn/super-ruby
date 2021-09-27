@@ -10,11 +10,12 @@ module SuperRuby
         )
           llvm_symbol =
             Workspace
-            .current_basic_block_builder
-            .store(
-              arguments_bytecode_chunks.first.llvm_symbol,
-              super_self_bytecode_chunk.llvm_symbol
-            )
+            .current_basic_block_builder do |current_basic_block_builder|
+              current_basic_block_builder.store(
+                arguments_bytecode_chunks.first.llvm_symbol,
+                super_self_bytecode_chunk.llvm_symbol
+              )
+            end
             
           Values::BytecodeChunk.new(
             value_type: Types::Void,
