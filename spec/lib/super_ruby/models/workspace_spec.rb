@@ -248,20 +248,23 @@ module SuperRuby
               (
                 struct
                 (
-                  (var id Integer 10)
+                  (var lhs Integer 10)
+                  (var rhs Integer 12)
+                  (var sum Integer)
                 )
               )
             )
             
-            (var custom_struct_instance CustomStruct)
-            ((custom_struct_instance id) write 12)
-            ((custom_struct_instance id) read)
+            (var instance CustomStruct)
+            ((instance lhs) write 100)
+            ((instance sum) write (((instance lhs) read) + ((instance rhs) read)))
+            ((instance sum) read)
           ))
           SUPER
         end
 
         it 'allows that field to be written to and read from' do
-          expect(result.to_i).to eq 12
+          expect(result.to_i).to eq 112
         end
       end
     end

@@ -56,15 +56,17 @@ module SuperRuby
                   Workspace.current_basic_block_builder do |current_basic_block_builder|
                     member_pointer = current_basic_block_builder.gep(
                       initializer.params.first,
-                      [LLVM.Int(index)]
+                      [LLVM.Int(0), LLVM.Int(index)]
                     )
                     store_llvm_symbol = current_basic_block_builder.store(
                       initial_value.llvm_symbol,
                       member_pointer
                     )
-                    current_basic_block_builder.ret(store_llvm_symbol)
                   end
                 end
+              end
+              Workspace.current_basic_block_builder do |current_basic_block_builder|
+                current_basic_block_builder.ret(nil)
               end
             end
           end

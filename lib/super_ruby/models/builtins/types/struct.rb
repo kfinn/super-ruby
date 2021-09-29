@@ -31,7 +31,7 @@ module SuperRuby
             raise if arguments_bytecode_chunks.any?
 
             llvm_symbol = Workspace.current_basic_block_builder do |current_basic_block_builder|
-              current_basic_block_builder.gep(super_self_bytecode_chunk.llvm_symbol, [LLVM.Int(index)])
+              current_basic_block_builder.gep(super_self_bytecode_chunk.llvm_symbol, [LLVM.Int(0), LLVM.Int(index)])
             end
 
             BytecodeChunk.new(
