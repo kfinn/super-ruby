@@ -16,7 +16,7 @@ module SuperRuby
                 *arguments_bytecode_chunks.map(&:llvm_symbol)
               )
             end
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: procedure_type.return_type,
             llvm_symbol: llvm_symbol
           )

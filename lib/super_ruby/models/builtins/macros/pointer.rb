@@ -10,7 +10,7 @@ module SuperRuby
 
         def to_bytecode_chunk!(list)
           target_bytecode_chunk = list.second.to_bytecode_chunk!
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: Builtins::Types::Type.instance,
             llvm_symbol: Builtins::Types::Pointer.new(
               target_bytecode_chunk.llvm_symbol

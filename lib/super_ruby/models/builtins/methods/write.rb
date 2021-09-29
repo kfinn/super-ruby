@@ -17,7 +17,7 @@ module SuperRuby
               )
             end
             
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: Types::Void,
             llvm_symbol: llvm_symbol
           )

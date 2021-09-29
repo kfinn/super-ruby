@@ -14,7 +14,7 @@ module SuperRuby
               current_basic_block_builder.load(super_self_bytecode_chunk.llvm_symbol)
             end
             
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: super_self_bytecode_chunk.value_type.target_type,
             llvm_symbol: llvm_symbol
           )

@@ -11,7 +11,7 @@ module SuperRuby
 
         class_methods do
           def typed_instance
-            Values::BytecodeChunk.new(
+            BytecodeChunk.new(
               value_type: Type.instance,
               llvm_symbol: instance
             )
@@ -50,6 +50,10 @@ module SuperRuby
           found = self.class.methods.find { |m| m.names.include? identifier }
            raise "unknown identifier: #{identifier}"  unless found.present?
            found
+        end
+
+        def pointer_methods
+          {}
         end
       end
     end

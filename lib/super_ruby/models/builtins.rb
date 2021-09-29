@@ -5,7 +5,9 @@ module SuperRuby
       Macros::Sequence,
       Macros::Procedure,
       Macros::If,
-      Macros::Pointer
+      Macros::Pointer,
+      Macros::Var,
+      Macros::Struct
     ].freeze
 
     TYPES = [

@@ -221,6 +221,49 @@ module SuperRuby
           expect(result.to_i).to eq 13
         end
       end
+
+      context 'with locally scoped variables' do
+        let(:super_code) do
+          <<~SUPER
+          (sequence(
+            (var x Integer 12)
+            (var y Integer 17)
+            (var z Integer ((x read) + (y read)))
+            (z read)
+          ))
+          SUPER
+        end
+
+        it 'allows those fields to be written to and read from' do
+          expect(result.to_i).to eq 29
+        end
+      end
+
+      context 'with a custom type declaration with a field' do
+        let(:super_code) do
+          <<~SUPER
+          (sequence(
+            (define
+              CustomStruct
+              (
+                struct
+                (
+                  (var id Integer 10)
+                )
+              )
+            )
+            
+            (var custom_struct_instance CustomStruct)
+            ((custom_struct_instance id) write 12)
+            ((custom_struct_instance id) read)
+          ))
+          SUPER
+        end
+
+        it 'allows that field to be written to and read from' do
+          expect(result.to_i).to eq 12
+        end
+      end
     end
   end
 end

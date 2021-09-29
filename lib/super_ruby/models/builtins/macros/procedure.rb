@@ -33,7 +33,7 @@ module SuperRuby
               llvm_argument.name = argument.name
               call_scope.define!(
                 argument.name,
-                Values::BytecodeChunk.new(
+                BytecodeChunk.new(
                   value_type: argument.type,
                   llvm_symbol: llvm_argument
                 )
@@ -52,7 +52,7 @@ module SuperRuby
             end
           end
 
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: Builtins::Types::Procedure.new(arguments, return_type),
             llvm_symbol: llvm_symbol,
             lazy_builder: lazy_builder

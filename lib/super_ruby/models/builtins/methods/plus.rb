@@ -17,7 +17,7 @@ module SuperRuby
               super_self_bytecode_chunk.llvm_symbol, *arguments_bytecode_chunks.map(&:llvm_symbol)
             )
           end
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: super_self_bytecode_chunk.value_type,
             llvm_symbol: llvm_symbol
           )

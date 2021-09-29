@@ -19,7 +19,7 @@ module SuperRuby
               arguments_bytecode_chunks.first.llvm_symbol
             )
           end
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: Types::Integer.instance,
             llvm_symbol: llvm_symbol
           )

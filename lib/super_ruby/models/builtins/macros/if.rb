@@ -69,7 +69,7 @@ module SuperRuby
           end
           Workspace.current_basic_block = result_basic_block
 
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: then_bytecode_chunk.value_type,
             llvm_symbol: llvm_symbol
           )

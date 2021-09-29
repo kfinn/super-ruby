@@ -1,5 +1,5 @@
 module SuperRuby
-  Token = Struct.new(:match) do
+  Token = ::Struct.new(:match) do
     delegate :text, to: :match
   end
 end

@@ -22,7 +22,9 @@ module SuperRuby
 
         def resolve(identifier)
           methods.fetch(identifier) do
-            raise "unknown identifier: #{identifier}"
+            target_type.pointer_methods.fetch(identifier) do
+              raise "unknown identifier: #{identifier}"
+            end
           end
         end
 

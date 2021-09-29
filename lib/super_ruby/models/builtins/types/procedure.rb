@@ -16,7 +16,7 @@ module SuperRuby
           end
         end
 
-        Argument = Struct.new(:name, :type) do
+        Argument = ::Struct.new(:name, :type) do
           delegate :to_llvm_type, to: :type
         end
 

@@ -14,7 +14,7 @@ module SuperRuby
             .current_basic_block_builder do |current_basic_block_builder|
               current_basic_block_builder.malloc(type.to_llvm_type)
             end
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: Types::Pointer.new(type),
             llvm_symbol: llvm_symbol
           )

@@ -12,7 +12,7 @@ module SuperRuby
             current_basic_block_builder.free(super_self_bytecode_chunk.llvm_symbol)
           end
 
-          Values::BytecodeChunk.new(
+          BytecodeChunk.new(
             value_type: Types::Void,
             llvm_symbol: llvm_symbol
           )
