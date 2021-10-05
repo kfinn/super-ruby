@@ -99,4 +99,3 @@ module SuperRuby
     end
   end
 end
-

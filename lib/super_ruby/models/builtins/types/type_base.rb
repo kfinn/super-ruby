@@ -2,6 +2,25 @@ module SuperRuby
   module Builtins
     module Types
       module TypeBase
+        class Method
+          def initialize(body)
+            @body = body
+          end
+          attr_reader :body
+
+          def to_bytecode_chunk!(
+            super_self_bytecode_chunk,
+            arguments_bytecode_chunks
+          )
+            body.call(
+              super_self_bytecode_chunk,
+              arguments_bytecode_chunks
+            )
+          end
+
+          def force!; true; end
+        end
+
         extend ActiveSupport::Concern
 
         included do
@@ -17,12 +36,14 @@ module SuperRuby
             )
           end
 
-          def methods(*methods)
-            if methods.present?
-              @methods = methods.map(&:instance)
-            else
-              @methods || []
+          def method(*identifiers, &body)
+            identifiers.each do |identifier|
+              builtin_methods[identifier] = Method.new(body)
             end
+          end
+
+          def builtin_methods
+            @builtin_methods ||= {}
           end
 
           def atom_text
@@ -47,9 +68,9 @@ module SuperRuby
         end
 
         def resolve(identifier)
-          found = self.class.methods.find { |m| m.names.include? identifier }
-           raise "unknown identifier: #{identifier}"  unless found.present?
-           found
+          self.class.builtin_methods.fetch(identifier) do
+            raise "unknown identifier: #{identifier}"
+          end
         end
 
         def pointer_methods

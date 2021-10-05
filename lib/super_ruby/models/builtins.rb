@@ -13,7 +13,6 @@ module SuperRuby
     TYPES = [
       Types::Float,
       Types::Integer,
-      Types::String,
       Types::Type,
       Types::Void
     ]
