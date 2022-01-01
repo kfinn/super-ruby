@@ -1,20 +1,3 @@
-GIT
-  remote: https://github.com/kfinn/ruby-llvm
-  revision: d316ca056df404dabe11a4fca484c5bc6d2050b5
-  specs:
-    ruby-llvm (11.0.1)
-      ffi (~> 1.13.1)
-      rake (>= 12, < 14)
-
-PATH
-  remote: .
-  specs:
-    super_ruby (0.1.0)
-      activemodel (~> 6.1, >= 6.1.4.1)
-      activesupport (~> 6.1, >= 6.1.4.1)
-      tty-config (~> 0.3.2)
-      zeitwerk (~> 2.4, >= 2.4.2)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -28,7 +11,6 @@ GEM
       zeitwerk (~> 2.3)
     concurrent-ruby (1.1.9)
     diff-lcs (1.4.4)
-    ffi (1.13.1)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     minitest (5.14.4)
@@ -46,7 +28,6 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
     rspec-support (3.10.2)
-    tty-config (0.3.2)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     zeitwerk (2.4.2)
@@ -55,10 +36,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activemodel (~> 6.1, >= 6.1.4.1)
+  activesupport (~> 6.1, >= 6.1.4.1)
   rake (~> 12.0)
   rspec (~> 3.0)
-  ruby-llvm!
-  super_ruby!
+  zeitwerk (~> 2.4, >= 2.4.2)
 
 BUNDLED WITH
    2.1.4

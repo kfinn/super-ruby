@@ -1,9 +1,8 @@
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in super_ruby.gemspec
-gemspec
+gem 'activemodel', '~> 6.1', '>= 6.1.4.1'
+gem 'activesupport', '~> 6.1', '>= 6.1.4.1'
+gem 'zeitwerk', '~> 2.4', '>= 2.4.2'
 
-gem "rake", "~> 12.0"
-gem "rspec", "~> 3.0"
-
-gem "ruby-llvm", git: 'https://github.com/kfinn/ruby-llvm'
+gem 'rake', '~> 12.0'
+gem 'rspec', '~> 3.0'
