@@ -5,9 +5,7 @@ module AstNodes
     "[" => "]"
   }.freeze
 
-  class List
-    attr_reader :children
-
+  List = Struct.new(:children)
     include Enumerable
     delegate :each, :[], :first, :second, :third, :fourth, :size, to: :children
 
@@ -22,20 +20,8 @@ module AstNodes
       new(children)
     end
 
-    def initialize(children)
-      @children = children
-    end
-
     def to_s
       "(#{map(&:to_s).join(" ")})"
-    end
-
-    def define?
-      size == 3 && first.define? && second.atom?
-    end
-
-    def atom?
-      false
     end
   end
 end

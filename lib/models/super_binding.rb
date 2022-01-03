@@ -16,4 +16,8 @@ class SuperBinding
   def locals
     @locals ||= {}
   end
+
+  def spawn
+    SuperBinding.new(self)
+  end
 end
