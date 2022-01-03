@@ -9,5 +9,13 @@ module AstNodes
     def to_s
       text
     end
+
+    def define?
+      text == 'define'
+    end
+
+    def atom?
+      true
+    end
   end
 end

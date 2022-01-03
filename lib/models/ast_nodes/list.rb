@@ -30,8 +30,12 @@ module AstNodes
       "(#{map(&:to_s).join(" ")})"
     end
 
-    def to_typing(hash)
-      Typings::MessageSend
+    def define?
+      size == 3 && first.define? && second.atom?
+    end
+
+    def atom?
+      false
     end
   end
 end

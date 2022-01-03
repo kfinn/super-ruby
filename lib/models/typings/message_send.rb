@@ -12,7 +12,6 @@ module Typings
     end
 
     def complete?
-      puts dependencies.join(", ")
       @complete ||= dependencies.all?(&:complete?)
     end
 
