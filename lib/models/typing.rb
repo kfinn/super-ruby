@@ -19,15 +19,15 @@ class Typing
     def handle_define(ast_node)
       return unless (
         ast_node.list? &&
-        ast_node.size != 3 &&
+        ast_node.size == 3 &&
         ast_node.first.atom? &&
         ast_node.first.text == 'define' &&
         ast_node.second.atom?
       )
 
       Workspace.current_workspace.current_super_binding.set(
-        ast_node_list.children.second.text,
-        Workspace.current_workspace.typing_for(ast_node_list.children.third)
+        ast_node.children.second.text,
+        Workspace.current_workspace.typing_for(ast_node.children.third)
       )
       Typings::ImmediateTyping.new(Types::Void.instance)
     end
@@ -54,16 +54,16 @@ class Typing
     end
 
     def handle_integer_literal(ast_node)
-        return unless (
-          ast_node.atom? &&
-          ast_node.text.match(/0|-?[1-9](\d)*/)
-        )
-        Typings::ImmediateTyping.new(Types::Integer.instance)
+      return unless (
+        ast_node.atom? &&
+        ast_node.text.match(/0|-?[1-9](\d)*/)
+      )
+      Typings::ImmediateTyping.new(Types::Integer.instance)
     end
 
     def handle_identifier(ast_node)
       return unless ast_node.kind_of? AstNodes::Atom
-      Workspace.current_workspace.current_super_binding.fetch(ast_node_atom.text)
+      Workspace.current_workspace.current_super_binding.fetch(ast_node.text)
     end
   end
 end

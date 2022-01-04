@@ -31,19 +31,35 @@ module Typings
       @argument_typings = argument_typings
     end
     attr_reader :receiver_typing, :message, :argument_typings
+    attr_accessor :result_typing
 
     def argument_typings_complete?
       @argument_typings_complete ||= receiver_typing.complete? && argument_typings.all?(&:complete?)
     end
 
-    def complete?
-      argument_typings_complete?
+    def result_typing_complete?
+      result_typing&.complete?
     end
 
-    def work!; end
+    def complete?
+      argument_typings_complete? && result_typing_complete?
+    end
+
+    def work!
+      if argument_typings_complete? && result_typing.blank?
+        self.result_typing = 
+          receiver_typing
+          .type
+          .message_send_result_typing(
+            message,
+            argument_typings.map(&:type)
+          )
+        self.result_typing.add_downstream(self)
+      end
+    end
 
     def type
-      @type ||= receiver_typing.type.message_send_result_type(message, argument_typings.map(&:type))
+      @type ||= result_typing.type
     end
   end
 end
