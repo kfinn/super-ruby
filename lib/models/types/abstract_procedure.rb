@@ -1,7 +1,8 @@
 module Types
   class AbstractProcedure
-    def initialize(procedure_definition)
-      @procedure_definition = procedure_definition
+    def initialize(argument_names, body)
+      @argument_names = argument_names
+      @body = body
     end
 
     def typing_for_message_send(message, argument_typings)

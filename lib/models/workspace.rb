@@ -26,22 +26,11 @@ class Workspace
       root_ast_nodes = AstNode.from_tokens(Lexer.new(source).each_token)
       root_ast_nodes.each do |root_ast_node|
         root_ast_nodes_by_source[source] = root_ast_node
-        typings_by_ast_node[root_ast_node] = Typing.from_ast_node(root_ast_node)
+        typing_for(root_ast_node)
       end
     end
 
-    incomplete_typings = Set.new(typings_by_ast_node.values.reject(&:complete?))
-    blocked = false
-    while incomplete_typings.any? && !blocked
-      blocked = true
-      completable_typings = incomplete_typings.select(&:complete?)
-      blocked = completable_typings.any?
-      incomplete_typings -= completable_typings
-    end
-
-    untyped_ast_nodes = typings_by_ast_node.each_with_object(Set.new) do |(ast_node, typing), acc|
-      acc << ast_node unless typing.complete?
-    end
+    work_queue.pump! while work_queue.any?
   end
 
   def dynamic_pass!
@@ -57,7 +46,7 @@ class Workspace
   end
 
   def result_typing
-    typings_by_ast_node[result_ast_node]
+    typing_for(result_ast_node)
   end
 
   def result_type
@@ -81,11 +70,13 @@ class Workspace
     self.current_super_binding = previous_super_binding
   end
 
-  def typings_by_ast_node
-    @typings_by_ast_node ||= Typing.new_typings_by_ast_node
-  end
+  delegate :typing_for, to: :typings
 
   private
+
+  def work_queue
+    @work_queue ||= WorkQueue.new
+  end
   
   def sources
     @sources ||= []
@@ -105,5 +96,9 @@ class Workspace
 
   def root_super_binding
     @root_super_binding ||= SuperBinding.new({})
+  end
+
+  def typings
+    @typings ||= TypingsCollection.new(self)
   end
 end

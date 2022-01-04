@@ -5,7 +5,7 @@ module AstNodes
     "[" => "]"
   }.freeze
 
-  List = Struct.new(:children)
+  List = Struct.new(:children) do
     include Enumerable
     delegate :each, :[], :first, :second, :third, :fourth, :size, to: :children
 
@@ -22,6 +22,14 @@ module AstNodes
 
     def to_s
       "(#{map(&:to_s).join(" ")})"
+    end
+
+    def list?
+      true
+    end
+
+    def atom?
+      false
     end
   end
 end

@@ -1,18 +1,28 @@
 module Typings
   class MessageSend
+    prepend WorkQueue::Job
+
     def self.handle_ast_node(ast_node)
       return unless (
-        ast_node.kind_of?(AstNodes::List)
-        && ast_node.size >= 2
-        && ast_node.second.kind_of(AstNodes::Atom)
+        ast_node.list? &&
+        ast_node.size >= 2 &&
+        ast_node.second.atom?
       )
 
-      typings_by_ast_node = Typing.current_typings_by_ast_node
-      Typings::MessageSend.new(
-        typings_by_ast_node[ast_node_list.first],
-        ast_node_list.second.text,
-        ast_node_list[2..].map { |argument_ast_node| typings_by_ast_node[argument_ast_node] }
+      workspace = Workspace.current_workspace
+      receiver_typing = workspace.typing_for(ast_node.first)
+      argument_typings = ast_node[2..].map { |argument_ast_node| workspace.typing_for(argument_ast_node) }
+
+      message_send_typing = Typings::MessageSend.new(
+        receiver_typing,
+        ast_node.second.text,
+        argument_typings
       )
+      
+      receiver_typing.add_downstream(message_send_typing)
+      argument_typings.each { |argument_typing| receiver_typing.add_downstream(argument_typing) }
+
+      message_send_typing
     end
 
     def initialize(receiver_typing, message, argument_typings)
@@ -22,28 +32,18 @@ module Typings
     end
     attr_reader :receiver_typing, :message, :argument_typings
 
-    def complete?
-      return false unless receiver_typing.complete? && argument_typings.all?(&:complete?)
-      typing_for_application.complete?      
+    def argument_typings_complete?
+      @argument_typings_complete ||= receiver_typing.complete? && argument_typings.all?(&:complete?)
     end
 
-    def typing_for_application
-      unless instance_variable_defined?(:@typing_for_application)
-        raise unless receiver_typing.complete? && argument_typings.all(&:complete?)
-        @typing_for_application = 
-          receiver_typing
-          .type
-          .typing_for_message_send(
-            message,
-            argument_typings
-          )
-      end
-      @typing_for_application
+    def complete?
+      argument_typings_complete?
     end
+
+    def work!; end
 
     def type
-      raise 'attempted to derive an incomplete type' unless complete?
-      @type ||= typing_for_application.type
+      @type ||= receiver_typing.type.message_send_result_type(message, argument_typings.map(&:type))
     end
   end
 end
