@@ -1,6 +1,6 @@
-module Typings
+module Jobs
   class MessageSend
-    prepend WorkQueue::Job
+    prepend BaseJob
 
     def self.handle_ast_node(ast_node)
       return unless (
@@ -13,16 +13,13 @@ module Typings
       receiver_typing = workspace.typing_for(ast_node.first)
       argument_typings = ast_node[2..].map { |argument_ast_node| workspace.typing_for(argument_ast_node) }
 
-      message_send_typing = Typings::MessageSend.new(
+      Jobs::MessageSend.new(
         receiver_typing,
         ast_node.second.text,
         argument_typings
-      )
-      
-      receiver_typing.add_downstream(message_send_typing)
-      argument_typings.each { |argument_typing| receiver_typing.add_downstream(argument_typing) }
-
-      message_send_typing
+      ).tap do |message_send|
+        receiver_typing.add_downstream(message_send)
+      end
     end
 
     def initialize(receiver_typing, message, argument_typings)
@@ -46,15 +43,15 @@ module Typings
     end
 
     def work!
-      if argument_typings_complete? && result_typing.blank?
-        self.result_typing = 
+      if receiver_typing.complete? && result_typing.blank?
+        self.result_typing =
           receiver_typing
           .type
           .message_send_result_typing(
             message,
-            argument_typings.map(&:type)
+            argument_typings
           )
-        self.result_typing.add_downstream(self)
+        result_typing.add_downstream(self)
       end
     end
 

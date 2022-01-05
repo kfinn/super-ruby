@@ -6,19 +6,32 @@ module Types
     end
     attr_reader :argument_names, :body
 
-    def message_send_result_typing(message, argument_types)
+    def message_send_result_typing(message, argument_typings)
       case message
       when 'call'
-        raise "invalid arguments count: #{argument_types.map(&:to_s).join(", ")}" unless argument_types.size == argument_names.size
-        raise "todo: return a typing that depends on having specialized this procedure"
+        raise "Invalid arguments count: expected #{argument_names.size}, but got #{argument_typings.size}" unless argument_typings.size == argument_names.size
+
+        workspace = Workspace.current_workspace
+        super_binding =
+          argument_names
+          .zip(argument_typings)
+          .each_with_object(
+            workspace
+            .current_super_binding
+            .spawn
+          ) do |(argument_name, argument_typing), super_binding|
+            super_binding.set(
+              argument_name,
+              argument_typing
+            )
+          end
+
+        workspace.with_current_super_binding(super_binding) do
+          workspace.typing_for(body)
+        end
       else
         raise "invalid message: #{message}"
       end
     end
-
-    def concrete_procedures_by_argument_types
-      concrete_procedures_by_argument_types ||= {}
-    end
-
   end
 end

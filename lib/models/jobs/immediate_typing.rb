@@ -1,6 +1,6 @@
-module Typings
+module Jobs
   class ImmediateTyping
-    prepend WorkQueue::Job
+    prepend BaseJob
 
     def initialize(type)
       @type = type

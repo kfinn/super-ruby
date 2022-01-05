@@ -1,5 +1,5 @@
 class SuperBinding
-  def initialize(parent)
+  def initialize(parent={})
     @parent = parent
   end
 

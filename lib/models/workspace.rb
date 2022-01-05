@@ -46,7 +46,7 @@ class Workspace
   end
 
   def result_typing
-    typing_for(result_ast_node)
+    typing_for(result_ast_node, root_super_binding)
   end
 
   def result_type
@@ -67,10 +67,15 @@ class Workspace
     previous_super_binding = self.current_super_binding
     self.current_super_binding = new_super_binding
     yield
+  ensure
     self.current_super_binding = previous_super_binding
   end
 
   delegate :typing_for, to: :typings
+
+  def root_super_binding
+    @root_super_binding ||= SuperBinding.new
+  end
 
   private
 
@@ -92,10 +97,6 @@ class Workspace
 
   def root_ast_nodes_by_source
     @root_ast_nodes_by_source ||= {}
-  end
-
-  def root_super_binding
-    @root_super_binding ||= SuperBinding.new({})
   end
 
   def typings

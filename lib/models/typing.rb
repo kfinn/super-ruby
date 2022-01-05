@@ -1,4 +1,4 @@
-class Typing
+module Typing
   class << self
     AST_NODE_HANDLERS = [
       :handle_define,
@@ -29,7 +29,7 @@ class Typing
         ast_node.children.second.text,
         Workspace.current_workspace.typing_for(ast_node.children.third)
       )
-      Typings::ImmediateTyping.new(Types::Void.instance)
+      Jobs::ImmediateTyping.new(Types::Void.instance)
     end
 
     def handle_procedure_definition(ast_node)
@@ -39,18 +39,17 @@ class Typing
         ast_node.first.atom? &&
         ast_node.first.text == 'procedure' &&
         ast_node.second.list? &&
-        ast_node.second.all?(&:atom?) &&
-        ast_node.third.list?
+        ast_node.second.all?(&:atom?)
       )
 
-      Typings::ImmediateTyping.new(Types::AbstractProcedure.new(
+      Jobs::ImmediateTyping.new(Types::AbstractProcedure.new(
         ast_node.second.map(&:text),
         ast_node.third
       ))
     end
 
     def handle_message_send(ast_node)
-      Typings::MessageSend.handle_ast_node(ast_node)
+      Jobs::MessageSend.handle_ast_node(ast_node)
     end
 
     def handle_integer_literal(ast_node)
@@ -58,7 +57,7 @@ class Typing
         ast_node.atom? &&
         ast_node.text.match(/0|-?[1-9](\d)*/)
       )
-      Typings::ImmediateTyping.new(Types::Integer.instance)
+      Jobs::ImmediateTyping.new(Types::Integer.instance)
     end
 
     def handle_identifier(ast_node)
