@@ -4,6 +4,7 @@ module Typing
       :handle_define,
       :handle_procedure_definition,
       :handle_if,
+      :handle_sequence,
       :handle_message_send,
       :handle_integer_literal,
       :handle_boolean_literal,
@@ -72,6 +73,29 @@ module Typing
 
     def handle_if(ast_node)
       Jobs::IfTyping.handle_ast_node(ast_node)
+    end
+
+    def handle_sequence(ast_node)
+      return unless (
+        ast_node.list? &&
+        ast_node.first.atom? &&
+        ast_node.first.text == 'sequence' &&
+        ast_node.second.list?
+      )
+
+      Workspace
+        .current_workspace
+        .with_current_super_binding(
+          Workspace
+            .current_workspace
+            .current_super_binding
+            .spawn(inherit_dynamic_locals: true)
+        ) do
+          child_typings = ast_node.second.map do |child_ast_node|
+            Workspace.current_workspace.typing_for(child_ast_node)
+          end
+          child_typings.last
+        end
     end
 
     def handle_identifier(ast_node)

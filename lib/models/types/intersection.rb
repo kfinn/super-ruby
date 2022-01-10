@@ -13,6 +13,20 @@ module Types
       )
     end
 
+    def to_s
+      "(#{types.map(&:to_s).join("|")})"
+    end
+
+    def ==(other)
+      other.kind_of?(Intersection) && state == other.state
+    end
+
+    delegate :hash, to: :state
+
+    def state
+      Set.new(types)
+    end
+
     class IntersectionTyping
       prepend Jobs::BaseJob
 

@@ -34,6 +34,10 @@ module Types
       cached_concrete_procedures_by_argument_types[concrete_procedure.argument_types] = concrete_procedure
     end
 
+    def to_s
+      "AbstractProcedure/#{argument_names.size}"
+    end
+
     private
 
     def cached_concrete_procedures_by_argument_types

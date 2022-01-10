@@ -50,7 +50,7 @@ class Workspace
   end
 
   def result_typing
-    typing_for(result_ast_node, root_super_binding)
+    typing_for(result_ast_node)
   end
 
   def result_type

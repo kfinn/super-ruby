@@ -19,6 +19,10 @@ module Types
       end
     end
 
+    def to_s
+      "Integer"
+    end
+
     class BinaryOperatorTyping
       prepend Jobs::BaseJob
 

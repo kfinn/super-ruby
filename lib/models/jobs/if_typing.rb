@@ -12,8 +12,28 @@ module Jobs
 
       workspace = Workspace.current_workspace
       condition_typing = workspace.typing_for(ast_node.second)
-      then_branch_typing = workspace.typing_for(ast_node.third)
-      else_branch_typing = ast_node.size > 3 ? workspace.typing_for(ast_node.fourth) : nil
+      then_branch_typing =
+        workspace
+        .with_current_super_binding(
+          workspace
+          .current_super_binding
+          .spawn(inherit_dynamic_locals: true)
+        ) do
+          workspace.typing_for(ast_node.third)
+        end
+      else_branch_typing = 
+        if ast_node.size > 3
+          workspace
+          .with_current_super_binding(
+            workspace
+            .current_super_binding
+            .spawn(inherit_dynamic_locals: true)
+          ) do
+            workspace.typing_for(ast_node.fourth)
+          end
+        else
+          Job::ImmediateTyping.new(Types::Void.instance)
+        end
 
       new(
         condition_typing,
@@ -57,7 +77,12 @@ module Jobs
     alias checked? checked
 
     def type
-      @type ||= Types::Intersection.new([then_branch_typing.type, else_branch_typing.type])
+      @type ||=
+        if then_branch_typing.type == else_branch_typing.type
+          then_branch_typing.type
+        else
+          Types::Intersection.new([then_branch_typing.type, else_branch_typing.type])
+        end
     end
   end
 end
