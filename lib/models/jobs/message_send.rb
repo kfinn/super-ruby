@@ -58,5 +58,9 @@ module Jobs
     def type
       @type ||= result_typing.type
     end
+
+    def to_s
+      "message send: #{message}"
+    end
   end
 end

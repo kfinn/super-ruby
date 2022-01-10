@@ -1,12 +1,23 @@
 class WorkQueue
-  delegate :<<, :any?, to: :jobs
+  delegate :any?, to: :jobs_list
 
   def pump!
-    first_job = jobs.shift
-    first_job.work!
+    job = jobs_list.shift
+    jobs_set.delete(job)
+    job.work!
   end
 
-  def jobs
-    @jobs ||= []
+  def jobs_list
+    @jobs_list ||= []
+  end
+
+  def jobs_set
+    @jobs_set ||= Set.new
+  end
+
+  def <<(job)
+\   return if job.in? jobs_set
+    jobs_list << job
+    jobs_set << job
   end
 end

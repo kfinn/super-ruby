@@ -4,7 +4,7 @@ module Jobs
 
     def add_downstream(job)
       if complete?
-        job.work!
+        job.enqueue!
       else
         downstreams << job
         enqueue!
@@ -12,8 +12,6 @@ module Jobs
     end
 
     def enqueue!
-      return if @enqueued
-      @eneuqued = true
       Workspace.current_workspace.work_queue << self
     end
 
@@ -22,8 +20,8 @@ module Jobs
     end
 
     def work!
-      super unless complete?
-      downstreams.each(&:work!) if complete?
+      super if incomplete?
+      downstreams.each(&:enqueue!) if complete?
     end
 
     def incomplete?

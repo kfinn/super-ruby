@@ -10,6 +10,10 @@ class Workspace
     end
   end
 
+  def as_current_workspace
+    self.class.with_current_workspace(self) { yield }
+  end
+
   def add_source_string(text)
     sources << SourceString.new(text)
   end
@@ -77,11 +81,11 @@ class Workspace
     @root_super_binding ||= SuperBinding.new
   end
 
-  private
-
   def work_queue
     @work_queue ||= WorkQueue.new
   end
+
+  private
   
   def sources
     @sources ||= []

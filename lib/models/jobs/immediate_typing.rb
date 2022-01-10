@@ -10,5 +10,11 @@ module Jobs
     def complete?
       true
     end
+
+    def ==(other)
+      other.kind_of?(ImmediateTyping) && type == other.type
+    end
+
+    delegate :hash, to: :type
   end
 end
