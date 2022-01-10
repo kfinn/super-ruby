@@ -57,12 +57,7 @@ module Jobs
     alias checked? checked
 
     def type
-      @type ||=
-        if then_branch_typing.type != else_branch_typing.type
-          raise "mismatched if branch types: #{then_branch_typing.type} vs #{else_branch_typing.type}"
-        else
-          then_branch_typing.type
-        end
+      @type ||= Types::Intersection.new([then_branch_typing.type, else_branch_typing.type])
     end
   end
 end
