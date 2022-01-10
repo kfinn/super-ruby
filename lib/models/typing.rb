@@ -3,8 +3,10 @@ module Typing
     AST_NODE_HANDLERS = [
       :handle_define,
       :handle_procedure_definition,
+      :handle_if,
       :handle_message_send,
       :handle_integer_literal,
+      :handle_boolean_literal,
       :handle_identifier
     ]
 
@@ -55,9 +57,21 @@ module Typing
     def handle_integer_literal(ast_node)
       return unless (
         ast_node.atom? &&
-        ast_node.text.match(/0|-?[1-9](\d)*/)
+        ast_node.text.match(/^(0|-?[1-9](\d)*)$/)
       )
       Jobs::ImmediateTyping.new(Types::Integer.instance)
+    end
+
+    def handle_boolean_literal(ast_node)
+      return unless (
+        ast_node.atom? &&
+        ast_node.text.in?(['true', 'false'])
+      )
+      Jobs::ImmediateTyping.new(Types::Boolean.instance)
+    end
+
+    def handle_if(ast_node)
+      Jobs::IfTyping.handle_ast_node(ast_node)
     end
 
     def handle_identifier(ast_node)

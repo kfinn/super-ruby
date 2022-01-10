@@ -13,7 +13,7 @@ module Jobs
       receiver_typing = workspace.typing_for(ast_node.first)
       argument_typings = ast_node[2..].map { |argument_ast_node| workspace.typing_for(argument_ast_node) }
 
-      Jobs::MessageSend.new(
+      new(
         receiver_typing,
         ast_node.second.text,
         argument_typings

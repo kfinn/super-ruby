@@ -4,27 +4,30 @@ module Types
 
     def message_send_result_typing(message, argument_typings)
       case message
-      when '+'
+      when '+', '-'
         raise "Invalid arguments count: expected 1, but got #{argument_typings.size}" unless argument_typings.size == 1
-        IntegerPlusTyping.new(*argument_typings).tap do |integer_plus_typing|
-          argument_typings.each { |argument_typing| argument_typing.add_downstream(integer_plus_typing) }
+        BinaryOperatorTyping.new(*argument_typings, self).tap do |operator_typing|
+          argument_typings.each { |argument_typing| argument_typing.add_downstream(operator_typing) }
+        end
+      when '>'
+        raise "Invalid arguments count: expected 1, but got #{argument_typings.size}" unless argument_typings.size == 1
+        BinaryOperatorTyping.new(*argument_typings, Boolean.instance).tap do |operator_typing|
+          argument_typings.each { |argument_typing| argument_typing.add_downstream(operator_typing) }
         end
       else
         raise "invalid message: #{message}"
       end
     end
 
-    def immediate_integer_typing
-      Jobs::ImmediateTyping.new(self)
-    end
-
-    class IntegerPlusTyping
+    class BinaryOperatorTyping
       prepend Jobs::BaseJob
 
-      def initialize(argument_typing)
+      def initialize(argument_typing, return_type)
         @argument_typing = argument_typing
+        @return_type = return_type
       end
-      attr_reader :argument_typing
+      attr_reader :argument_typing, :return_type
+      alias type return_type
       delegate :complete?, to: :argument_typing
 
       def complete?
@@ -39,10 +42,6 @@ module Types
 
       def worked?
         @worked
-      end
-
-      def type
-        Integer.instance
       end
     end
   end

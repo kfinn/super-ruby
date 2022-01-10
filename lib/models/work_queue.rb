@@ -16,7 +16,7 @@ class WorkQueue
   end
 
   def <<(job)
-\   return if job.in? jobs_set
+    return if job.in? jobs_set
     jobs_list << job
     jobs_set << job
   end
