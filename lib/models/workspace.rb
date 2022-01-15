@@ -15,50 +15,32 @@ class Workspace
   end
 
   def add_source_string(text)
-    sources << SourceString.new(text)
+    sources_awaiting_static_pass << SourceString.new(text)
   end
 
   def evaluate!
     self.class.with_current_workspace(self) do
-      static_pass!
-      dynamic_pass!
-    end
-  end
-
-  def static_pass!
-    sources_to_parse.each do |source|
-      root_ast_nodes = AstNode.from_tokens(Lexer.new(source).each_token)
-      root_ast_nodes.each do |root_ast_node|
-        root_ast_nodes_by_source[source] = root_ast_node
-        typing_for(root_ast_node)
+      sources_awaiting_static_pass.each do |source|
+        root_ast_nodes = AstNode.from_tokens(Lexer.new(source).each_token)
+        root_ast_nodes.each do |root_ast_node|
+          self.result_typing = typing_for(root_ast_node)
+          self.result_evaluation = Evaluation.from_ast_node(root_ast_node)
+        end
       end
+      sources_awaiting_static_pass.clear
+
+      work_queue.pump! while work_queue.any?
     end
-
-    work_queue.pump! while work_queue.any?
   end
 
-  def dynamic_pass!
-
-  end
-
-  def last_source
-    sources.last
-  end
-
-  def result_ast_node
-    root_ast_nodes_by_source[last_source]
-  end
-
-  def result_typing
-    typing_for(result_ast_node)
-  end
+  attr_accessor :result_typing, :result_evaluation
 
   def result_type
     result_typing.type
   end
 
   def result_value
-    "unimplemented"
+    result_evaluation&.value
   end
 
   def current_super_binding
@@ -85,22 +67,27 @@ class Workspace
     @work_queue ||= WorkQueue.new
   end
 
+  def current_basic_block
+    @current_basic_block ||= BasicBlock.new
+  end
+  attr_writer :current_basic_block
+
+  def with_current_basic_block(basic_block)
+    previous_basic_block = current_basic_block
+    self.current_basic_block = basic_block
+    yield
+  ensure
+    self.current_basic_block = previous_basic_block
+  end
+
   private
   
-  def sources
-    @sources ||= []
+  def sources_awaiting_static_pass
+    @sources_awaiting_static_pass ||= []
   end
 
-  def next_source_to_parse_index
-    root_ast_nodes_by_source.size
-  end
-
-  def sources_to_parse
-    sources[next_source_to_parse_index..]
-  end
-
-  def root_ast_nodes_by_source
-    @root_ast_nodes_by_source ||= {}
+  def ast_nodes_awaiting_dynamic_pass
+    @ast_nodes_awaiting_dynamic_pass ||= []
   end
 
   def typings

@@ -40,7 +40,7 @@ module Jobs
           .each_with_object(
             super_binding.spawn
           ) do |(argument_name, argument_typing), super_binding_builder|
-            super_binding_builder.set(
+            super_binding_builder.set_typing(
               argument_name,
               argument_typing
             )

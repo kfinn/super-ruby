@@ -8,7 +8,7 @@ class ProcedureSpecializationsCollection
         .current_super_binding
         .spawn
       ) do |(argument_name, argument_typing), super_binding|
-        super_binding.set(
+        super_binding.set_typing(
           argument_name,
           argument_typing
         )

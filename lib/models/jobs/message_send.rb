@@ -3,12 +3,6 @@ module Jobs
     prepend BaseJob
 
     def self.handle_ast_node(ast_node)
-      return unless (
-        ast_node.list? &&
-        ast_node.size >= 2 &&
-        ast_node.second.atom?
-      )
-
       workspace = Workspace.current_workspace
       receiver_typing = workspace.typing_for(ast_node.first)
       argument_typings = ast_node[2..].map { |argument_ast_node| workspace.typing_for(argument_ast_node) }

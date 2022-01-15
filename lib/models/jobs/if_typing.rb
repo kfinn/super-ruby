@@ -3,13 +3,6 @@ module Jobs
     prepend BaseJob
 
     def self.handle_ast_node(ast_node)
-      return unless (
-        ast_node.list? &&
-        ast_node.first.atom? &&
-        ast_node.first.text == 'if' &&
-        ast_node.size.in?(3..4)
-      )
-
       workspace = Workspace.current_workspace
       condition_typing = workspace.typing_for(ast_node.second)
       then_branch_typing =

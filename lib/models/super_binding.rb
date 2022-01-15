@@ -6,20 +6,20 @@ class SuperBinding
 
   attr_reader :parent, :inherit_dynamic_locals
 
-  def fetch(name, include_dynamic_locals: true)
+  def fetch_typing(name, include_dynamic_locals: true)
     return dynamic_locals[name] if include_dynamic_locals && dynamic_locals.include?(name)
-    return static_locals[name] if static_locals.include?(name)
+    return static_local_typings[name] if static_local_typings.include?(name)
     raise "unknown identifier: #{name}" unless parent.present?
-    parent.fetch(name, include_dynamic_locals: inherit_dynamic_locals)
+    parent.fetch_typing(name, include_dynamic_locals: inherit_dynamic_locals)
   end
 
-  def set(name, value)
-    raise "attempting to redefine #{name}" if name.in? static_locals
-    static_locals[name] = value
+  def set_typing(name, typing)
+    raise "attempting to redefine #{name}" if name.in? static_local_typings
+    static_local_typings[name] = typing
   end
 
-  def static_locals
-    @static_locals ||= {}
+  def static_local_typings
+    @static_local_typings ||= {}
   end
 
   def dynamic_locals

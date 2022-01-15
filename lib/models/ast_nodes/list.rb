@@ -7,6 +7,7 @@ module AstNodes
 
   List = Struct.new(:children) do
     include Enumerable
+    include BaseAstNode
     delegate :each, :[], :first, :second, :third, :fourth, :size, to: :children
 
     def self.from_tokens(tokens)
