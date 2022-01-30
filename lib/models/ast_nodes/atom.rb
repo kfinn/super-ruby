@@ -1,5 +1,5 @@
 module AstNodes
-  Atom = ::Struct.new(:token) do
+  Atom = Struct.new(:token) do
     include BaseAstNode
     
     def self.from_tokens(tokens)

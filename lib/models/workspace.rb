@@ -24,7 +24,7 @@ class Workspace
         root_ast_nodes = AstNode.from_tokens(Lexer.new(source).each_token)
         root_ast_nodes.each do |root_ast_node|
           self.result_typing = typing_for(root_ast_node)
-          self.result_evaluation = Evaluation.from_ast_node(root_ast_node)
+          self.result_evaluation = Jobs::Evaluation.new(root_ast_node)
         end
       end
       sources_awaiting_static_pass.clear

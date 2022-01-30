@@ -19,6 +19,15 @@ module Types
       end
     end
 
+    def message_send_result(value, message, arguments)
+      case message
+      when '+'
+        
+      else
+        raise "invalid message: #{message}"
+      end
+    end
+
     def to_s
       "Integer"
     end
