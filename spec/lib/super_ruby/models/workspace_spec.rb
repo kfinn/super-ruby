@@ -27,6 +27,7 @@ RSpec.describe Workspace do
           )
         )
       )
+      expect(workspace.result_value).to eq(true)
     end
   end
 end
