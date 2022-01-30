@@ -21,10 +21,12 @@ class Workspace
   def evaluate!
     self.class.with_current_workspace(self) do
       sources_awaiting_static_pass.each do |source|
-        root_ast_nodes = AstNode.from_tokens(Lexer.new(source).each_token)
-        root_ast_nodes.each do |root_ast_node|
+        root_s_expressions = SExpression.from_tokens(Lexer.new(source).each_token)
+        root_s_expressions.each do |root_s_expression|
+          root_ast_node = AstNode.from_s_expression(root_s_expression)
           self.result_typing = typing_for(root_ast_node)
-          self.result_evaluation = Jobs::Evaluation.new(root_ast_node)
+          self.result_evaluation = Jobs::TypedEvaluation.new(root_ast_node)
+          work_queue << self.result_evaluation
         end
       end
       sources_awaiting_static_pass.clear

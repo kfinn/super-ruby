@@ -1,7 +1,5 @@
-module AstNodes
+module SExpressions
   Atom = Struct.new(:token) do
-    include BaseAstNode
-    
     def self.from_tokens(tokens)
       new(tokens.next)
     end

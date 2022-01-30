@@ -6,7 +6,7 @@ class TypingsCollection
   attr_reader :workspace
 
   def typing_for(ast_node)
-    storage[ast_node] ||= Typing::from_ast_node(ast_node)
+    storage[ast_node] ||= ast_node.spawn_typing
   end
 
   private

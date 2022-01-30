@@ -2,47 +2,14 @@ module Jobs
   class IfTyping
     prepend BaseJob
 
-    def self.handle_ast_node(ast_node)
-      workspace = Workspace.current_workspace
-      condition_typing = workspace.typing_for(ast_node.second)
-      then_branch_typing =
-        workspace
-        .with_current_super_binding(
-          workspace
-          .current_super_binding
-          .spawn(inherit_dynamic_locals: true)
-        ) do
-          workspace.typing_for(ast_node.third)
-        end
-      else_branch_typing = 
-        if ast_node.size > 3
-          workspace
-          .with_current_super_binding(
-            workspace
-            .current_super_binding
-            .spawn(inherit_dynamic_locals: true)
-          ) do
-            workspace.typing_for(ast_node.fourth)
-          end
-        else
-          Job::ImmediateTyping.new(Types::Void.instance)
-        end
-
-      new(
-        condition_typing,
-        then_branch_typing,
-        else_branch_typing
-      ).tap do |if_typing|
-        condition_typing.add_downstream(if_typing)
-        then_branch_typing.add_downstream(if_typing)
-        else_branch_typing.add_downstream(if_typing)
-      end
-    end
-
     def initialize(condition_typing, then_branch_typing, else_branch_typing)
       @condition_typing = condition_typing
       @then_branch_typing = then_branch_typing
       @else_branch_typing = else_branch_typing || ImmediateTyping.new(Types::Void.instance)
+
+      @condition_typing.add_downstream(self)
+      @then_branch_typing.add_downstream(self)
+      @else_branch_typing.add_downstream(self)
     end
     attr_reader :condition_typing, :then_branch_typing, :else_branch_typing
     attr_writer :type
