@@ -3,7 +3,7 @@ module AstNodes
     include BaseAstNode
 
     Argument = Struct.new(:s_expression) do
-      def self.match(s_expression)
+      def self.match?(s_expression)
         s_expression.atom?
       end
 
@@ -30,6 +30,10 @@ module AstNodes
           body_ast_node
         )
       )
+    end
+
+    def evaluate(typing)
+      typing.type.to_s
     end
 
     def arguments_ast_nodes

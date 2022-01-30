@@ -13,7 +13,7 @@ module AstNodes
     end
 
     def spawn_typing
-      Workspace.current_workspace.current_super_binding.set_typing(
+      Workspace.current_workspace.current_super_binding.set_static_typing(
         s_expression.children.second.text,
         Jobs::TypedEvaluation.new(value_ast_node)
       )

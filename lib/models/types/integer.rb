@@ -9,7 +9,7 @@ module Types
         BinaryOperatorTyping.new(*argument_typings, self).tap do |operator_typing|
           argument_typings.each { |argument_typing| argument_typing.add_downstream(operator_typing) }
         end
-      when '>'
+      when '>', '<'
         raise "Invalid arguments count: expected 1, but got #{argument_typings.size}" unless argument_typings.size == 1
         BinaryOperatorTyping.new(*argument_typings, Boolean.instance).tap do |operator_typing|
           argument_typings.each { |argument_typing| argument_typing.add_downstream(operator_typing) }
@@ -19,13 +19,8 @@ module Types
       end
     end
 
-    def message_send_result(value, message, arguments)
-      case message
-      when '+'
-        
-      else
-        raise "invalid message: #{message}"
-      end
+    def message_send_result(typing, receiver, arguments)
+      receiver.send(typing.message, *arguments)
     end
 
     def to_s

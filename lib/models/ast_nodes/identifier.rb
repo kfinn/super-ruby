@@ -11,7 +11,7 @@ module AstNodes
     end
 
     def evaluate(typing)
-      Workspace.current_workspace.current_super_binding.fetch_typing(s_expression.text).value
+      Workspace.current_workspace.current_super_binding.fetch_value(s_expression.text)
     end
   end
 end

@@ -26,12 +26,18 @@ module Types
       end
     end
 
-    def cached_concrete_procedure_for_argument_types(argument_types)
-      cached_concrete_procedures_by_argument_types[argument_types]
+    def message_send_result(typing, receiver, arguments)
+      typing.result_typing.procedure_specialization.concrete_procedure.call(
+        argument_names.zip(arguments).to_h
+      )
+    end
+
+    def cached_concrete_procedure_for_argument_types(argument_types_by_name)
+      cached_concrete_procedures_by_argument_types[argument_types_by_name]
     end
 
     def define_concrete_procedure(concrete_procedure)
-      cached_concrete_procedures_by_argument_types[concrete_procedure.argument_types] = concrete_procedure
+      cached_concrete_procedures_by_argument_types[concrete_procedure.argument_types_by_name] = concrete_procedure
     end
 
     def to_s

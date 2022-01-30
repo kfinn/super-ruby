@@ -1,5 +1,5 @@
 module Jobs
-  class MessageSend
+  class MessageSendTyping
     prepend BaseJob
 
     def initialize(receiver_typing, message, argument_typings)

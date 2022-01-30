@@ -28,24 +28,14 @@ module Jobs
       if return_typing_complete?
         self.concrete_procedure = Types::ConcreteProcedure.new(
           argument_types_by_name.values,
-          return_typing.type
+          return_typing.type,
+          self
         )
         abstract_procedure.define_concrete_procedure(self.concrete_procedure)
         return
       end
 
       if return_typing.blank?
-        body_super_binding =
-          argument_typings_by_name
-          .each_with_object(
-            super_binding.spawn
-          ) do |(argument_name, argument_typing), super_binding_builder|
-            super_binding_builder.set_typing(
-              argument_name,
-              argument_typing
-            )
-          end
-
         self.return_typing = workspace.with_current_super_binding(body_super_binding) do
           workspace.typing_for(abstract_procedure.body)
         end
@@ -67,6 +57,19 @@ module Jobs
 
     def return_typing_complete?
       return_typing&.complete?
+    end
+
+    def body_super_binding
+      @body_super_binding ||=
+        argument_typings_by_name
+        .each_with_object(
+          super_binding.spawn
+        ) do |(argument_name, argument_typing), super_binding_builder|
+          super_binding_builder.set_dynamic_typing(
+            argument_name,
+            argument_typing
+          )
+        end
     end
   end
 end

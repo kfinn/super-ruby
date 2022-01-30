@@ -18,7 +18,17 @@ module AstNodes
         workspace.typing_for(argument_ast_node)
       end
 
-      Jobs::MessageSend.new(receiver_typing, message, argument_typings)
+      Jobs::MessageSendTyping.new(receiver_typing, message, argument_typings)
+    end
+
+    def evaluate(typing)
+      typing.receiver_typing.type.message_send_result(
+        typing,
+        receiver_ast_node.evaluate(typing.receiver_typing),
+        argument_ast_nodes.zip(typing.argument_typings).map do |argument_ast_node, argument_typing|
+          argument_ast_node.evaluate(argument_typing)
+        end
+      )
     end
 
     def receiver_ast_node
