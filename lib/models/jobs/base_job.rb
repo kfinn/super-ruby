@@ -27,5 +27,9 @@ module Jobs
     def incomplete?
       !complete?
     end
+
+    def has_value?
+      false
+    end
   end
 end

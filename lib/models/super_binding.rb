@@ -8,18 +8,18 @@ class SuperBinding
 
   def fetch_typing(name, include_dynamic_locals: true)
     return dynamic_locals[name] if include_dynamic_locals && dynamic_locals.include?(name)
-    return static_local_typings[name] if static_local_typings.include?(name)
+    return static_locals[name] if static_locals.include?(name)
     raise "unknown identifier: #{name}" unless parent.present?
     parent.fetch_typing(name, include_dynamic_locals: inherit_dynamic_locals)
   end
-
+  
   def set_typing(name, typing)
-    raise "attempting to redefine #{name}" if name.in? static_local_typings
-    static_local_typings[name] = typing
+    raise "attempting to redefine #{name}" if name.in? static_locals
+    static_locals[name] = typing
   end
 
-  def static_local_typings
-    @static_local_typings ||= {}
+  def static_locals
+    @static_locals ||= {}
   end
 
   def dynamic_locals

@@ -20,11 +20,22 @@ module AstNodes
             .current_super_binding
             .spawn(inherit_dynamic_locals: true)
         ) do
-          child_typings = child_ast_nodes.map do |child_ast_node|
-            Workspace.current_workspace.typing_for(child_ast_node)
-          end
-          child_typings.last
+          Jobs::SequenceTyping.new(
+            child_ast_nodes.map do |child_ast_node|
+              Workspace.current_workspace.typing_for(child_ast_node)
+            end
+          )
         end
+    end
+
+    def evaluate(typing)
+      Workspace.current_workspace.with_current_super_binding(typing.super_binding) do
+        children_with_typings = child_ast_nodes.zip(typing.child_typings)
+        child_values = children_with_typings.map do |child_ast_node, child_typing|
+          child_ast_node.evaluate(child_typing)
+        end
+        child_values.last
+      end
     end
 
     def child_ast_nodes
