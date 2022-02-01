@@ -27,5 +27,10 @@ module AstNodes
     def evaluate_with_tree_walking(typing)
       Types::Void.instance.instance
     end
+
+    def build_bytecode!(_typing)
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+      Workspace.current_workspace.current_bytecode_builder << Types::Void.instance.instance
+    end
   end
 end
