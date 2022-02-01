@@ -1,5 +1,15 @@
 module Types
   class Intersection
+    def self.from_types(*types)
+      new(
+        Set.new(
+          types.flat_map do |type|
+            type.try(:types)&.to_a || [type]
+          end
+        )
+      )
+    end
+
     def initialize(types)
       @types = types
     end
@@ -22,10 +32,7 @@ module Types
     end
 
     delegate :hash, to: :state
-
-    def state
-      Set.new(types)
-    end
+    alias state types
 
     class IntersectionTyping
       prepend Jobs::BaseJob

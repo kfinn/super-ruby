@@ -41,7 +41,7 @@ module Jobs
         if then_branch_typing.type == else_branch_typing.type
           then_branch_typing.type
         else
-          Types::Intersection.new([then_branch_typing.type, else_branch_typing.type])
+          Types::Intersection.from_types(then_branch_typing.type, else_branch_typing.type)
         end
     end
   end

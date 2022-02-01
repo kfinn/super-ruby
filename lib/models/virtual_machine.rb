@@ -13,6 +13,11 @@ class VirtualMachine
         push! instruction_pointer.next!
       when Opcodes::DISCARD
         pop!
+      when Opcodes::JUMP
+        instruction_pointer = instruction_pointer.next!
+      when Opcodes::JUMP_UNLESS_FALSE
+        destination = instruction_pointer.next!
+        instruction_pointer = destination if pop!
       else
         raise "unimplemented opcode: #{opcode}"
       end

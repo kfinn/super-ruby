@@ -2,7 +2,7 @@ RSpec.describe Workspace do
   let(:workspace) { Workspace.new(evaluation_strategy: workspace_evaluation_strategy) }
 
   shared_examples 'a super evaluator' do
-    it 'correctly types an if expression with a redefined static variable' do
+    it 'correctly evaluates an if expression with a redefined static variable' do
       workspace.add_source_string '(define x 12)'
       workspace.add_source_string <<~SUPER.squish
         (
@@ -22,8 +22,8 @@ RSpec.describe Workspace do
       SUPER
       workspace.evaluate!
       expect(workspace.result_type).to(eq(
-        Types::Intersection.new(
-          [Types::Integer.instance, Types::Boolean.instance]
+        Types::Intersection.from_types(
+          Types::Integer.instance, Types::Boolean.instance
           )
         )
       )
@@ -43,6 +43,13 @@ RSpec.describe Workspace do
       expect(workspace.result_type).to eq(Types::Integer.instance)
       expect(workspace.result_value).to eq(101)
     end
+
+    it 'correctly evaluates nested conditionals' do
+      workspace.add_source_string '(if true (if false 1 (if true 2)) 4)'
+      workspace.evaluate!
+      expect(workspace.result_type).to eq(Types::Intersection.from_types(Types::Integer.instance, Types::Void.instance))
+      expect(workspace.result_value).to eq(2)
+    end
   end
 
   describe "when evaluating by tree walking" do
@@ -50,7 +57,7 @@ RSpec.describe Workspace do
     it_behaves_like 'a super evaluator'
   end
 
-  describe "when evaluating by tree walking" do
+  describe "when evaluating by bytecode" do
     let(:workspace_evaluation_strategy) { :evaluate_with_bytecode }
     it_behaves_like 'a super evaluator'
   end

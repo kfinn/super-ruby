@@ -45,7 +45,7 @@ module AstNodes
         then_branch_typing,
         else_branch_typing
       )
-    end
+    end  
 
     def evaluate_with_tree_walking(typing)
       if condition_ast_node.evaluate_with_tree_walking(typing.condition_typing)
@@ -55,6 +55,40 @@ module AstNodes
       else
         Types::Void.instance.instance
       end
+    end
+
+    def build_bytecode!(typing)
+      condition_ast_node.build_bytecode!(typing.condition_typing)
+
+      result_bytecode_builder = BufferBuilder.new
+      then_branch_bytecode_builder = BufferBuilder.new
+      else_branch_bytecode_builder = BufferBuilder.new
+
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP_UNLESS_FALSE
+      Workspace.current_workspace.current_bytecode_builder << then_branch_bytecode_builder.pointer
+
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
+      Workspace.current_workspace.current_bytecode_builder << else_branch_bytecode_builder.pointer
+
+      Workspace.current_workspace.with_current_bytecode_builder(then_branch_bytecode_builder) do
+        then_branch_ast_node.build_bytecode!(typing.then_branch_typing)
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
+        Workspace.current_workspace.current_bytecode_builder << result_bytecode_builder.pointer
+      end
+
+      Workspace.current_workspace.with_current_bytecode_builder(else_branch_bytecode_builder) do
+        if else_branch_ast_node.present?
+          else_branch_ast_node.build_bytecode!(typing.else_branch_typing) 
+        else
+          Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+          Workspace.current_workspace.current_bytecode_builder << Types::Void.instance.instance
+        end
+          
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
+        Workspace.current_workspace.current_bytecode_builder << result_bytecode_builder.pointer
+      end
+
+      Workspace.current_workspace.current_bytecode_builder = result_bytecode_builder
     end
 
     def condition_ast_node

@@ -1,10 +1,6 @@
 class BufferBuilder
   delegate :<<, :[], to: :storage
 
-  def build
-    self
-  end
-
   def pointer
     Pointer.new(self, 0)
   end

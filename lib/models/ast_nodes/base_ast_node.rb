@@ -11,12 +11,12 @@ module AstNodes
     end
 
     def evaluate_with_bytecode(typing)
-      bytecode_builder = BufferBuilder.new
-      Workspace.current_workspace.with_current_bytecode_builder(bytecode_builder) do
+      starting_bytecode_builder = BufferBuilder.new
+      Workspace.current_workspace.with_current_bytecode_builder(starting_bytecode_builder) do
         build_bytecode!(typing)
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::RETURN
       end
-      bytecode_builder << Opcodes::RETURN
-      Workspace.current_workspace.virtual_machine.evaluate(bytecode_builder.build.pointer)
+      Workspace.current_workspace.virtual_machine.evaluate(starting_bytecode_builder.pointer)
     end
 
     def build_bytecode!(typing)
