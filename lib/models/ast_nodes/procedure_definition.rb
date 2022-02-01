@@ -32,7 +32,7 @@ module AstNodes
       )
     end
 
-    def evaluate(typing)
+    def evaluate_with_tree_walking(typing)
       typing.type.to_s
     end
 

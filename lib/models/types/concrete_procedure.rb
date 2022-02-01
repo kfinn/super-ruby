@@ -37,7 +37,7 @@ module Types
               end
             end
         ) do
-          body.evaluate(return_typing)
+          body.evaluate_with_tree_walking(return_typing)
         end
     end
   end

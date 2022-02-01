@@ -28,13 +28,23 @@ module AstNodes
         end
     end
 
-    def evaluate(typing)
+    def evaluate_with_tree_walking(typing)
       Workspace.current_workspace.with_current_super_binding(typing.super_binding) do
         children_with_typings = child_ast_nodes.zip(typing.child_typings)
         child_values = children_with_typings.map do |child_ast_node, child_typing|
-          child_ast_node.evaluate(child_typing)
+          child_ast_node.evaluate_with_tree_walking(child_typing)
         end
         child_values.last
+      end
+    end
+
+    def build_bytecode!(typing)
+      Workspace.current_workspace.with_current_super_binding(typing.super_binding) do
+        children_with_typings = child_ast_nodes.zip(typing.child_typings)
+        children_with_typings.each_with_index do |(child_ast_node, child_typing), index|
+          Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD if index > 0
+          child_ast_node.build_bytecode!(child_typing)
+        end
       end
     end
 

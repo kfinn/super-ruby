@@ -10,9 +10,11 @@ class Workspace
     end
   end
 
-  def as_current_workspace
-    self.class.with_current_workspace(self) { yield }
+  def initialize(evaluation_strategy: :evaluate_with_tree_walking)
+    @evaluation_strategy = evaluation_strategy
   end
+
+  attr_reader :evaluation_strategy
 
   def add_source_string(text)
     sources_awaiting_static_pass << SourceString.new(text)
@@ -25,7 +27,7 @@ class Workspace
         root_s_expressions.each do |root_s_expression|
           root_ast_node = AstNode.from_s_expression(root_s_expression)
           self.result_typing = typing_for(root_ast_node)
-          self.result_evaluation = Jobs::TypedEvaluation.new(root_ast_node)
+          self.result_evaluation = Jobs::TypedEvaluation.new(root_ast_node, evaluation_strategy)
           work_queue << self.result_evaluation
         end
       end
@@ -69,27 +71,24 @@ class Workspace
     @work_queue ||= WorkQueue.new
   end
 
-  def current_basic_block
-    @current_basic_block ||= BasicBlock.new
-  end
-  attr_writer :current_basic_block
+  attr_accessor :current_bytecode_builder
 
-  def with_current_basic_block(basic_block)
-    previous_basic_block = current_basic_block
-    self.current_basic_block = basic_block
+  def with_current_bytecode_builder(bytecode_builder)
+    previous_bytecode_builder = current_bytecode_builder
+    self.current_bytecode_builder = bytecode_builder
     yield
   ensure
-    self.current_basic_block = previous_basic_block
+    self.current_bytecode_builder = previous_bytecode_builder
+  end
+
+  def virtual_machine
+    @virtual_machine ||= VirtualMachine.new
   end
 
   private
   
   def sources_awaiting_static_pass
     @sources_awaiting_static_pass ||= []
-  end
-
-  def ast_nodes_awaiting_dynamic_pass
-    @ast_nodes_awaiting_dynamic_pass ||= []
   end
 
   def typings

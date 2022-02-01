@@ -10,7 +10,7 @@ module AstNodes
       Workspace.current_workspace.current_super_binding.fetch_typing(s_expression.text)
     end
 
-    def evaluate(typing)
+    def evaluate_with_tree_walking(typing)
       Workspace.current_workspace.current_super_binding.fetch_value(s_expression.text)
     end
   end
