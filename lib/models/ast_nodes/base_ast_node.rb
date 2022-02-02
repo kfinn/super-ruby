@@ -13,6 +13,7 @@ module AstNodes
     def evaluate_with_bytecode(typing)
       starting_bytecode_builder = BufferBuilder.new
       Workspace.current_workspace.with_current_bytecode_builder(starting_bytecode_builder) do
+        
         build_bytecode!(typing)
         Workspace.current_workspace.current_bytecode_builder << Opcodes::RETURN
       end

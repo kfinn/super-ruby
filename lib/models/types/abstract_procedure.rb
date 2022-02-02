@@ -32,6 +32,19 @@ module Types
       )
     end
 
+    def build_message_send_bytecode!(typing)
+      concrete_procedure = cached_concrete_procedure_for_argument_types(
+        typing.result_typing.procedure_specialization.argument_types_by_name
+      )
+
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
+      Workspace.current_workspace.current_bytecode_builder << concrete_procedure.bytecode_pointer
+      Workspace.current_workspace.current_bytecode_builder << argument_names.size
+      argument_names.each do |argument_name|
+        Workspace.current_workspace.current_bytecode_builder << concrete_procedure.body_super_binding.fetch_dynamic_slot_index(argument_name)
+      end
+    end
+
     def cached_concrete_procedure_for_argument_types(argument_types_by_name)
       cached_concrete_procedures_by_argument_types[argument_types_by_name]
     end

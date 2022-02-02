@@ -31,6 +31,15 @@ module AstNodes
       )
     end
 
+    def build_bytecode!(typing)
+      receiver_ast_node.build_bytecode!(typing)
+      argument_ast_nodes.zip(typing.argument_typings).map do |argument_ast_node, argument_typing|
+        argument_ast_node.build_bytecode!(argument_typing)
+      end
+
+      typing.receiver_typing.type.build_message_send_bytecode!(typing)
+    end
+
     def receiver_ast_node
       @receiver_ast_node ||= AstNode.from_s_expression(s_expression.first)
     end

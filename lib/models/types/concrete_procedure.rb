@@ -7,8 +7,8 @@ module Types
     end
 
     attr_reader :argument_types_by_name, :return_type, :procedure_specialization
-    delegate :abstract_procedure, :return_typing, to: :procedure_specialization
-    delegate :body, to: :abstract_procedure
+    delegate :abstract_procedure, :return_typing, :body_super_binding, to: :procedure_specialization
+    delegate :body, :argument_names, to: :abstract_procedure
 
     def ==(other)
       other.kind_of?(ConcreteProcedure) && state == other.state
@@ -28,17 +28,35 @@ module Types
       Workspace
         .current_workspace
         .with_current_super_binding(
-          procedure_specialization
-            .body_super_binding
-            .dup
-            .tap do |draft_call_super_binding|
-              argument_values_by_name.each do |name, value|
-                draft_call_super_binding.set_dynamic_value(name, value)
-              end
+          body_super_binding.dup.tap do |draft_call_super_binding|
+            argument_values_by_name.each do |name, value|
+              draft_call_super_binding.set_dynamic_value(name, value)
             end
+          end
         ) do
           body.evaluate_with_tree_walking(return_typing)
         end
+    end
+
+    def bytecode_pointer
+      workspace = Workspace.current_workspace
+      unless workspace.in? bytecode_pointers_by_workspace
+        bytecode_builder = BufferBuilder.new
+        workspace.with_current_bytecode_builder(bytecode_builder) do
+          workspace.with_current_super_binding(body_super_binding) do
+            body.build_bytecode!(return_typing)
+            workspace.current_bytecode_builder << Opcodes::RETURN
+          end
+        end
+        bytecode_pointers_by_workspace[workspace] = bytecode_builder.pointer
+      end
+      bytecode_pointers_by_workspace[workspace]
+    end
+
+    private
+
+    def bytecode_pointers_by_workspace
+      @bytecode_pointers_by_workspace ||= {}
     end
   end
 end

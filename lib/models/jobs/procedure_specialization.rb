@@ -18,7 +18,7 @@ module Jobs
       return unless argument_typings_complete?
       return if concrete_procedure.present?
 
-      cached_concrete_procedure = abstract_procedure.cached_concrete_procedure_for_argument_types(argument_types_by_name.values)
+      cached_concrete_procedure = abstract_procedure.cached_concrete_procedure_for_argument_types(argument_types_by_name)
       if cached_concrete_procedure.present?
         self.concrete_procedure = cached_concrete_procedure
         self.return_typing = ImmediateTyping.new(self.concrete_procedure.return_type)
@@ -27,7 +27,7 @@ module Jobs
 
       if return_typing_complete?
         self.concrete_procedure = Types::ConcreteProcedure.new(
-          argument_types_by_name.values,
+          argument_types_by_name,
           return_typing.type,
           self
         )

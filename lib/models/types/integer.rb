@@ -23,6 +23,21 @@ module Types
       receiver.send(typing.message, *arguments)
     end
 
+    def build_message_send_bytecode!(typing)
+      Workspace
+        .current_workspace
+        .current_bytecode_builder << case typing.message
+          when '+'
+            Opcodes::INTEGER_ADD
+          when '-'
+            Opcodes::INTEGER_SUBTRACT
+          when '<'
+            Opcodes::INTEGER_LESS_THAN
+          when '>'
+            Opcodes::INTEGER_GREATER_THAN
+          end
+    end
+
     def to_s
       "Integer"
     end

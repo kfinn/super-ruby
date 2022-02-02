@@ -7,7 +7,7 @@ class BufferBuilder
 
   Pointer = Struct.new(:buffer_builder, :index) do
     def next!
-      buffer_builder[index].tap do
+      buffer_builder[index].tap do |value|
         self.index += 1
       end
     end

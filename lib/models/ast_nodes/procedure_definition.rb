@@ -36,6 +36,8 @@ module AstNodes
       typing.type.to_s
     end
 
+    def build_bytecode!(typing); end
+
     def arguments_ast_nodes
       @arguments_ast_nodes ||= s_expression.second.map do |argument_s_expression|
         Argument.new(argument_s_expression)
