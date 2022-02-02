@@ -3,6 +3,7 @@ module Jobs
     extend ActiveSupport::Concern
 
     def add_downstream(job)
+      raise "infinite loop: attempting to add #{job} to #{self}" if job.has_transitive_downstream_job?(self)
       if complete?
         job.enqueue!
       else
@@ -17,6 +18,10 @@ module Jobs
 
     def downstreams
       @downstreams ||= Set.new
+    end
+
+    def has_transitive_downstream_job?(job)
+      job.in?(downstreams) || downstreams.any? { |downstream| downstream.has_transitive_downstream_job? job }
     end
 
     def work!

@@ -36,7 +36,10 @@ module AstNodes
       typing.type.to_s
     end
 
-    def build_bytecode!(typing); end
+    def build_bytecode!(typing)
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+      Workspace.current_workspace.current_bytecode_builder << typing.type.to_s
+    end
 
     def arguments_ast_nodes
       @arguments_ast_nodes ||= s_expression.second.map do |argument_s_expression|

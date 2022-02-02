@@ -34,6 +34,7 @@ class VirtualMachine
           argument_slots[index] = instruction_pointer.next!
           argument_values[arguments_count - index - 1] = pop!
         end
+        pop!
         argument_slots.zip(argument_values).each do |slot, value|
           call_frame[slot] = value
         end
