@@ -10,10 +10,6 @@ module AstNodes
       Workspace.current_workspace.current_super_binding.fetch_typing(name)
     end
 
-    def evaluate_with_tree_walking(typing)
-      Workspace.current_workspace.current_super_binding.fetch_value(name)
-    end
-
     def build_bytecode!(typing)
       current_workspace = Workspace.current_workspace
       current_super_binding = current_workspace.current_super_binding

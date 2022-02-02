@@ -19,10 +19,6 @@ module Types
       end
     end
 
-    def message_send_result(typing, receiver, arguments)
-      receiver.send(typing.message, *arguments)
-    end
-
     def build_message_send_bytecode!(typing)
       Workspace
         .current_workspace

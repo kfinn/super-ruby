@@ -15,17 +15,13 @@ module AstNodes
     def spawn_typing
       Workspace.current_workspace.current_super_binding.set_static_typing(
         s_expression.children.second.text,
-        Jobs::TypedEvaluation.new(value_ast_node, Workspace.current_workspace.evaluation_strategy)
+        Jobs::TypedEvaluation.new(value_ast_node)
       )
       Jobs::ImmediateTyping.new(Types::Void.instance)
     end
 
     def value_ast_node
       @value_ast_node ||= AstNode.from_s_expression(s_expression.third)
-    end
-
-    def evaluate_with_tree_walking(typing)
-      Types::Void.instance.instance
     end
 
     def build_bytecode!(_typing)

@@ -47,16 +47,6 @@ module AstNodes
       )
     end  
 
-    def evaluate_with_tree_walking(typing)
-      if condition_ast_node.evaluate_with_tree_walking(typing.condition_typing)
-        then_branch_ast_node.evaluate_with_tree_walking(typing.then_branch_typing)
-      elsif else_branch_ast_node.present?
-        else_branch_ast_node.evaluate_with_tree_walking(typing.else_branch_typing)
-      else
-        Types::Void.instance.instance
-      end
-    end
-
     def build_bytecode!(typing)
       condition_ast_node.build_bytecode!(typing.condition_typing)
 

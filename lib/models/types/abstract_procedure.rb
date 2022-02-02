@@ -26,12 +26,6 @@ module Types
       end
     end
 
-    def message_send_result(typing, receiver, arguments)
-      typing.result_typing.procedure_specialization.concrete_procedure.call(
-        argument_names.zip(arguments).to_h
-      )
-    end
-
     def build_message_send_bytecode!(typing)
       concrete_procedure = cached_concrete_procedure_for_argument_types(
         typing.result_typing.procedure_specialization.argument_types_by_name

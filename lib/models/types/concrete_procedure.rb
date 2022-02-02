@@ -24,20 +24,6 @@ module Types
       "(#{argument_types_by_name.map(&:to_s).join(", ")}) -> #{return_type.to_s}"
     end
 
-    def call(argument_values_by_name)
-      Workspace
-        .current_workspace
-        .with_current_super_binding(
-          body_super_binding.dup.tap do |draft_call_super_binding|
-            argument_values_by_name.each do |name, value|
-              draft_call_super_binding.set_dynamic_value(name, value)
-            end
-          end
-        ) do
-          body.evaluate_with_tree_walking(return_typing)
-        end
-    end
-
     def bytecode_pointer
       workspace = Workspace.current_workspace
       unless workspace.in? bytecode_pointers_by_workspace

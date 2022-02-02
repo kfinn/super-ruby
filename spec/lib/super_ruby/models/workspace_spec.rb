@@ -1,64 +1,52 @@
 RSpec.describe Workspace do
-  let(:workspace) { Workspace.new(evaluation_strategy: workspace_evaluation_strategy) }
+  let(:workspace) { Workspace.new }
 
-  shared_examples 'a super evaluator' do
-    it 'correctly evaluates an if expression with a redefined static variable' do
-      workspace.add_source_string '(define x 12)'
-      workspace.add_source_string <<~SUPER.squish
+  it 'correctly evaluates an if expression with a redefined static variable' do
+    workspace.add_source_string '(define x 12)'
+    workspace.add_source_string <<~SUPER.squish
+      (
+        if
+        true
         (
-          if
-          true
+          sequence
           (
-            sequence
             (
-              (
-                define x true
-              )
-              x
+              define x true
             )
+            x
           )
-          x
         )
-      SUPER
-      workspace.evaluate!
-      expect(workspace.result_type).to(eq(
-        Types::Intersection.from_types(
-          Types::Integer.instance, Types::Boolean.instance
-          )
+        x
+      )
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to(eq(
+      Types::Intersection.from_types(
+        Types::Integer.instance, Types::Boolean.instance
         )
       )
-      expect(workspace.result_value).to eq(true)
-    end
-
-    it 'correctly calls a procedure referencing a static variable' do
-      workspace.add_source_string '(sequence ((define x 12) ((procedure () (x + 1)) call)))'
-      workspace.evaluate!
-      expect(workspace.result_type).to eq(Types::Integer.instance)
-      expect(workspace.result_value).to eq(13)
-    end
-
-    it 'correctly calls a procedure referencing a dynamic variable' do
-      workspace.add_source_string '((procedure (x) (x + 1)) call 100)'
-      workspace.evaluate!
-      expect(workspace.result_type).to eq(Types::Integer.instance)
-      expect(workspace.result_value).to eq(101)
-    end
-
-    it 'correctly evaluates nested conditionals' do
-      workspace.add_source_string '(if true (if false 1 (if true 2)) 4)'
-      workspace.evaluate!
-      expect(workspace.result_type).to eq(Types::Intersection.from_types(Types::Integer.instance, Types::Void.instance))
-      expect(workspace.result_value).to eq(2)
-    end
+    )
+    expect(workspace.result_value).to eq(true)
   end
 
-  describe "when evaluating by tree walking" do
-    let(:workspace_evaluation_strategy) { :evaluate_with_tree_walking }
-    it_behaves_like 'a super evaluator'
+  it 'correctly calls a procedure referencing a static variable' do
+    workspace.add_source_string '(sequence ((define x 12) ((procedure () (x + 1)) call)))'
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Integer.instance)
+    expect(workspace.result_value).to eq(13)
   end
 
-  describe "when evaluating by bytecode" do
-    let(:workspace_evaluation_strategy) { :evaluate_with_bytecode }
-    it_behaves_like 'a super evaluator'
+  it 'correctly calls a procedure referencing a dynamic variable' do
+    workspace.add_source_string '((procedure (x) (x + 1)) call 100)'
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Integer.instance)
+    expect(workspace.result_value).to eq(101)
+  end
+
+  it 'correctly evaluates nested conditionals' do
+    workspace.add_source_string '(if true (if false 1 (if true 2)) 4)'
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Intersection.from_types(Types::Integer.instance, Types::Void.instance))
+    expect(workspace.result_value).to eq(2)
   end
 end

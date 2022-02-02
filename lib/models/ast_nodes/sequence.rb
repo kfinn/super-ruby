@@ -28,16 +28,6 @@ module AstNodes
         end
     end
 
-    def evaluate_with_tree_walking(typing)
-      Workspace.current_workspace.with_current_super_binding(typing.super_binding) do
-        children_with_typings = child_ast_nodes.zip(typing.child_typings)
-        child_values = children_with_typings.map do |child_ast_node, child_typing|
-          child_ast_node.evaluate_with_tree_walking(child_typing)
-        end
-        child_values.last
-      end
-    end
-
     def build_bytecode!(typing)
       Workspace.current_workspace.with_current_super_binding(typing.super_binding) do
         children_with_typings = child_ast_nodes.zip(typing.child_typings)

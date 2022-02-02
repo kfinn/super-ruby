@@ -21,16 +21,6 @@ module AstNodes
       Jobs::MessageSendTyping.new(receiver_typing, message, argument_typings)
     end
 
-    def evaluate_with_tree_walking(typing)
-      typing.receiver_typing.type.message_send_result(
-        typing,
-        receiver_ast_node.evaluate_with_tree_walking(typing.receiver_typing),
-        argument_ast_nodes.zip(typing.argument_typings).map do |argument_ast_node, argument_typing|
-          argument_ast_node.evaluate_with_tree_walking(argument_typing)
-        end
-      )
-    end
-
     def build_bytecode!(typing)
       receiver_ast_node.build_bytecode!(typing)
       argument_ast_nodes.zip(typing.argument_typings).map do |argument_ast_node, argument_typing|

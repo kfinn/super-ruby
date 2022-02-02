@@ -6,11 +6,7 @@ module AstNodes
 
     attr_reader :s_expression
 
-    def evaluate_with_tree_walking(typing)
-      raise "unimplemented: #{s_expression}"
-    end
-
-    def evaluate_with_bytecode(typing)
+    def evaluate(typing)
       starting_bytecode_builder = BufferBuilder.new
       Workspace.current_workspace.with_current_bytecode_builder(starting_bytecode_builder) do
         

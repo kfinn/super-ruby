@@ -10,12 +10,6 @@ class Workspace
     end
   end
 
-  def initialize(evaluation_strategy: :evaluate_with_tree_walking)
-    @evaluation_strategy = evaluation_strategy
-  end
-
-  attr_reader :evaluation_strategy
-
   def add_source_string(text)
     sources_awaiting_static_pass << SourceString.new(text)
   end
@@ -27,7 +21,7 @@ class Workspace
         root_s_expressions.each do |root_s_expression|
           root_ast_node = AstNode.from_s_expression(root_s_expression)
           self.result_typing = typing_for(root_ast_node)
-          self.result_evaluation = Jobs::TypedEvaluation.new(root_ast_node, evaluation_strategy)
+          self.result_evaluation = Jobs::TypedEvaluation.new(root_ast_node)
           work_queue << self.result_evaluation
         end
       end

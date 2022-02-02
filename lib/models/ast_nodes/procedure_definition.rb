@@ -32,10 +32,6 @@ module AstNodes
       )
     end
 
-    def evaluate_with_tree_walking(typing)
-      typing.type.to_s
-    end
-
     def build_bytecode!(typing)
       Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
       Workspace.current_workspace.current_bytecode_builder << typing.type.to_s
