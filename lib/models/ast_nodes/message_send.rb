@@ -14,15 +14,11 @@ module AstNodes
       workspace = Workspace.current_workspace
 
       receiver_typing = workspace.typing_for(receiver_ast_node)
-      argument_typings = argument_ast_nodes.map do |argument_ast_node|
-        workspace.typing_for(argument_ast_node)
-      end
-
-      Jobs::MessageSendTyping.new(receiver_typing, message, argument_typings)
+      Jobs::MessageSendTyping.new(receiver_typing, message, argument_ast_nodes)
     end
 
     def build_bytecode!(typing)
-      receiver_ast_node.build_bytecode!(typing)
+      receiver_ast_node.build_bytecode!(typing.receiver_typing)
       argument_ast_nodes.zip(typing.argument_typings).map do |argument_ast_node, argument_typing|
         argument_ast_node.build_bytecode!(argument_typing)
       end

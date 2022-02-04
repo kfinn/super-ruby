@@ -8,29 +8,31 @@ module Jobs
     end
     attr_reader :abstract_procedure, :argument_typings_by_name
     delegate :ast_node, :workspace, :super_binding, to: :abstract_procedure
-    attr_accessor :return_typing, :concrete_procedure
+    attr_accessor :concrete_procedure, :return_typing
+    alias type concrete_procedure
+    alias value concrete_procedure
+
+    def specialized?
+      concrete_procedure.present?
+    end
 
     def complete?
-      concrete_procedure.present?
+      specialized?
     end
 
     def work!
       return unless argument_typings_complete?
-      return if concrete_procedure.present?
+      return if specialized?
 
       cached_concrete_procedure = abstract_procedure.cached_concrete_procedure_for_argument_types(argument_types_by_name)
       if cached_concrete_procedure.present?
         self.concrete_procedure = cached_concrete_procedure
-        self.return_typing = ImmediateTyping.new(self.concrete_procedure.return_type)
+        self.return_typing = cached_concrete_procedure.procedure_specialization.return_typing
         return
       end
 
       if return_typing_complete?
-        self.concrete_procedure = Types::ConcreteProcedure.new(
-          argument_types_by_name,
-          return_typing.type,
-          self
-        )
+        self.concrete_procedure = Types::ConcreteProcedure.new(self)
         abstract_procedure.define_concrete_procedure(self.concrete_procedure)
         return
       end
@@ -48,7 +50,7 @@ module Jobs
     end
 
     def argument_types_by_name
-      @argument_types_by_name ||= argument_typings_by_name.transform_values(&:type)
+      @argument_types_by_name ||= argument_typings_by_name.transform_values(&:value)
     end
 
     def argument_typings_complete?

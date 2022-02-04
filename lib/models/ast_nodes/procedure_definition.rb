@@ -34,7 +34,7 @@ module AstNodes
 
     def build_bytecode!(typing)
       Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-      Workspace.current_workspace.current_bytecode_builder << typing.type.to_s
+      Workspace.current_workspace.current_bytecode_builder << typing.type
     end
 
     def arguments_ast_nodes

@@ -2,6 +2,11 @@ module Types
   class Integer
     include Singleton
 
+    def delivery_strategy_for_message(message)
+      :dynamic
+    end
+
+
     def message_send_result_typing(message, argument_typings)
       case message
       when '+', '-'

@@ -7,6 +7,7 @@ module AstNode
     AstNodes::MessageSend,
     AstNodes::IntegerLiteral,
     AstNodes::BooleanLiteral,
+    AstNodes::TypeLiteral,
     AstNodes::Identifier    
   ]
 

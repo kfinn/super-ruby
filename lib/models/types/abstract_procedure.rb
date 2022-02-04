@@ -8,18 +8,22 @@ module Types
     end
     attr_reader :argument_names, :body, :workspace, :super_binding
 
+    def delivery_strategy_for_message(message)
+      if message == 'specialize'
+        :static
+      else
+        :dynamic
+      end
+    end
+
     def message_send_result_typing(message, argument_typings)
       case message
-      when 'call'
+      when 'specialize'
         raise "Invalid arguments count: expected #{argument_names.size}, but got #{argument_typings.size}" unless argument_typings.size == argument_names.size
 
-        procedure_specialization = Jobs::ProcedureSpecialization.new(
+        Jobs::ProcedureSpecialization.new(
           self,
           argument_names.zip(argument_typings).to_h
-        )
-
-        Jobs::ConcreteProcedureReturnTyping.new(
-          procedure_specialization
         )
       else
         raise "invalid message: #{message}"
@@ -27,15 +31,18 @@ module Types
     end
 
     def build_message_send_bytecode!(typing)
-      concrete_procedure = cached_concrete_procedure_for_argument_types(
-        typing.result_typing.procedure_specialization.argument_types_by_name
-      )
+      case typing.message
+      when 'specialize'
+        (typing.argument_typings.size + 1).times do
+          Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
+        end
+        
+        concrete_procedure = cached_concrete_procedure_for_argument_types(
+          typing.result_typing.argument_types_by_name
+        )
 
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
-      Workspace.current_workspace.current_bytecode_builder << concrete_procedure.bytecode_pointer
-      Workspace.current_workspace.current_bytecode_builder << argument_names.size
-      argument_names.each do |argument_name|
-        Workspace.current_workspace.current_bytecode_builder << concrete_procedure.body_super_binding.fetch_dynamic_slot_index(argument_name)
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+        Workspace.current_workspace.current_bytecode_builder << concrete_procedure.bytecode_pointer
       end
     end
 
@@ -44,11 +51,14 @@ module Types
     end
 
     def define_concrete_procedure(concrete_procedure)
+      if concrete_procedure.argument_types_by_name.in? cached_concrete_procedures_by_argument_types
+        raise "duplicate concrete procedure for #{self}: (#{concrete_procedure.argument_types_by_name.values.map(&:to_s).join(", ")})" 
+      end
       cached_concrete_procedures_by_argument_types[concrete_procedure.argument_types_by_name] = concrete_procedure
     end
 
     def to_s
-      "AbstractProcedure/#{argument_names.size}"
+      "(#{argument_names.size.times.map { "?" }.join(", ")}) -> ?"
     end
 
     private

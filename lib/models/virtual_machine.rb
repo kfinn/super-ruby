@@ -3,8 +3,12 @@ class VirtualMachine
     call_frames << CallFrame.new(input_instruction_pointer.dup)
     result = nil
     while call_frames.any?
-      instruction_pointer = call_frames.last.instruction_pointer
-      opcode = instruction_pointer.next!
+      if ENV['debug']
+        puts "registers: [#{registers.map(&:to_s).join(",")}]"
+        puts "instructions: #{upcoming_instructions.map(&:to_s).join(",")}"
+      end
+      opcode = next_instruction!
+
       case opcode
       when Opcodes::DISCARD
         pop!
@@ -15,26 +19,28 @@ class VirtualMachine
         end
 
       when Opcodes::LOAD_CONSTANT
-        push! instruction_pointer.next!
+        push! next_instruction!
       when Opcodes::LOAD_LOCAL
-        push! call_frames.last[instruction_pointer.next!]
+        push! call_frames.last[next_instruction!]
 
       when Opcodes::JUMP
-        call_frames.last.instruction_pointer = instruction_pointer.next!
+        call_frames.last.instruction_pointer = next_instruction!
       when Opcodes::JUMP_UNLESS_FALSE
-        destination = instruction_pointer.next!
+        destination = next_instruction!
         call_frames.last.instruction_pointer = destination if pop!
       when Opcodes::CALL
-        destination_instruction_pointer = instruction_pointer.next!
-        arguments_count = instruction_pointer.next!
-        call_frame = CallFrame.new(destination_instruction_pointer, arguments_count)
+        arguments_count = pop!
         argument_slots = []
+        arguments_count.times do |index|
+          argument_slots.unshift(pop!)
+        end
         argument_values = []
         arguments_count.times do |index|
-          argument_slots[index] = instruction_pointer.next!
-          argument_values[arguments_count - index - 1] = pop!
+          argument_values.unshift(pop!)
         end
-        pop!
+
+        destination_instruction_pointer = pop!
+        call_frame = CallFrame.new(destination_instruction_pointer, arguments_count)
         argument_slots.zip(argument_values).each do |slot, value|
           call_frame[slot] = value
         end
@@ -62,6 +68,17 @@ class VirtualMachine
     end
 
     raise "registers not empty after running bytecode: #{registers}" unless registers.empty?
+    result
+  end
+
+  def upcoming_instructions
+    call_frames.last.instruction_pointer.preview
+  end
+
+  def next_instruction!
+    current_call_frame = call_frames.last
+    result = current_call_frame.instruction_pointer.dereference
+    current_call_frame.instruction_pointer = current_call_frame.instruction_pointer.succ
     result
   end
 
