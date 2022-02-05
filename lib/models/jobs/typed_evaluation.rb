@@ -6,8 +6,9 @@ module Jobs
       @ast_node = ast_node
       @typing = Workspace.current_workspace.typing_for(@ast_node)
       @typing.add_downstream(self)
+      @super_binding = Workspace.current_workspace.current_super_binding
     end
-    attr_reader :ast_node, :typing, :strategy
+    attr_reader :ast_node, :typing, :super_binding
     attr_accessor :evaluated, :value
     alias evaluated? evaluated
     delegate :type, to: :typing
@@ -15,7 +16,9 @@ module Jobs
     def work!
       return unless typing.complete?
       self.evaluated = true
-      self.value = ast_node.evaluate(typing)
+      Workspace.current_workspace.with_current_super_binding(super_binding) do
+        self.value = ast_node.evaluate(typing)
+      end
     end
 
     def complete?

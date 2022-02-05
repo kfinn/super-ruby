@@ -3,7 +3,7 @@ class VirtualMachine
     call_frames << CallFrame.new(input_instruction_pointer.dup)
     result = nil
     while call_frames.any?
-      if ENV['debug']
+      if ENV['DEBUG']
         puts "registers: [#{registers.map(&:to_s).join(",")}]"
         puts "instructions: #{upcoming_instructions.map(&:to_s).join(",")}"
       end

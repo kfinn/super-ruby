@@ -6,6 +6,10 @@ class BufferBuilder
   end
 
   Pointer = Struct.new(:buffer_builder, :index) do
+    def to_s
+      "<bytecode>"
+    end
+
     def dereference
       buffer_builder[index]
     end

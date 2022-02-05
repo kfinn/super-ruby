@@ -1,7 +1,7 @@
 RSpec.describe Workspace do
   let(:workspace) { Workspace.new }
 
-  it 'can specialize and call a procedure with no arguments' do
+  it 'specializes and calls a procedure with no arguments' do
     workspace.add_source_string '(((procedure (x) 12) specialize Integer) call 1)'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
@@ -62,5 +62,24 @@ RSpec.describe Workspace do
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Intersection.from_types(Types::Integer.instance, Types::Void.instance))
     expect(workspace.result_value).to eq(2)
+  end
+
+  it 'specializes the same abstract procedure with multiple types of arguments' do
+    workspace.add_source_string <<~SUPER
+      (sequence (
+        (define identity (procedure (x) x))
+        (define boolean_identity (identity specialize Boolean))
+        (define integer_identity (identity specialize Integer))
+        (
+          if
+          (boolean_identity call true)
+          (integer_identity call 100)
+          (integer_identity call 200)
+        )
+      ))
+    SUPER
+    workspace.evaluate!
+    # expect(workspace.result_type).to eq (Types::Integer.instance)
+    expect(workspace.result_value).to eq (100)
   end
 end

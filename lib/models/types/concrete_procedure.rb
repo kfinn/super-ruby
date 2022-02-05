@@ -7,6 +7,10 @@ module Types
     delegate :abstract_procedure, :argument_types_by_name, to: :procedure_specialization
     delegate :super_binding, :body, :argument_names, to: :abstract_procedure
 
+    def body
+      @body ||= abstract_procedure.body.dup
+    end
+
     def ==(other)
       other.kind_of?(ConcreteProcedure) && state == other.state
     end
@@ -18,7 +22,7 @@ module Types
     end
 
     def to_s
-      "(#{argument_types_by_name.map(&:to_s).join(", ")}) -> #{return_type.to_s}"
+      "(#{argument_types_by_name.map(&:to_s).join(", ")}) -> ?"
     end
 
     def delivery_strategy_for_message(message)

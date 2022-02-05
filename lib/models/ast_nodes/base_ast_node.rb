@@ -7,6 +7,7 @@ module AstNodes
     attr_reader :s_expression
 
     def evaluate(typing)
+      puts "evaluating #{s_expression}" if ENV["DEBUG"]
       starting_bytecode_builder = BufferBuilder.new
       Workspace.current_workspace.with_current_bytecode_builder(starting_bytecode_builder) do
         build_bytecode!(typing)

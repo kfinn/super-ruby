@@ -11,6 +11,7 @@ module Jobs
     end
     attr_reader :receiver_typing, :message, :argument_ast_nodes
     attr_accessor :result_typing, :argument_typings
+    delegate :type, to: :result_typing, allow_nil: true
 
     def upstream_typings_complete?
       @upstream_typings_complete ||= receiver_typing.complete? && !argument_typings.nil? && argument_typings.all?(&:complete?)
@@ -51,10 +52,6 @@ module Jobs
           )
         result_typing.add_downstream(self)
       end
-    end
-
-    def type
-      @type ||= result_typing.type
     end
 
     def to_s

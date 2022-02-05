@@ -14,6 +14,7 @@ class SuperBinding
   end
 
   attr_reader :parent, :inherit_dynamic_locals, :static_locals, :dynamic_local_typings, :dynamic_local_values
+  alias inherit_dynamic_locals? inherit_dynamic_locals
 
   def fetch_typing(name, include_dynamic_locals: true)
     return dynamic_local_typings[name] if include_dynamic_locals && dynamic_local_typings.include?(name)
@@ -113,5 +114,30 @@ class SuperBinding
 
   def all_downstream_dynamic_locals
     dynamic_local_typings.keys.map { |name| [self, name] } + downstream_super_bindings.flat_map(&:all_downstream_dynamic_locals)
+  end
+
+  def to_s
+    flattened_bindings = {}
+
+    current_super_binding_for_dynamics = self
+    while current_super_binding_for_dynamics.present?
+      current_super_binding_for_dynamics.dynamic_local_typings.each do |key, typing|
+        next if key.in? flattened_bindings
+        flattened_bindings[key] = typing.complete? ? typing.type.to_s : "?"
+      end
+      current_super_binding_for_dynamics =
+        current_super_binding_for_dynamics.inherit_dynamic_locals? ? current_super_binding_for_dynamics.parent : nil
+    end
+
+    current_super_binding_for_statics = self
+    while current_super_binding_for_statics.present?
+      current_super_binding_for_statics.static_locals.each do |key, typing|
+        next if key.in? flattened_bindings
+        flattened_bindings[key] = typing.complete? ? typing.type.to_s : "?"
+      end
+      current_super_binding_for_statics = current_super_binding_for_statics.parent
+    end
+
+    flattened_bindings.to_s
   end
 end
