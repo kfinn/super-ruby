@@ -83,6 +83,15 @@ RSpec.describe Workspace do
     expect(workspace.result_value).to eq (100)
   end
 
+  it 'returns the value of a conditional expression inside of a procedure' do
+    workspace.add_source_string '(define quantize (procedure (x) (if (x > 50) 100 0)))'
+    workspace.add_source_string '(define quantize_integer (quantize specialize Integer))'
+    workspace.add_source_string '(quantize_integer call 51)'
+    workspace.evaluate!
+    expect(workspace.result_type).to eq (Types::Integer.instance)
+    expect(workspace.result_value).to eq (100)
+  end
+
   xit 'specializes and calls recursive procedures' do
     workspace.add_source_string <<~SUPER
       (

@@ -23,8 +23,6 @@ class BufferBuilder
     end
   end
 
-  private
-
   def storage
     @storage ||= []
   end

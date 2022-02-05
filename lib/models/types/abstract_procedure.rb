@@ -37,26 +37,24 @@ module Types
           Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
         end
         
-        concrete_procedure = cached_concrete_procedure_for_argument_types(
+        procedure_specialization = cached_procedure_specialization_for_argument_types(
           typing.result_typing.argument_types_by_name
         )
 
         Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-        Workspace.current_workspace.current_bytecode_builder << concrete_procedure.bytecode_pointer
+        Workspace.current_workspace.current_bytecode_builder << procedure_specialization.concrete_procedure_instance.bytecode_pointer
       end
     end
 
-    def cached_concrete_procedure_for_argument_types(argument_types_by_name)
-      cached_concrete_procedures_by_argument_types[argument_types_by_name].tap do |cached|
-        puts "reusing cached concrete procedure: #{cached}" if cached && ENV["DEBUG"]
-      end
+    def cached_procedure_specialization_for_argument_types(argument_types_by_name)
+      cached_procedure_specializations_by_argument_types[argument_types_by_name]
     end
 
-    def define_concrete_procedure(concrete_procedure)
-      if concrete_procedure.argument_types_by_name.in? cached_concrete_procedures_by_argument_types
-        raise "duplicate concrete procedure for #{self}: (#{concrete_procedure.argument_types_by_name.values.map(&:to_s).join(", ")})" 
+    def define_procedure_specialization(procedure_specialization)
+      if procedure_specialization.argument_types_by_name.in? cached_procedure_specializations_by_argument_types
+        raise "duplicate procedure specialization for #{self}: (#{procedure_specialization.argument_types_by_name.values.map(&:to_s).join(", ")})" 
       end
-      cached_concrete_procedures_by_argument_types[concrete_procedure.argument_types_by_name] = concrete_procedure
+      cached_procedure_specializations_by_argument_types[procedure_specialization.argument_types_by_name] = procedure_specialization
     end
 
     def to_s
@@ -65,8 +63,8 @@ module Types
 
     private
 
-    def cached_concrete_procedures_by_argument_types
-      @cached_concrete_procedures_by_argument_types ||= {}
+    def cached_procedure_specializations_by_argument_types
+      @cached_procedure_specializations_by_argument_types ||= {}
     end
   end
 end
