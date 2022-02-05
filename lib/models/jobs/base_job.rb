@@ -25,6 +25,7 @@ module Jobs
     end
 
     def work!
+      puts "working #{self}" if ENV['DEBUG']
       super if incomplete?
       downstreams.each(&:enqueue!) if complete?
     end

@@ -7,6 +7,7 @@ module AstNodes
     end
 
     def spawn_typing
+      puts "searching for typing for #{name} within #{Workspace.current_workspace.current_super_binding.to_s}" if ENV['DEBUG']
       Workspace.current_workspace.current_super_binding.fetch_typing(name)
     end
 

@@ -6,7 +6,11 @@ class TypingsCollection
   attr_reader :workspace
 
   def typing_for(ast_node)
-    storage[ast_node] ||= ast_node.spawn_typing
+    return storage[ast_node] if ast_node.in? storage
+
+    typing = ast_node.spawn_typing
+    puts "spawned typing for #{ast_node.s_expression}: #{typing}" if ENV["DEBUG"]
+    storage[ast_node] = typing
   end
 
   private

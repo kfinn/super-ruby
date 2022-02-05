@@ -47,7 +47,9 @@ module Types
     end
 
     def cached_concrete_procedure_for_argument_types(argument_types_by_name)
-      cached_concrete_procedures_by_argument_types[argument_types_by_name]
+      cached_concrete_procedures_by_argument_types[argument_types_by_name].tap do |cached|
+        puts "reusing cached concrete procedure: #{cached}" if cached && ENV["DEBUG"]
+      end
     end
 
     def define_concrete_procedure(concrete_procedure)

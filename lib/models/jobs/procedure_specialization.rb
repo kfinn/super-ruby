@@ -24,7 +24,6 @@ module Jobs
       return unless argument_typings_complete?
       return if specialized?
 
-
       cached_concrete_procedure = abstract_procedure.cached_concrete_procedure_for_argument_types(argument_types_by_name) ||
       self.concrete_procedure =
         if cached_concrete_procedure.present?

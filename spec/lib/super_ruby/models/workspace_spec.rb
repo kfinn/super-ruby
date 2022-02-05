@@ -79,7 +79,50 @@ RSpec.describe Workspace do
       ))
     SUPER
     workspace.evaluate!
-    # expect(workspace.result_type).to eq (Types::Integer.instance)
+    expect(workspace.result_type).to eq (Types::Integer.instance)
     expect(workspace.result_value).to eq (100)
+  end
+
+  xit 'specializes and calls recursive procedures' do
+    workspace.add_source_string <<~SUPER
+      (
+        define
+        fibonacci 
+        (
+          (
+            procedure
+            (n)
+            (
+              if (n < 2)
+              1
+              ((fibonacci call (n - 1)) + (fibonacci call (n - 2)))
+            )
+          )
+          specialize
+          Integer
+        )
+      )
+    SUPER
+    workspace.add_source_string '(fibonacci call 5)'
+    workspace.evaluate!
+    expect(workspace.result_type).to eq (Types::Integer.instance)
+    expect(workspace.result_value).to eq (5)
+  end
+
+  xit 'repeatedly specializes the same abstract procedure' do
+    workspace.add_source_string <<~SUPER
+      (sequence(
+        (define identity (procedure (x) x))
+        (
+          if
+          ((identity specialize Boolean) call true)
+          (((identity specialize Integer) call 100) + ((identity specialize Integer) call 101))
+          2
+        )
+      ))
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to eq (Types::Integer.instance)
+    expect(workspace.result_value).to eq (201)
   end
 end
