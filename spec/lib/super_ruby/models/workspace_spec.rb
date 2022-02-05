@@ -1,13 +1,18 @@
 RSpec.describe Workspace do
   let(:workspace) { Workspace.new }
 
-  it 'can specialize and call a simple procedure' do
-    # (sequence((define sp ((procedure () 12) specialize)) (sp call)))
-    # (sequence ((define x 12) (((procedure () (x + 1)) specialize) call)))
+  it 'can specialize and call a procedure with no arguments' do
     workspace.add_source_string '(((procedure (x) 12) specialize Integer) call 1)'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
     expect(workspace.result_value).to eq 12
+  end
+
+  it 'can define a specialized procedure with no arguments and call it' do
+    workspace.add_source_string '(sequence((define sp ((procedure () 13) specialize)) (sp call)))'
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Integer.instance)
+    expect(workspace.result_value).to eq 13
   end
 
   it 'correctly evaluates an if expression with a redefined static variable' do

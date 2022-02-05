@@ -24,25 +24,16 @@ module Jobs
       return unless argument_typings_complete?
       return if specialized?
 
-      cached_concrete_procedure = abstract_procedure.cached_concrete_procedure_for_argument_types(argument_types_by_name)
-      if cached_concrete_procedure.present?
-        self.concrete_procedure = cached_concrete_procedure
-        self.return_typing = cached_concrete_procedure.procedure_specialization.return_typing
-        return
-      end
 
-      if return_typing_complete?
-        self.concrete_procedure = Types::ConcreteProcedure.new(self)
-        abstract_procedure.define_concrete_procedure(self.concrete_procedure)
-        return
-      end
-
-      if return_typing.blank?
-        self.return_typing = workspace.with_current_super_binding(body_super_binding) do
-          workspace.typing_for(abstract_procedure.body)
+      cached_concrete_procedure = abstract_procedure.cached_concrete_procedure_for_argument_types(argument_types_by_name) ||
+      self.concrete_procedure =
+        if cached_concrete_procedure.present?
+          cached_concrete_procedure
+        else
+          Types::ConcreteProcedure.new(self).tap do |constructed_concrete_procedure|
+            abstract_procedure.define_concrete_procedure(constructed_concrete_procedure)
+          end
         end
-        self.return_typing.add_downstream(self)
-      end
     end
 
     def argument_typings
@@ -59,19 +50,6 @@ module Jobs
 
     def return_typing_complete?
       return_typing&.complete?
-    end
-
-    def body_super_binding
-      @body_super_binding ||=
-        argument_typings_by_name
-        .each_with_object(
-          super_binding.spawn
-        ) do |(argument_name, argument_typing), super_binding_builder|
-          super_binding_builder.set_dynamic_typing(
-            argument_name,
-            argument_typing
-          )
-        end
     end
   end
 end
