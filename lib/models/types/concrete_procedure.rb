@@ -46,17 +46,9 @@ module Types
       end
     end
 
-    def build_message_send_bytecode!(typing)
-      body_super_binding = build_body_super_binding(typing.receiver_typing.super_binding)
-      argument_names.each do |argument_name|
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-        Workspace.current_workspace.current_bytecode_builder << body_super_binding.fetch_dynamic_slot_index(argument_name)
-      end
-
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-      Workspace.current_workspace.current_bytecode_builder << argument_names.size
-      
+    def build_message_send_bytecode!(typing)      
       Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
+      Workspace.current_workspace.current_bytecode_builder << argument_names.size
     end
 
     def build_body_super_binding(definition_super_binding)
