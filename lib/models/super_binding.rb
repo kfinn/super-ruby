@@ -2,9 +2,9 @@ class SuperBinding
   def initialize(
     parent: nil,
     inherit_dynamic_locals: false,
-    static_locals: {},
-    dynamic_local_typings: {},
-    dynamic_local_values: {}
+    static_locals: LocalsCollection.new,
+    dynamic_local_typings: LocalsCollection.new,
+    dynamic_local_values: LocalsCollection.new
   )
     @parent = parent
     @inherit_dynamic_locals = inherit_dynamic_locals
@@ -43,12 +43,10 @@ class SuperBinding
   end
   
   def set_static_typing(name, typing)
-    validate_name(name)
     static_locals[name] = typing
   end
 
   def set_dynamic_typing(name, typing)
-    validate_name(name)
     dynamic_local_typings[name] = typing
   end
 
