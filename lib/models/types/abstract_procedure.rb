@@ -19,12 +19,8 @@ module Types
     def message_send_result_typing(message, argument_typings)
       case message
       when 'specialize'
-        raise "Invalid arguments count: expected #{argument_names.size}, but got #{argument_typings.size}" unless argument_typings.size == argument_names.size
-
-        Jobs::ProcedureSpecialization.new(
-          self,
-          argument_names.zip(argument_typings).to_h
-        )
+        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_typings.size}" unless argument_typings.size == 1
+        Jobs::ProcedureSpecialization.new(self, argument_typings.first)
       else
         raise "invalid message: #{message}"
       end
@@ -37,8 +33,8 @@ module Types
           Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
         end
         
-        procedure_specialization = cached_procedure_specialization_for_argument_types(
-          typing.result_typing.argument_types_by_name
+        procedure_specialization = cached_procedure_specialization_for_concrete_procedure(
+          typing.argument_typings.first.value
         )
 
         Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
@@ -46,15 +42,15 @@ module Types
       end
     end
 
-    def cached_procedure_specialization_for_argument_types(argument_types_by_name)
-      cached_procedure_specializations_by_argument_types[argument_types_by_name]
+    def cached_procedure_specialization_for_concrete_procedure(concrete_procedure)
+      cached_procedure_specializations_by_concrete_procedure[concrete_procedure]
     end
 
     def define_procedure_specialization(procedure_specialization)
-      if procedure_specialization.argument_types_by_name.in? cached_procedure_specializations_by_argument_types
-        raise "duplicate procedure specialization for #{self}: (#{procedure_specialization.argument_types_by_name.values.map(&:to_s).join(", ")})" 
+      if procedure_specialization.concrete_procedure.in? cached_procedure_specializations_by_concrete_procedure
+        raise "duplicate procedure specialization for #{self}: #{procedure_specialization.concrete_procedure.to_s}" 
       end
-      cached_procedure_specializations_by_argument_types[procedure_specialization.argument_types_by_name] = procedure_specialization
+      cached_procedure_specializations_by_concrete_procedure[procedure_specialization.concrete_procedure] = procedure_specialization
     end
 
     def to_s
@@ -63,8 +59,8 @@ module Types
 
     private
 
-    def cached_procedure_specializations_by_argument_types
-      @cached_procedure_specializations_by_argument_types ||= {}
+    def cached_procedure_specializations_by_concrete_procedure
+      @cached_procedure_specializations_by_concrete_procedure ||= {}
     end
   end
 end

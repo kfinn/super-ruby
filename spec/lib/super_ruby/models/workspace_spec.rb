@@ -2,14 +2,14 @@ RSpec.describe Workspace do
   let(:workspace) { Workspace.new }
 
   it 'specializes and calls a procedure with no arguments' do
-    workspace.add_source_string '(((procedure (x) 12) specialize Integer) call 1)'
+    workspace.add_source_string '(((procedure (x) 12) specialize (ConcreteProcedure (Integer) Integer)) call 1)'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
     expect(workspace.result_value).to eq 12
   end
 
   it 'can define a specialized procedure with no arguments and call it' do
-    workspace.add_source_string '(sequence((define sp ((procedure () 13) specialize)) (sp call)))'
+    workspace.add_source_string '(sequence((define sp ((procedure () 13) specialize (ConcreteProcedure () Integer))) (sp call)))'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
     expect(workspace.result_value).to eq 13
@@ -44,14 +44,14 @@ RSpec.describe Workspace do
   end
 
   it 'correctly calls a procedure referencing a static variable' do
-    workspace.add_source_string '(sequence ((define x 12) (((procedure () (x + 1)) specialize) call)))'
+    workspace.add_source_string '(sequence ((define x 12) (((procedure () (x + 1)) specialize (ConcreteProcedure () Integer)) call)))'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
     expect(workspace.result_value).to eq(13)
   end
 
   it 'correctly calls a procedure referencing a dynamic variable' do
-    workspace.add_source_string '(((procedure (x) (x + 1)) specialize Integer) call 100)'
+    workspace.add_source_string '(((procedure (x) (x + 1)) specialize (ConcreteProcedure (Integer) Integer)) call 100)'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
     expect(workspace.result_value).to eq(101)
@@ -68,8 +68,8 @@ RSpec.describe Workspace do
     workspace.add_source_string <<~SUPER
       (sequence (
         (define identity (procedure (x) x))
-        (define boolean_identity (identity specialize Boolean))
-        (define integer_identity (identity specialize Integer))
+        (define boolean_identity (identity specialize (ConcreteProcedure (Boolean) Boolean)))
+        (define integer_identity (identity specialize (ConcreteProcedure (Integer) Integer)))
         (
           if
           (boolean_identity call true)
@@ -85,7 +85,7 @@ RSpec.describe Workspace do
 
   it 'returns the value of a conditional expression inside of a procedure' do
     workspace.add_source_string '(define quantize (procedure (x) (if (x > 50) 100 0)))'
-    workspace.add_source_string '(define quantize_integer (quantize specialize Integer))'
+    workspace.add_source_string '(define quantize_integer (quantize specialize (ConcreteProcedure (Integer) Integer)))'
     workspace.add_source_string '(quantize_integer call 51)'
     workspace.evaluate!
     expect(workspace.result_type).to eq (Types::Integer.instance)
@@ -108,7 +108,7 @@ RSpec.describe Workspace do
             )
           )
           specialize
-          Integer
+          (ConcreteProcedure (Integer) Integer)
         )
       )
     SUPER
@@ -124,8 +124,8 @@ RSpec.describe Workspace do
         (define identity (procedure (x) x))
         (
           if
-          ((identity specialize Boolean) call true)
-          (((identity specialize Integer) call 100) + ((identity specialize Integer) call 101))
+          ((identity specialize (ConcreteProcedure (Boolean) Boolean)) call true)
+          (((identity specialize (ConcreteProcedure (Integer) Integer)) call 100) + ((identity specialize (ConcreteProcedure (Integer) Integer)) call 101))
           2
         )
       ))

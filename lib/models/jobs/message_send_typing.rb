@@ -55,7 +55,7 @@ module Jobs
     end
 
     def to_s
-      "message send: #{message}"
+      "(#{receiver_typing.to_s} #{message} #{argument_ast_nodes.map(&:to_s).join(" ")})"
     end
   end
 end

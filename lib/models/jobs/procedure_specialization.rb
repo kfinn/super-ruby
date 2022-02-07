@@ -2,81 +2,57 @@ module Jobs
   class ProcedureSpecialization
     prepend BaseJob
 
-    def initialize(abstract_procedure, argument_typings_by_name)
+    def initialize(abstract_procedure, concrete_procedure_typing)
       @abstract_procedure = abstract_procedure
-      @argument_typings_by_name = argument_typings_by_name
+      @concrete_procedure_typing = concrete_procedure_typing
     end
-    attr_reader :abstract_procedure, :argument_typings_by_name
-    delegate :ast_node, :body, :workspace, :super_binding, to: :abstract_procedure
-    attr_accessor :concrete_procedure, :return_typings
+    attr_reader :abstract_procedure, :concrete_procedure_typing
+    delegate :argument_names, :ast_node, :workspace, :super_binding, to: :abstract_procedure
+    attr_accessor :validated
+    alias complete? validated
+
+    def concrete_procedure
+      concrete_procedure_typing.value
+    end
     alias type concrete_procedure
-
-    def concrete_procedure_instance
-      @concrete_procedure_instance ||= concrete_procedure.instance(self)
-    end
-
-    def complete?
-      concrete_procedure.present?
-    end
-
-    def return_typing
-      cached_procedure_specialization&.return_typing || own_return_typing
-    end
 
     def body
       @body ||= abstract_procedure.body.dup
     end
 
-    attr_accessor :cached_procedure_specialization, :own_return_typing
+    attr_accessor :cached_procedure_specialization, :own_body_typing
+
+    def body_typing
+      cached_procedure_specialization&.own_body_typing || own_body_typing
+    end
+
+    def concrete_procedure_instance
+      @concrete_procedure_instance ||= concrete_procedure.instance(self)
+    end
 
     def work!
-      return unless argument_typings_complete?
+      return unless concrete_procedure_typing.complete?
 
-      if cached_procedure_specialization.nil? && own_return_typing.nil?
-        self.cached_procedure_specialization = abstract_procedure.cached_procedure_specialization_for_argument_types(argument_types_by_name)
+      if cached_procedure_specialization.nil? && own_body_typing.nil?
+        self.cached_procedure_specialization = abstract_procedure.cached_procedure_specialization_for_concrete_procedure(concrete_procedure)
         if cached_procedure_specialization.present?
-          self.cached_procedure_specialization.add_downstream(self)
+          cached_procedure_specialization.add_downstream(self)
         else
-          self.own_return_typing = 
-            workspace.with_current_super_binding(
-              argument_typings_by_name
-                .each_with_object(super_binding.spawn) do |(argument_name, argument_typing), super_binding_builder|
-                  super_binding_builder.set_dynamic_typing(argument_name, Jobs::ImmediateTyping.new(argument_typing.value))
-                end
-            ) do
-              workspace.typing_for(body)
+          own_body_typing_super_binding =
+            argument_names.zip(concrete_procedure.argument_types).each_with_object(super_binding.spawn) do |(argument_name, argument_type), super_binding_builder|
+              super_binding_builder.set_dynamic_typing(argument_name, Jobs::ImmediateTyping.new(argument_type))
             end
-          self.own_return_typing.add_downstream(self)
-          abstract_procedure.define_procedure_specialization(self)
-          return
+          self.own_body_typing = Workspace.current_workspace.with_current_super_binding(own_body_typing_super_binding) do
+            Workspace.current_workspace.typing_for body
+          end
+          own_body_typing.add_downstream(self)
         end
       end
 
-      return unless return_typing.complete?
-      self.concrete_procedure = Types::ConcreteProcedure.new(
-        argument_types_by_name,
-        return_typing.type
-      )
-    end
-
-    def argument_typings
-      argument_typings_by_name.values
-    end
-
-    def argument_types_by_name
-      @argument_types_by_name ||= argument_typings_by_name.transform_values(&:value)
-    end
-
-    def argument_typings_complete?
-      argument_typings.all?(&:complete?)
-    end
-
-    def return_typing_complete?
-      return_typing&.complete?
-    end
-
-    def return_type
-      return_typing.type
+      return unless body_typing.complete?
+      raise "Invalid specialization return type:\n\texpected #{body_typing.type.to_s}\n\tactual: #{concrete_procedure.return_type.to_s}" unless body_typing.type == concrete_procedure.return_type
+      self.validated = true
+      abstract_procedure.define_procedure_specialization(self) if own_body_typing.present?
     end
   end
 end

@@ -2,11 +2,10 @@ module AstNode
   PRIORITIZED_AST_NODE_CLASSES = [
     AstNodes::Define,
     AstNodes::ProcedureDefinition,
+    AstNodes::ConcreteProcedureLiteral,
     AstNodes::If,
     AstNodes::Sequence,
     AstNodes::MessageSend,
-    # AstNodes::IntegerLiteral,
-    # AstNodes::BooleanLiteral,
     AstNodes::Identifier    
   ]
 

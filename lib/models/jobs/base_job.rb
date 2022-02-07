@@ -11,7 +11,6 @@ module Jobs
     attr_reader :workspace, :super_binding
 
     def add_downstream(job)
-      raise "infinite loop: attempting to add #{job} to #{self}" if job.has_transitive_downstream_job?(self)
       if complete?
         job.enqueue!
       else
@@ -42,6 +41,7 @@ module Jobs
         end
       end
       downstreams.each(&:enqueue!) if complete?
+      puts "done" if ENV['DEBUG']
     end
 
     def incomplete?

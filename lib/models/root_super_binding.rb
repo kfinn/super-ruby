@@ -49,4 +49,12 @@ class RootSuperBinding
   def to_s
     "<root super binding>"
   end
+
+  def static_locals
+    []
+  end
+
+  def parent
+    nil
+  end
 end

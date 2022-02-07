@@ -23,7 +23,7 @@ module Jobs
     end
 
     def complete?
-      typing.complete? && evaluated?
+      evaluated?
     end
   end
 end
