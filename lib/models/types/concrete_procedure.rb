@@ -32,11 +32,11 @@ module Types
       :dynamic
     end
 
-    def message_send_result_typing(message, call_argument_typings)
+    def message_send_result_typing(message, message_send_argument_typings)
       case message
       when 'call'
-        raise "Invalid arguments count: expected #{argument_types.size}, but got #{call_argument_typings.size}" unless call_argument_typings.size == argument_types.size
-        Jobs::ConcreteProcedureCallTyping.new(self, call_argument_typings)
+        raise "Invalid arguments count: expected #{argument_types.size}, but got #{message_send_argument_typings.size}" unless message_send_argument_typings.size == argument_types.size
+        Jobs::ConcreteProcedureCallTyping.new(self, message_send_argument_typings)
       else
         raise "invalid message: #{message}"
       end
