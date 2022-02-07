@@ -16,6 +16,7 @@ module Jobs
     def work!
       return unless typing.complete?
       self.evaluated = true
+      puts "evaluating #{ast_node.s_expression} within #{super_binding.to_s}" if ENV['DEBUG']
       Workspace.current_workspace.with_current_super_binding(super_binding) do
         self.value = ast_node.evaluate(typing)
       end
@@ -23,10 +24,6 @@ module Jobs
 
     def complete?
       typing.complete? && evaluated?
-    end
-
-    def has_value?
-      true
     end
   end
 end

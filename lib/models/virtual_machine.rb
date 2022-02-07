@@ -24,10 +24,11 @@ class VirtualMachine
         push! call_frames.last[next_instruction!]
 
       when Opcodes::JUMP
-        call_frames.last.instruction_pointer = next_instruction!
+        call_frames.last.instruction_pointer = pop!
       when Opcodes::JUMP_UNLESS_FALSE
-        destination = next_instruction!
-        call_frames.last.instruction_pointer = destination if pop!
+        destination = pop!
+        condition = pop!
+        call_frames.last.instruction_pointer = destination if condition
       when Opcodes::CALL
         arguments_count = next_instruction!
         argument_values = []

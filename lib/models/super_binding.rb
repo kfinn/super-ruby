@@ -1,6 +1,6 @@
 class SuperBinding
   def initialize(
-    parent: nil,
+    parent:,
     inherit_dynamic_locals: false,
     static_locals: LocalsCollection.new,
     dynamic_local_typings: LocalsCollection.new,
@@ -19,15 +19,13 @@ class SuperBinding
   def fetch_typing(name, include_dynamic_locals: true)
     return dynamic_local_typings[name] if include_dynamic_locals && dynamic_local_typings.include?(name)
     return static_locals[name] if static_locals.include?(name)
-    raise "unknown identifier: #{name}" unless parent.present?
-    parent.fetch_typing(name, include_dynamic_locals: inherit_dynamic_locals)
+    parent.fetch_typing(name, include_dynamic_locals: inherit_dynamic_locals && include_dynamic_locals)
   end
 
   def fetch_value(name, include_dynamic_locals: true)
     return dynamic_local_values[name] if include_dynamic_locals && dynamic_local_values.include?(name)
     return static_locals[name].value if static_locals.include?(name)
-    raise "unknown identifier: #{name}" unless parent.present?
-    parent.fetch_value(name, include_dynamic_locals: inherit_dynamic_locals)
+    parent.fetch_value(name, include_dynamic_locals: inherit_dynamic_locals && include_dynamic_locals)
   end
 
   def has_dynamic_binding?(name)
@@ -38,7 +36,7 @@ class SuperBinding
 
   def has_static_binding?(name)
     return true if name.in? static_locals
-    return parent.has_static_binding?(name) if parent.present?
+    return parent.has_static_binding?(name)
     false
   end
   
@@ -83,16 +81,6 @@ class SuperBinding
     end
   end
 
-  def dup
-    SuperBinding.new(
-      parent: self.parent,
-      inherit_dynamic_locals: inherit_dynamic_locals,
-      static_locals: static_locals.dup,
-      dynamic_local_typings: dynamic_local_typings.dup,
-      dynamic_local_values: dynamic_local_values.dup
-    )
-  end
-
   def downstream_super_bindings
     @downstream_super_bindings ||= []
   end
@@ -119,9 +107,9 @@ class SuperBinding
 
     current_super_binding_for_dynamics = self
     while current_super_binding_for_dynamics.present?
-      current_super_binding_for_dynamics.dynamic_local_typings.each do |key, typing|
-        next if key.in? flattened_bindings
-        flattened_bindings[key] = typing.complete? ? typing.type.to_s : "?"
+      current_super_binding_for_dynamics.dynamic_local_typings.each do |local|
+        next if local.name.in? flattened_bindings
+        flattened_bindings[local.name] = local.value.complete? ? local.value.type.to_s : "?"
       end
       current_super_binding_for_dynamics =
         current_super_binding_for_dynamics.inherit_dynamic_locals? ? current_super_binding_for_dynamics.parent : nil
@@ -129,9 +117,9 @@ class SuperBinding
 
     current_super_binding_for_statics = self
     while current_super_binding_for_statics.present?
-      current_super_binding_for_statics.static_locals.each do |key, typing|
-        next if key.in? flattened_bindings
-        flattened_bindings[key] = typing.complete? ? typing.type.to_s : "?"
+      current_super_binding_for_statics.static_locals.each do |local|
+        next if local.name.in? flattened_bindings
+        flattened_bindings[local.name] = local.value.complete? ? local.value.type.to_s : "?"
       end
       current_super_binding_for_statics = current_super_binding_for_statics.parent
     end

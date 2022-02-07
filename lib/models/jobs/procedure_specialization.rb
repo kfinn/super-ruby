@@ -23,6 +23,10 @@ module Jobs
       cached_procedure_specialization&.return_typing || own_return_typing
     end
 
+    def body
+      @body ||= abstract_procedure.body.dup
+    end
+
     attr_accessor :cached_procedure_specialization, :own_return_typing
 
     def work!

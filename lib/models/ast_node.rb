@@ -5,9 +5,8 @@ module AstNode
     AstNodes::If,
     AstNodes::Sequence,
     AstNodes::MessageSend,
-    AstNodes::IntegerLiteral,
-    AstNodes::BooleanLiteral,
-    AstNodes::TypeLiteral,
+    # AstNodes::IntegerLiteral,
+    # AstNodes::BooleanLiteral,
     AstNodes::Identifier    
   ]
 

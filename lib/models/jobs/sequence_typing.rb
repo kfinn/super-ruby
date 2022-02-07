@@ -4,13 +4,12 @@ module Jobs
 
     def initialize(child_typings)
       @child_typings = child_typings
-      @super_binding = Workspace.current_workspace.current_super_binding
 
       @child_typings.each do |child_typing|
         child_typing.add_downstream(self)
       end
     end
-    attr_reader :child_typings, :super_binding
+    attr_reader :child_typings
     attr_accessor :worked
     alias worked? worked
 

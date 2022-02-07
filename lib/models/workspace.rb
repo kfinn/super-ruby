@@ -58,7 +58,7 @@ class Workspace
   delegate :typing_for, to: :typings
 
   def root_super_binding
-    @root_super_binding ||= SuperBinding.new
+    @root_super_binding ||= RootSuperBinding.instance.spawn
   end
 
   def work_queue

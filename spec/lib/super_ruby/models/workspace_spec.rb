@@ -118,7 +118,7 @@ RSpec.describe Workspace do
     expect(workspace.result_value).to eq (5)
   end
 
-  xit 'repeatedly specializes the same abstract procedure' do
+  it 'repeatedly specializes the same abstract procedure' do
     workspace.add_source_string <<~SUPER
       (sequence(
         (define identity (procedure (x) x))

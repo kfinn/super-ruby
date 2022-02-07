@@ -16,10 +16,11 @@ class LocalsCollection
   end
 
   def [](name)
-    locals[locals_index_by_name.fetch(name)]&.value
+    locals[locals_index_by_name.fetch(name)].value
   end
 
   def []=(name, value)
+    puts "setting #{name} to #{value}" if ENV["DEBUG"]
     raise "attempting to redefine #{name}" if name.in? locals
     local = Local.new(name, value)
     locals_index_by_name[name] = locals.size

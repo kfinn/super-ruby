@@ -54,16 +54,19 @@ module AstNodes
       then_branch_bytecode_builder = BufferBuilder.new
       else_branch_bytecode_builder = BufferBuilder.new
 
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP_UNLESS_FALSE
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
       Workspace.current_workspace.current_bytecode_builder << then_branch_bytecode_builder.pointer
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP_UNLESS_FALSE
 
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
       Workspace.current_workspace.current_bytecode_builder << else_branch_bytecode_builder.pointer
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
 
       Workspace.current_workspace.with_current_bytecode_builder(then_branch_bytecode_builder) do
         then_branch_ast_node.build_bytecode!(typing.then_branch_typing)
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_workspace.current_bytecode_builder << result_bytecode_builder.pointer
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
       end
 
       Workspace.current_workspace.with_current_bytecode_builder(else_branch_bytecode_builder) do
@@ -74,8 +77,9 @@ module AstNodes
           Workspace.current_workspace.current_bytecode_builder << Types::Void.instance.instance
         end
           
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_workspace.current_bytecode_builder << result_bytecode_builder.pointer
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
       end
 
       Workspace.current_workspace.current_bytecode_builder = result_bytecode_builder
