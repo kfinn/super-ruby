@@ -47,5 +47,9 @@ module Jobs
     def incomplete?
       !complete?
     end
+
+    def to_s
+      "(#{self.class.to_s} #{super})"
+    end
   end
 end

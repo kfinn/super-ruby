@@ -22,5 +22,9 @@ module Jobs
     end
 
     delegate :hash, to: :state
+
+    def to_s
+      "(#{type.to_s} #{value.to_s})"
+    end
   end
 end

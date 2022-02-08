@@ -33,11 +33,12 @@ module Jobs
     def work!
       return unless concrete_procedure_typing.complete?
 
-      if cached_procedure_specialization.nil? && own_body_typing.nil?
+      if body_typing.nil?
         self.cached_procedure_specialization = abstract_procedure.cached_procedure_specialization_for_concrete_procedure(concrete_procedure)
         if cached_procedure_specialization.present?
           cached_procedure_specialization.add_downstream(self)
         else
+          abstract_procedure.define_procedure_specialization(self)
           own_body_typing_super_binding =
             argument_names.zip(concrete_procedure.argument_types).each_with_object(super_binding.spawn) do |(argument_name, argument_type), super_binding_builder|
               super_binding_builder.set_dynamic_typing(argument_name, Jobs::ImmediateTyping.new(argument_type))
@@ -52,7 +53,10 @@ module Jobs
       return unless body_typing.complete?
       raise "Invalid specialization return type:\n\texpected #{body_typing.type.to_s}\n\tactual: #{concrete_procedure.return_type.to_s}" unless body_typing.type == concrete_procedure.return_type
       self.validated = true
-      abstract_procedure.define_procedure_specialization(self) if own_body_typing.present?
+    end
+
+    def to_s
+      "(#{abstract_procedure.to_s} specialize #{concrete_procedure_typing.to_s})"
     end
   end
 end

@@ -44,5 +44,9 @@ module Jobs
           Types::Intersection.from_types(then_branch_typing.type, else_branch_typing.type)
         end
     end
+
+    def to_s
+      "(if #{condition_typing.to_s} #{then_branch_typing.to_s} #{else_branch_typing.to_s})"
+    end
   end
 end

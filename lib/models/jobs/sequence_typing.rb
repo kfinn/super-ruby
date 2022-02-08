@@ -14,13 +14,10 @@ module Jobs
     alias worked? worked
 
     def complete?
-      @complete ||= child_typings.all?(&:complete?) && worked?
+      child_typings.all?(&:complete?)
     end
 
-    def work!
-      return unless child_typings.all?(&:complete?)
-      self.worked = true
-    end
+    def work!; end
 
     def type
       child_typings.last.type

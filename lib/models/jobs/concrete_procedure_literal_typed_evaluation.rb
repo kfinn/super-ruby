@@ -35,5 +35,9 @@ module Jobs
     def complete?
       value.present?
     end
+
+    def to_s
+      "(ConcreteProcedure (#{argument_typed_evaluations.map(&:to_s).join(" ")}) #{return_typed_evaluation.to_s})"
+    end
   end
 end

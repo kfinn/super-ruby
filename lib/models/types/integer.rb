@@ -11,14 +11,10 @@ module Types
       case message
       when '+', '-'
         raise "Invalid arguments count: expected 1, but got #{argument_typings.size}" unless argument_typings.size == 1
-        BinaryOperatorTyping.new(*argument_typings, self).tap do |operator_typing|
-          argument_typings.each { |argument_typing| argument_typing.add_downstream(operator_typing) }
-        end
+        BinaryOperatorTyping.new(*argument_typings, self)
       when '>', '<'
         raise "Invalid arguments count: expected 1, but got #{argument_typings.size}" unless argument_typings.size == 1
-        BinaryOperatorTyping.new(*argument_typings, Boolean.instance).tap do |operator_typing|
-          argument_typings.each { |argument_typing| argument_typing.add_downstream(operator_typing) }
-        end
+        BinaryOperatorTyping.new(*argument_typings, Boolean.instance)
       else
         raise "invalid message: #{message}"
       end
@@ -49,6 +45,7 @@ module Types
       def initialize(argument_typing, return_type)
         @argument_typing = argument_typing
         @return_type = return_type
+        @argument_typing.add_downstream(self)
       end
       attr_reader :argument_typing, :return_type
       alias type return_type

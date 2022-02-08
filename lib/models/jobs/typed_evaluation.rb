@@ -25,5 +25,9 @@ module Jobs
     def complete?
       evaluated?
     end
+
+    def to_s
+      ast_node.s_expression.to_s
+    end
   end
 end

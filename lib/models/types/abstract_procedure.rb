@@ -20,7 +20,7 @@ module Types
       case message
       when 'specialize'
         raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_typings.size}" unless argument_typings.size == 1
-        Jobs::ProcedureSpecialization.new(self, argument_typings.first)
+        Jobs::ProcedureSpecialization.new(self, *argument_typings)
       else
         raise "invalid message: #{message}"
       end
@@ -54,7 +54,7 @@ module Types
     end
 
     def to_s
-      "(#{argument_names.size.times.map { "?" }.join(", ")}) -> ?"
+      "(AbstractProcedure (#{argument_names.size.times.map { "?" }.join(", ")}) ?)"
     end
 
     private

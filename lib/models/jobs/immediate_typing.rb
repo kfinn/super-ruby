@@ -15,6 +15,8 @@ module Jobs
       other.kind_of?(ImmediateTyping) && type == other.type
     end
 
-    delegate :hash, to: :type
+    delegate :hash, to: :state
+
+    delegate :to_s, to: :type
   end
 end
