@@ -41,7 +41,6 @@ module Jobs
         end
       end
       downstreams.each(&:enqueue!) if complete?
-      puts "done" if ENV['DEBUG']
     end
 
     def incomplete?

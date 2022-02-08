@@ -20,9 +20,7 @@ class Workspace
         root_s_expressions = SExpression.from_tokens(Lexer.new(source).each_token)
         root_s_expressions.each do |root_s_expression|
           root_ast_node = AstNode.from_s_expression(root_s_expression)
-          self.result_typing = typing_for(root_ast_node)
-          self.result_evaluation = Jobs::TypedEvaluation.new(root_ast_node)
-          work_queue << self.result_evaluation
+          self.result = Jobs::TypedEvaluation.new(root_ast_node).tap(&:enqueue!)
         end
       end
       sources_awaiting_static_pass.clear
@@ -31,15 +29,8 @@ class Workspace
     end
   end
 
-  attr_accessor :result_typing, :result_evaluation
-
-  def result_type
-    result_typing.type
-  end
-
-  def result_value
-    result_evaluation&.value
-  end
+  attr_accessor :result
+  delegate :type, :value, to: :result, prefix: true
 
   def current_super_binding
     @current_super_binding ||= root_super_binding
