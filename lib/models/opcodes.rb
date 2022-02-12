@@ -11,4 +11,5 @@ module Opcodes
   INTEGER_SUBTRACT = :integer_subtract
   INTEGER_LESS_THAN = :integer_less_than
   INTEGER_GREATER_THAN = :integer_greater_than
+  INTEGER_EQUAL = :integer_equal
 end

@@ -118,6 +118,54 @@ RSpec.describe Workspace do
     expect(workspace.result_value).to eq (5)
   end
 
+  it 'can call concrete procedures passed as function pointers' do
+    workspace.add_source_string <<~SUPER
+      (
+        define
+        increment
+        (
+          (procedure (x) (x + 1))
+          specialize
+          (ConcreteProcedure (Integer) Integer)
+        )
+      )
+    SUPER
+    workspace.add_source_string <<~SUPER
+      (
+        define
+        decrement
+        (
+          (procedure (x) (x - 1))
+          specialize
+          (ConcreteProcedure (Integer) Integer)
+        )
+      )
+    SUPER
+    workspace.add_source_string <<~SUPER
+      (
+        define
+        apply
+        (
+          (procedure (p x) (p call x))
+          specialize
+          (ConcreteProcedure ((ConcreteProcedure (Integer) Integer) Integer) Integer)
+        )
+      )
+    SUPER
+    workspace.add_source_string('(define x 12)')
+    workspace.add_source_string <<~SUPER
+      (
+        if
+        (x > 0)
+        (apply call increment x)
+        (apply call decrement x)
+      )
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to eq (Types::Integer.instance)
+    expect(workspace.result_value).to eq (13)
+  end
+
   it 'repeatedly specializes the same abstract procedure' do
     workspace.add_source_string <<~SUPER
       (sequence(
@@ -133,5 +181,40 @@ RSpec.describe Workspace do
     workspace.evaluate!
     expect(workspace.result_type).to eq (Types::Integer.instance)
     expect(workspace.result_value).to eq (201)
+  end
+
+  it 'computes the type of values' do
+    workspace.add_source_string <<~SUPER
+      (1 type)
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Type.instance)
+    expect(workspace.result_value).to eq(Types::Integer.instance)
+  end
+
+  it 'specializes procedures by using the type bulitin' do
+    workspace.add_source_string <<~SUPER
+      (
+        (
+          (procedure (x) x)
+          specialize
+          (ConcreteProcedure ((1 type)) (1 type))
+        )
+        call
+        1
+      )
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Integer.instance)
+    expect(workspace.result_value).to eq(1)
+  end
+
+  it 'automatically specializes simple abstract procedures on call' do
+    workspace.add_source_string <<~SUPER
+      ((procedure (x) (x + 1)) call 10)
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Integer.instance)
+    expect(workspace.result_value).to eq(11)
   end
 end

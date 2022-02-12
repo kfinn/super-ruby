@@ -1,5 +1,5 @@
 module Types
-  class Boolean
+  class Code
     include Singleton
     include BaseType
   end

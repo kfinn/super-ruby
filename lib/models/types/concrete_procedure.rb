@@ -1,5 +1,7 @@
 module Types
   class ConcreteProcedure
+    include BaseType
+
     class Instance
       def initialize(bytecode)
         @bytecode = bytecode
@@ -28,23 +30,24 @@ module Types
       "(ConcreteProcedure (#{argument_types.map(&:to_s).join(", ")}) #{return_type.to_s})"
     end
 
-    def delivery_strategy_for_message(message)
-      :dynamic
-    end
-
     def message_send_result_typing(message, message_send_argument_typings)
       case message
       when 'call'
         raise "Invalid arguments count: expected #{argument_types.size}, but got #{message_send_argument_typings.size}" unless message_send_argument_typings.size == argument_types.size
         Jobs::ConcreteProcedureCallTyping.new(self, message_send_argument_typings)
       else
-        raise "invalid message: #{message}"
+        super
       end
     end
 
-    def build_message_send_bytecode!(typing)      
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
-      Workspace.current_workspace.current_bytecode_builder << argument_types.size
+    def build_message_send_bytecode!(typing)
+      case typing.message
+      when 'call'
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
+        Workspace.current_workspace.current_bytecode_builder << argument_types.size
+      else
+        super
+      end
     end
 
     def build_body_super_binding(procedure_specialization)

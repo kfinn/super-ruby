@@ -1,6 +1,7 @@
 module Types
   class Void
     include Singleton
+    include BaseType
 
     class Instance
       include Singleton
@@ -12,10 +13,6 @@ module Types
 
     def instance
       Instance.instance
-    end
-
-    def to_s
-      "Void"
     end
   end
 end

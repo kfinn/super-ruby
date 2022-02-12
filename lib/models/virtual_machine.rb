@@ -31,12 +31,12 @@ class VirtualMachine
         call_frames.last.instruction_pointer = destination if condition
       when Opcodes::CALL
         arguments_count = next_instruction!
+        destination_instruction_pointer = pop!
         argument_values = []
         arguments_count.times do |index|
           argument_values.unshift(pop!)
         end
 
-        destination_instruction_pointer = pop!
         call_frame = CallFrame.new(destination_instruction_pointer, arguments_count)
         argument_values.each_with_index do |value, slot|
           call_frame[slot] = value
@@ -44,27 +44,31 @@ class VirtualMachine
         call_frames << call_frame
 
       when Opcodes::INTEGER_ADD
-        second_argument = pop!
         first_argument = pop!
+        second_argument = pop!
         push!(first_argument + second_argument)
       when Opcodes::INTEGER_SUBTRACT
-        second_argument = pop!
         first_argument = pop!
+        second_argument = pop!
         push!(first_argument - second_argument)
       when Opcodes::INTEGER_LESS_THAN
-        second_argument = pop!
         first_argument = pop!
+        second_argument = pop!
         push!(first_argument < second_argument)
       when Opcodes::INTEGER_GREATER_THAN
-        second_argument = pop!
         first_argument = pop!
+        second_argument = pop!
         push!(first_argument > second_argument)
+      when Opcodes::INTEGER_EQUAL
+        first_argument = pop!
+        second_argument = pop!
+        push!(first_argument == second_argument)
       else
         raise "unimplemented opcode: #{opcode}"
       end
     end
 
-    raise "registers not empty after running bytecode: #{registers}" unless registers.empty?
+    raise "registers not empty after running bytecode: #{registers.map(&:to_s)}" unless registers.empty?
     result
   end
 

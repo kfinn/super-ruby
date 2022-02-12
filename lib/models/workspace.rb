@@ -6,6 +6,7 @@ class Workspace
       previous_workspace = self.current_workspace
       self.current_workspace = workspace
       yield
+    ensure
       self.current_workspace = previous_workspace
     end
   end
@@ -34,6 +35,10 @@ class Workspace
 
   def current_super_binding
     @current_super_binding ||= root_super_binding
+  end
+
+  def as_current_workspace
+    self.class.with_current_workspace(self) { yield }
   end
 
   attr_writer :current_super_binding

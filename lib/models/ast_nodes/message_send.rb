@@ -18,11 +18,12 @@ module AstNodes
     end
 
     def build_bytecode!(typing)
-      receiver_ast_node.build_bytecode!(typing.receiver_typing)
       argument_ast_nodes.zip(typing.argument_typings).map do |argument_ast_node, argument_typing|
         argument_ast_node.build_bytecode!(argument_typing)
       end
 
+      receiver_ast_node.build_bytecode!(typing.receiver_typing)
+      
       typing.receiver_typing.type.build_message_send_bytecode!(typing)
     end
 

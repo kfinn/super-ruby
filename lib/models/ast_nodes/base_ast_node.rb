@@ -5,6 +5,7 @@ module AstNodes
     end
 
     attr_reader :s_expression
+    delegate :to_s, to: :s_expression
 
     def evaluate(typing)
       puts "evaluating #{s_expression}" if ENV["DEBUG"]

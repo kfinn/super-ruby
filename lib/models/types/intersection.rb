@@ -1,5 +1,7 @@
 module Types
   class Intersection
+    include BaseType
+
     def self.from_types(*types)
       new(
         Set.new(
@@ -15,12 +17,8 @@ module Types
     end
     attr_reader :types
 
-    def delivery_strategy_for_message(message)
-      :dynamic
-    end
-
     def message_send_result_typing(message, argument_typings)
-      IntersectionTyping.new(
+      self.class.from_types(
         types.map do |type|
           type.message_send_result_typing(message, argument_typings)
         end
