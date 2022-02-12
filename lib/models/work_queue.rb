@@ -34,7 +34,6 @@ class WorkQueue
   end
 
   def raise_deadlock!
-    binding.irb
     raise "deadlock detected:#{deadlocked_jobs_to_s}" if deadlocked_jobs == jobs_set
   end
 
