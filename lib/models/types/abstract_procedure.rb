@@ -26,7 +26,7 @@ module Types
         Jobs::AbstractProcedureCallTypeInference.new(self, argument_type_inferences)
       when 'specialize'
         raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
-        Jobs::ExplicitProcedureSpecialization.new(self, argument_type_inferences.first)
+        Jobs::ExplicitProcedureSpecializationTypeInference.new(self, argument_type_inferences.first)
       else
         super
       end
@@ -63,6 +63,18 @@ module Types
 
     def cached_implicit_procedure_specialization_for_argument_types(argument_types)
       cached_implicit_procedure_specializations_by_argument_types[argument_types]
+    end
+
+    def declare_specialization(argument_types)
+      return if argument_types.in? cached_implicit_procedure_specializations_by_argument_types
+      define_implicit_procedure_specialization(
+        Jobs::ImplicitProcedureSpecialization.new(
+          self,
+          argument_types.map do |argument_type|
+            Jobs::ImmediateTypeInference.new(argument_type)
+          end
+        )
+      )
     end
 
     def define_implicit_procedure_specialization(implicit_procedure_specialization)

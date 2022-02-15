@@ -12,7 +12,6 @@ module Jobs
     attr_reader :receiver_type_inference, :message, :argument_ast_nodes
     attr_accessor :result_type_inference, :argument_type_inferences
     delegate :type, to: :result_type_inference, allow_nil: true
-    delegate :type_check, to: :result_type_inference
 
     def upstream_type_inferences_complete?
       @upstream_type_inferences_complete ||= receiver_type_inference.complete? && !argument_type_inferences.nil? && argument_type_inferences.all?(&:complete?)
@@ -24,6 +23,14 @@ module Jobs
 
     def complete?
       upstream_type_inferences_complete? && result_type_inference_complete?
+    end
+
+    def type_check
+      @type_check ||= Jobs::SequenceTypeCheck.new([
+        receiver_type_inference.type_check,
+        *argument_type_inferences.map(&:type_check),
+        result_type_inference.type_check
+      ])
     end
 
     def work!

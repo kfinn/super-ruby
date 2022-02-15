@@ -3,13 +3,13 @@ module Types
     include BaseType
 
     def self.from_types(*types)
-      new(
-        Set.new(
-          types.flat_map do |type|
-            type.try(:types)&.to_a || [type]
-          end
-        )
+      types_set = Set.new(
+        types.flat_map do |type|
+          type.try(:types)&.to_a || [type]
+        end
       )
+      return types_set.first if types_set.size == 1
+      new(types_set)
     end
 
     def initialize(types)

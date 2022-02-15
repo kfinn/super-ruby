@@ -19,30 +19,17 @@ module Jobs
     end
 
     def complete?
-      upstreams_complete? && checked?
+      upstreams_complete?
     end
 
-    def work!
-      return unless upstreams_complete?
-      check!
-    end
+    def work!; end
 
-    def check!
-      return if checked?
-      raise "invalid if condition: expected Boolean, got #{condition_type_inference.type}" unless condition_type_inference.type == Types::Boolean.instance
-      self.checked = true
+    def type_check
+      @type_check ||= ImmediateTypeCheck.new(condition_type_inference.type == Types::Boolean.instance)
     end
-
-    attr_accessor :checked
-    alias checked? checked
 
     def type
-      @type ||=
-        if then_branch_type_inference.type == else_branch_type_inference.type
-          then_branch_type_inference.type
-        else
-          Types::Intersection.from_types(then_branch_type_inference.type, else_branch_type_inference.type)
-        end
+      @type ||= Types::Intersection.from_types(then_branch_type_inference.type, else_branch_type_inference.type)
     end
 
     def to_s

@@ -17,6 +17,10 @@ module Jobs
       child_type_inferences.all?(&:complete?)
     end
 
+    def type_check
+      @type_check = SequenceTypeCheck.new(child_type_inferences.map(&:type_check))
+    end
+
     def work!; end
 
     def type
