@@ -48,7 +48,7 @@ module Jobs
     end
 
     def to_s
-      "(#{self.class.to_s} #{super})"
+      "(#{self.class.to_s}@#{object_id} #{super})"
     end
   end
 end
