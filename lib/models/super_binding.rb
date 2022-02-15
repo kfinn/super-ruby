@@ -3,23 +3,23 @@ class SuperBinding
     parent:,
     inherit_dynamic_locals: false,
     static_locals: LocalsCollection.new,
-    dynamic_local_typings: LocalsCollection.new,
+    dynamic_local_type_inferences: LocalsCollection.new,
     dynamic_local_values: LocalsCollection.new
   )
     @parent = parent
     @inherit_dynamic_locals = inherit_dynamic_locals
     @static_locals = static_locals
-    @dynamic_local_typings = dynamic_local_typings
+    @dynamic_local_type_inferences = dynamic_local_type_inferences
     @dynamic_local_values = dynamic_local_values
   end
 
-  attr_reader :parent, :inherit_dynamic_locals, :static_locals, :dynamic_local_typings, :dynamic_local_values
+  attr_reader :parent, :inherit_dynamic_locals, :static_locals, :dynamic_local_type_inferences, :dynamic_local_values
   alias inherit_dynamic_locals? inherit_dynamic_locals
 
-  def fetch_typing(name, include_dynamic_locals: true)
-    return dynamic_local_typings[name] if include_dynamic_locals && dynamic_local_typings.include?(name)
+  def fetch_type_inference(name, include_dynamic_locals: true)
+    return dynamic_local_type_inferences[name] if include_dynamic_locals && dynamic_local_type_inferences.include?(name)
     return static_locals[name] if static_locals.include?(name)
-    parent.fetch_typing(name, include_dynamic_locals: inherit_dynamic_locals && include_dynamic_locals)
+    parent.fetch_type_inference(name, include_dynamic_locals: inherit_dynamic_locals && include_dynamic_locals)
   end
 
   def fetch_value(name, include_dynamic_locals: true)
@@ -29,7 +29,7 @@ class SuperBinding
   end
 
   def has_dynamic_binding?(name)
-    return true if name.in? dynamic_local_typings
+    return true if name.in? dynamic_local_type_inferences
     return parent.has_dynamic_binding?(name) if inherit_dynamic_locals
     false
   end
@@ -40,17 +40,17 @@ class SuperBinding
     false
   end
   
-  def set_static_typing(name, typing)
-    static_locals[name] = typing
+  def set_static_type_inference(name, type_inference)
+    static_locals[name] = type_inference
   end
 
-  def set_dynamic_typing(name, typing)
-    dynamic_local_typings[name] = typing
+  def set_dynamic_type_inference(name, type_inference)
+    dynamic_local_type_inferences[name] = type_inference
   end
 
   def set_dynamic_value(name, value)
-    raise "attempting to set dynamic value for unbound name #{name}" unless name.in? dynamic_local_typings
-    raise "attempting to redefine dynamic value for #{name}" unless name.in? dynamic_local_typings
+    raise "attempting to set dynamic value for unbound name #{name}" unless name.in? dynamic_local_type_inferences
+    raise "attempting to redefine dynamic value for #{name}" unless name.in? dynamic_local_type_inferences
     dynamic_local_values[name] = value
   end
 
@@ -58,15 +58,15 @@ class SuperBinding
     dynamic_local_slots_by_super_binding_and_name.fetch([self, name])
   end
 
-  def fetch_static_typing(name)
-    static_locals.fetch(name) { parent.fetch_static_typing(name) }
+  def fetch_static_type_inference(name)
+    static_locals.fetch(name) { parent.fetch_static_type_inference(name) }
   end
 
   def validate_name(name)
     raise "attempting to redefine #{name}" if name.in? static_locals
     current_super_binding = self
     while current_super_binding.inherit_dynamic_locals
-      raise "attempting to redefine #{name}" if name.in? dynamic_local_typings
+      raise "attempting to redefine #{name}" if name.in? dynamic_local_type_inferences
       current_super_binding = current_super_binding.parent
     end
   end
@@ -99,7 +99,7 @@ class SuperBinding
   end
 
   def all_downstream_dynamic_locals
-    dynamic_local_typings.keys.map { |name| [self, name] } + downstream_super_bindings.flat_map(&:all_downstream_dynamic_locals)
+    dynamic_local_type_inferences.keys.map { |name| [self, name] } + downstream_super_bindings.flat_map(&:all_downstream_dynamic_locals)
   end
 
   def to_s
@@ -107,7 +107,7 @@ class SuperBinding
 
     current_super_binding_for_dynamics = self
     while current_super_binding_for_dynamics.present?
-      current_super_binding_for_dynamics.dynamic_local_typings.each do |local|
+      current_super_binding_for_dynamics.dynamic_local_type_inferences.each do |local|
         next if local.name.in? flattened_bindings
         flattened_bindings[local.name] = local.value.complete? ? local.value.type.to_s : "?"
       end

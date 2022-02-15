@@ -12,8 +12,8 @@ module AstNodes
       )
     end
 
-    def spawn_typing
-      Workspace.current_workspace.current_super_binding.set_static_typing(
+    def spawn_type_inference
+      Workspace.current_workspace.current_super_binding.set_static_type_inference(
         s_expression.children.second.text,
         Jobs::Evaluation.new(value_ast_node)
       )
@@ -24,7 +24,7 @@ module AstNodes
       @value_ast_node ||= AstNode.from_s_expression(s_expression.third)
     end
 
-    def build_bytecode!(_typing)
+    def build_bytecode!(_type_inference)
       Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
       Workspace.current_workspace.current_bytecode_builder << Types::Void.instance.instance
     end

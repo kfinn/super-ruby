@@ -2,60 +2,60 @@ module Jobs
   class MessageSendTypeInference
     prepend BaseJob
 
-    def initialize(receiver_typing, message, argument_ast_nodes)
-      @receiver_typing = receiver_typing
+    def initialize(receiver_type_inference, message, argument_ast_nodes)
+      @receiver_type_inference = receiver_type_inference
       @message = message
       @argument_ast_nodes = argument_ast_nodes
 
-      @receiver_typing.add_downstream(self)
+      @receiver_type_inference.add_downstream(self)
     end
-    attr_reader :receiver_typing, :message, :argument_ast_nodes
-    attr_accessor :result_typing, :argument_typings
-    delegate :type, to: :result_typing, allow_nil: true
+    attr_reader :receiver_type_inference, :message, :argument_ast_nodes
+    attr_accessor :result_type_inference, :argument_type_inferences
+    delegate :type, to: :result_type_inference, allow_nil: true
 
-    def upstream_typings_complete?
-      @upstream_typings_complete ||= receiver_typing.complete? && !argument_typings.nil? && argument_typings.all?(&:complete?)
+    def upstream_type_inferences_complete?
+      @upstream_type_inferences_complete ||= receiver_type_inference.complete? && !argument_type_inferences.nil? && argument_type_inferences.all?(&:complete?)
     end
 
-    def result_typing_complete?
-      result_typing&.complete?
+    def result_type_inference_complete?
+      result_type_inference&.complete?
     end
 
     def complete?
-      upstream_typings_complete? && result_typing_complete?
+      upstream_type_inferences_complete? && result_type_inference_complete?
     end
 
     def work!
-      if receiver_typing.complete? && argument_typings.nil?
-        case receiver_typing.type.delivery_strategy_for_message(message)
+      if receiver_type_inference.complete? && argument_type_inferences.nil?
+        case receiver_type_inference.type.delivery_strategy_for_message(message)
         when :static
-          self.argument_typings = argument_ast_nodes.map do |argument_ast_node|
+          self.argument_type_inferences = argument_ast_nodes.map do |argument_ast_node|
             Evaluation.new(argument_ast_node)
           end
         when :dynamic
-          self.argument_typings = argument_ast_nodes.map do |argument_ast_node|
-            Workspace.current_workspace.typing_for argument_ast_node
+          self.argument_type_inferences = argument_ast_nodes.map do |argument_ast_node|
+            Workspace.current_workspace.type_inference_for argument_ast_node
           end
         end
-        argument_typings.each do |argument_typing|
-          argument_typing.add_downstream self
+        argument_type_inferences.each do |argument_type_inference|
+          argument_type_inference.add_downstream self
         end
       end
 
-      if !argument_typings.nil? && argument_typings.all?(&:complete?)
-        self.result_typing =
-          receiver_typing
+      if !argument_type_inferences.nil? && argument_type_inferences.all?(&:complete?)
+        self.result_type_inference =
+          receiver_type_inference
           .type
-          .message_send_result_typing(
+          .message_send_result_type_inference(
             message,
-            argument_typings
+            argument_type_inferences
           )
-        result_typing.add_downstream(self)
+        result_type_inference.add_downstream(self)
       end
     end
 
     def to_s
-      "(#{receiver_typing.to_s} #{message}#{argument_ast_nodes.map { |ast_node| " #{ast_node.s_expression.to_s}" }.join})"
+      "(#{receiver_type_inference.to_s} #{message}#{argument_ast_nodes.map { |ast_node| " #{ast_node.s_expression.to_s}" }.join})"
     end
   end
 end

@@ -4,15 +4,15 @@ module Jobs
 
     def initialize(
       concrete_procedure,
-      argument_typings
+      argument_type_inferences
     )
       @concrete_procedure = concrete_procedure
-      @argument_typings = argument_typings
-      argument_typings.each do |argument_typing|
-        argument_typing.add_downstream(self)
+      @argument_type_inferences = argument_type_inferences
+      argument_type_inferences.each do |argument_type_inference|
+        argument_type_inference.add_downstream(self)
       end
     end
-    attr_reader :concrete_procedure, :argument_typings
+    attr_reader :concrete_procedure, :argument_type_inferences
     attr_accessor :validated
     alias validated? validated
     alias complete? validated?
@@ -21,18 +21,18 @@ module Jobs
       concrete_procedure.return_type
     end
 
-    def upstream_typings_complete?
-      argument_typings.all?(&:complete?)
+    def upstream_type_inferences_complete?
+      argument_type_inferences.all?(&:complete?)
     end
 
     def work!
-      return unless upstream_typings_complete?
+      return unless upstream_type_inferences_complete?
       return if validated?
 
       self.validated = true
       invalid = false
-      argument_typings.each_with_index do |argument_typing, argument_index|
-        if argument_typing.type != concrete_procedure.argument_types[argument_index]
+      argument_type_inferences.each_with_index do |argument_type_inference, argument_index|
+        if argument_type_inference.type != concrete_procedure.argument_types[argument_index]
           invalid = true
         end
       end

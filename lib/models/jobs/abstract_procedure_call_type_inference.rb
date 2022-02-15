@@ -2,11 +2,11 @@ module Jobs
   class AbstractProcedureCallTypeInference
     prepend BaseJob
 
-    def initialize(abstract_procedure, argument_typings)
+    def initialize(abstract_procedure, argument_type_inferences)
       @abstract_procedure = abstract_procedure
-      @argument_typings = argument_typings
+      @argument_type_inferences = argument_type_inferences
     end
-    attr_reader :abstract_procedure, :argument_typings
+    attr_reader :abstract_procedure, :argument_type_inferences
     attr_accessor :implicit_procedure_specialization
     delegate :complete?, :concrete_procedure, to: :implicit_procedure_specialization
 
@@ -18,7 +18,7 @@ module Jobs
       @implicit_procedure_specialization ||=
         Jobs::ImplicitProcedureSpecialization.new(
           abstract_procedure,
-          argument_typings
+          argument_type_inferences
         ).tap do |built|
           built.add_downstream(self)
         end
@@ -27,7 +27,7 @@ module Jobs
     def work!; end
 
     def to_s
-      "((AbstractProcedure (#{abstract_procedure.argument_names.map { "?" }.join(" ")}) ?) call#{argument_typings.map { |argument_typing| " #{argument_typing.to_s}" }.join})"
+      "((AbstractProcedure (#{abstract_procedure.argument_names.map { "?" }.join(" ")}) ?) call#{argument_type_inferences.map { |argument_type_inference| " #{argument_type_inference.to_s}" }.join})"
     end
   end
 end

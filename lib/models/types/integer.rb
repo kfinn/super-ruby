@@ -3,25 +3,25 @@ module Types
     include Singleton
     include BaseType
 
-    def message_send_result_typing(message, argument_typings)
+    def message_send_result_type_inference(message, argument_type_inferences)
       case message
       when '+', '-'
-        raise "Invalid arguments count: expected 1, but got #{argument_typings.size}" unless argument_typings.size == 1
-        BinaryOperatorTyping.new(*argument_typings, self)
+        raise "Invalid arguments count: expected 1, but got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
+        BinaryOperatorTyping.new(*argument_type_inferences, self)
       when '>', '<', '=='
-        raise "Invalid arguments count: expected 1, but got #{argument_typings.size}" unless argument_typings.size == 1
-        BinaryOperatorTyping.new(*argument_typings, Boolean.instance)
+        raise "Invalid arguments count: expected 1, but got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
+        BinaryOperatorTyping.new(*argument_type_inferences, Boolean.instance)
       else
         super
       end
     end
 
-    def build_message_send_bytecode!(typing)
-      case typing.message
+    def build_message_send_bytecode!(type_inference)
+      case type_inference.message
       when '+', '-', '<', '>', '=='
         Workspace
           .current_workspace
-          .current_bytecode_builder << case typing.message
+          .current_bytecode_builder << case type_inference.message
             when '+'
               Opcodes::INTEGER_ADD
             when '-'
@@ -41,22 +41,22 @@ module Types
     class BinaryOperatorTyping
       prepend Jobs::BaseJob
 
-      def initialize(argument_typing, return_type)
-        @argument_typing = argument_typing
+      def initialize(argument_type_inference, return_type)
+        @argument_type_inference = argument_type_inference
         @return_type = return_type
-        @argument_typing.add_downstream(self)
+        @argument_type_inference.add_downstream(self)
       end
-      attr_reader :argument_typing, :return_type
+      attr_reader :argument_type_inference, :return_type
       alias type return_type
-      delegate :complete?, to: :argument_typing
+      delegate :complete?, to: :argument_type_inference
 
       def complete?
-        worked? && argument_typing.complete?
+        worked? && argument_type_inference.complete?
       end
 
       def work!
-        return unless argument_typing.complete?
-        raise "invalid argument to +: expected Integer, got #{argument_typing.type}" unless argument_typing.type == Integer.instance
+        return unless argument_type_inference.complete?
+        raise "invalid argument to +: expected Integer, got #{argument_type_inference.type}" unless argument_type_inference.type == Integer.instance
         @worked = true
       end
 

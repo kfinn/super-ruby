@@ -2,25 +2,25 @@ module Jobs
   class SequenceTypeInference
     prepend BaseJob
 
-    def initialize(child_typings)
-      @child_typings = child_typings
+    def initialize(child_type_inferences)
+      @child_type_inferences = child_type_inferences
 
-      @child_typings.each do |child_typing|
-        child_typing.add_downstream(self)
+      @child_type_inferences.each do |child_type_inference|
+        child_type_inference.add_downstream(self)
       end
     end
-    attr_reader :child_typings
+    attr_reader :child_type_inferences
     attr_accessor :worked
     alias worked? worked
 
     def complete?
-      child_typings.all?(&:complete?)
+      child_type_inferences.all?(&:complete?)
     end
 
     def work!; end
 
     def type
-      child_typings.last.type
+      child_type_inferences.last.type
     end
   end
 end

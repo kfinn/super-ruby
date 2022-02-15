@@ -13,7 +13,7 @@ module AstNodes
       )
     end
 
-    def spawn_typing
+    def spawn_type_inference
       Jobs::ConcreteProcedureLiteralEvaluation.new(
         argument_ast_nodes.map do |argument_ast_node|
           Jobs::Evaluation.new(argument_ast_node)
@@ -22,9 +22,9 @@ module AstNodes
       )
     end
 
-    def build_bytecode!(typing)
+    def build_bytecode!(type_inference)
       Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-      Workspace.current_workspace.current_bytecode_builder << typing.value
+      Workspace.current_workspace.current_bytecode_builder << type_inference.value
     end
 
     def argument_ast_nodes

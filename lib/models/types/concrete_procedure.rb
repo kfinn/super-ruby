@@ -30,18 +30,18 @@ module Types
       "(ConcreteProcedure (#{argument_types.map(&:to_s).join(", ")}) #{return_type.to_s})"
     end
 
-    def message_send_result_typing(message, message_send_argument_typings)
+    def message_send_result_type_inference(message, message_send_argument_type_inferences)
       case message
       when 'call'
-        raise "Invalid arguments count: expected #{argument_types.size}, but got #{message_send_argument_typings.size}" unless message_send_argument_typings.size == argument_types.size
-        Jobs::ConcreteProcedureCallTypeInference.new(self, message_send_argument_typings)
+        raise "Invalid arguments count: expected #{argument_types.size}, but got #{message_send_argument_type_inferences.size}" unless message_send_argument_type_inferences.size == argument_types.size
+        Jobs::ConcreteProcedureCallTypeInference.new(self, message_send_argument_type_inferences)
       else
         super
       end
     end
 
-    def build_message_send_bytecode!(typing)
-      case typing.message
+    def build_message_send_bytecode!(type_inference)
+      case type_inference.message
       when 'call'
         Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
         Workspace.current_workspace.current_bytecode_builder << argument_types.size
@@ -57,7 +57,7 @@ module Types
         .each_with_object(
           procedure_specialization.super_binding.spawn
         ) do |(argument_name, argument_type), super_binding_builder|
-          super_binding_builder.set_dynamic_typing(
+          super_binding_builder.set_dynamic_type_inference(
             argument_name,
             Jobs::ImmediateTypeInference.new(argument_type)
           )
@@ -73,7 +73,7 @@ module Types
         procedure_specialization.workspace.with_current_bytecode_builder(
           buffer_builder
         ) do
-          procedure_specialization.body.build_bytecode!(procedure_specialization.body_typing)
+          procedure_specialization.body.build_bytecode!(procedure_specialization.body_type_inference)
           Workspace.current_workspace.current_bytecode_builder << Opcodes::RETURN
         end
       end
