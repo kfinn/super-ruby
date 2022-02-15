@@ -38,7 +38,7 @@ module Jobs
           abstract_procedure.define_implicit_procedure_specialization(self)
           own_body_typing_super_binding =
             argument_names.zip(argument_types).each_with_object(super_binding.spawn) do |(argument_name, argument_type), super_binding_builder|
-              super_binding_builder.set_dynamic_typing(argument_name, Jobs::ImmediateTyping.new(argument_type))
+              super_binding_builder.set_dynamic_typing(argument_name, Jobs::ImmediateTypeInference.new(argument_type))
             end
           self.own_body_typing = Workspace.current_workspace.with_current_super_binding(own_body_typing_super_binding) do
             Workspace.current_workspace.typing_for body

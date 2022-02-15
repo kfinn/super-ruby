@@ -1,5 +1,5 @@
 module Jobs
-  class ImmediateTypedEvaluation
+  class ImmediateEvaluation
     prepend BaseJob
 
     def initialize(type, value)

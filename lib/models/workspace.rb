@@ -21,7 +21,7 @@ class Workspace
         root_s_expressions = SExpression.from_tokens(Lexer.new(source).each_token)
         root_s_expressions.each do |root_s_expression|
           root_ast_node = AstNode.from_s_expression(root_s_expression)
-          self.result = Jobs::TypedEvaluation.new(root_ast_node).tap(&:enqueue!)
+          self.result = Jobs::Evaluation.new(root_ast_node).tap(&:enqueue!)
         end
       end
       sources_awaiting_static_pass.clear

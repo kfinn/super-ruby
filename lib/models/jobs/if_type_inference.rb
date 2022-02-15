@@ -1,11 +1,11 @@
 module Jobs
-  class IfTyping
+  class IfTypeInference
     prepend BaseJob
 
     def initialize(condition_typing, then_branch_typing, else_branch_typing)
       @condition_typing = condition_typing
       @then_branch_typing = then_branch_typing
-      @else_branch_typing = else_branch_typing || ImmediateTyping.new(Types::Void.instance)
+      @else_branch_typing = else_branch_typing || ImmediateTypeInference.new(Types::Void.instance)
 
       @condition_typing.add_downstream(self)
       @then_branch_typing.add_downstream(self)

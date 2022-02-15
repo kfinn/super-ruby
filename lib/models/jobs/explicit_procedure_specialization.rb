@@ -33,7 +33,7 @@ module Jobs
         if implicit_procedure_specialization.nil?
           self.implicit_procedure_specialization = Jobs::ImplicitProcedureSpecialization.new(
             abstract_procedure,
-            argument_types.map { |argument_type| Jobs::ImmediateTyping.new(argument_type) }
+            argument_types.map { |argument_type| Jobs::ImmediateTypeInference.new(argument_type) }
           )
         end
         implicit_procedure_specialization.add_downstream(self)

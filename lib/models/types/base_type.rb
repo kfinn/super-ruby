@@ -10,7 +10,7 @@ module Types
       case message
       when 'type'
         raise "invalid arguments count to #{self.class.name}#type. Expected 0, got #{argument_typings}.size" unless argument_typings.empty?
-        Jobs::ImmediateTypedEvaluation.new(Type.instance, self)
+        Jobs::ImmediateEvaluation.new(Type.instance, self)
       else
         raise "invalid message: #{self.class.name}##{message}"
       end

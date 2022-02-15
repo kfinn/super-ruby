@@ -4,19 +4,19 @@ class RootSuperBinding
   def fetch_typing(name, **_kwargs)
     case name
     when 'Integer'
-      Jobs::ImmediateTypedEvaluation.new(Types::Type.instance, Types::Integer.instance)
+      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Integer.instance)
     when 'Boolean'
-      Jobs::ImmediateTypedEvaluation.new(Types::Type.instance, Types::Boolean.instance)
+      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Boolean.instance)
     when 'Void'
-      Jobs::ImmediateTypedEvaluation.new(Types::Type.instance, Types::Void.instance)
+      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Void.instance)
     when 'Type'
-      Jobs::ImmediateTypedEvaluation.new(Types::Type.instance, Types::Type.instance)
+      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Type.instance)
     when /^(0|-?[1-9](\d)*)$/
-      Jobs::ImmediateTypedEvaluation.new(Types::Integer.instance, name.to_i)
+      Jobs::ImmediateEvaluation.new(Types::Integer.instance, name.to_i)
     when 'true'
-      Jobs::ImmediateTypedEvaluation.new(Types::Boolean.instance, true)
+      Jobs::ImmediateEvaluation.new(Types::Boolean.instance, true)
     when 'false'
-      Jobs::ImmediateTypedEvaluation.new(Types::Boolean.instance, false)
+      Jobs::ImmediateEvaluation.new(Types::Boolean.instance, false)
     else
       raise "unknown identifier: #{name}"
     end

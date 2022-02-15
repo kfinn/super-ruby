@@ -23,7 +23,7 @@ module Types
       case message
       when 'call'
         raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_typings.size}" unless argument_typings.size == argument_names.size
-        Jobs::AbstractProcedureCall.new(self, argument_typings)
+        Jobs::AbstractProcedureCallTypeInference.new(self, argument_typings)
       when 'specialize'
         raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_typings.size}" unless argument_typings.size == 1
         Jobs::ExplicitProcedureSpecialization.new(self, argument_typings.first)

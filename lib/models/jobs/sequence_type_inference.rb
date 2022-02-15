@@ -1,5 +1,5 @@
 module Jobs
-  class SequenceTyping
+  class SequenceTypeInference
     prepend BaseJob
 
     def initialize(child_typings)

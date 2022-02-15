@@ -37,10 +37,10 @@ module AstNodes
             workspace.typing_for(else_branch_ast_node)
           end
         else
-          Jobs::ImmediateTyping.new(Types::Void.instance)
+          Jobs::ImmediateTypeInference.new(Types::Void.instance)
         end
 
-      Jobs::IfTyping.new(
+      Jobs::IfTypeInference.new(
         condition_typing,
         then_branch_typing,
         else_branch_typing

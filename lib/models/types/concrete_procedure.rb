@@ -34,7 +34,7 @@ module Types
       case message
       when 'call'
         raise "Invalid arguments count: expected #{argument_types.size}, but got #{message_send_argument_typings.size}" unless message_send_argument_typings.size == argument_types.size
-        Jobs::ConcreteProcedureCallTyping.new(self, message_send_argument_typings)
+        Jobs::ConcreteProcedureCallTypeInference.new(self, message_send_argument_typings)
       else
         super
       end
@@ -59,7 +59,7 @@ module Types
         ) do |(argument_name, argument_type), super_binding_builder|
           super_binding_builder.set_dynamic_typing(
             argument_name,
-            Jobs::ImmediateTyping.new(argument_type)
+            Jobs::ImmediateTypeInference.new(argument_type)
           )
         end
     end

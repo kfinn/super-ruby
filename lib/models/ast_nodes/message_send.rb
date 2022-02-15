@@ -14,7 +14,7 @@ module AstNodes
       workspace = Workspace.current_workspace
 
       receiver_typing = workspace.typing_for(receiver_ast_node)
-      Jobs::MessageSendTyping.new(receiver_typing, message, argument_ast_nodes)
+      Jobs::MessageSendTypeInference.new(receiver_typing, message, argument_ast_nodes)
     end
 
     def build_bytecode!(typing)

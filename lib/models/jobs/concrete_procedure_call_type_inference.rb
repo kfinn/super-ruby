@@ -1,5 +1,5 @@
 module Jobs
-  class ConcreteProcedureCallTyping
+  class ConcreteProcedureCallTypeInference
     prepend BaseJob
 
     def initialize(

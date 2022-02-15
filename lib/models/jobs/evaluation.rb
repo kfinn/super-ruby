@@ -1,5 +1,5 @@
 module Jobs
-  class TypedEvaluation
+  class Evaluation
     prepend BaseJob
 
     def initialize(ast_node)

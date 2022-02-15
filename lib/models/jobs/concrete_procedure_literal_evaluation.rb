@@ -1,5 +1,5 @@
 module Jobs
-  class ConcreteProcedureLiteralTypedEvaluation
+  class ConcreteProcedureLiteralEvaluation
     prepend BaseJob
 
     def initialize(argument_typed_evaluations, return_typed_evaluation)

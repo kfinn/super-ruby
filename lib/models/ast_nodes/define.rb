@@ -15,9 +15,9 @@ module AstNodes
     def spawn_typing
       Workspace.current_workspace.current_super_binding.set_static_typing(
         s_expression.children.second.text,
-        Jobs::TypedEvaluation.new(value_ast_node)
+        Jobs::Evaluation.new(value_ast_node)
       )
-      Jobs::ImmediateTyping.new(Types::Void.instance)
+      Jobs::ImmediateTypeInference.new(Types::Void.instance)
     end
 
     def value_ast_node

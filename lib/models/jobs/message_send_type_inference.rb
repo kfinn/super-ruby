@@ -1,5 +1,5 @@
 module Jobs
-  class MessageSendTyping
+  class MessageSendTypeInference
     prepend BaseJob
 
     def initialize(receiver_typing, message, argument_ast_nodes)
@@ -30,7 +30,7 @@ module Jobs
         case receiver_typing.type.delivery_strategy_for_message(message)
         when :static
           self.argument_typings = argument_ast_nodes.map do |argument_ast_node|
-            TypedEvaluation.new(argument_ast_node)
+            Evaluation.new(argument_ast_node)
           end
         when :dynamic
           self.argument_typings = argument_ast_nodes.map do |argument_ast_node|

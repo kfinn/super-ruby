@@ -20,7 +20,7 @@ module AstNodes
             .current_super_binding
             .spawn(inherit_dynamic_locals: true)
         ) do
-          Jobs::SequenceTyping.new(
+          Jobs::SequenceTypeInference.new(
             child_ast_nodes.map do |child_ast_node|
               Workspace.current_workspace.typing_for(child_ast_node)
             end

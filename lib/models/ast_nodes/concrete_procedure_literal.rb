@@ -14,11 +14,11 @@ module AstNodes
     end
 
     def spawn_typing
-      Jobs::ConcreteProcedureLiteralTypedEvaluation.new(
+      Jobs::ConcreteProcedureLiteralEvaluation.new(
         argument_ast_nodes.map do |argument_ast_node|
-          Jobs::TypedEvaluation.new(argument_ast_node)
+          Jobs::Evaluation.new(argument_ast_node)
         end,
-        Jobs::TypedEvaluation.new(return_ast_node)
+        Jobs::Evaluation.new(return_ast_node)
       )
     end
 

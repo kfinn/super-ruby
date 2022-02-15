@@ -24,7 +24,7 @@ module AstNodes
     end
 
     def spawn_typing
-      Jobs::ImmediateTyping.new(
+      Jobs::ImmediateTypeInference.new(
         Types::AbstractProcedure.new(
           arguments_ast_nodes.map(&:name),
           body_ast_node

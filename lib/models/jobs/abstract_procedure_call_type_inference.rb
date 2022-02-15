@@ -1,5 +1,5 @@
 module Jobs
-  class AbstractProcedureCall
+  class AbstractProcedureCallTypeInference
     prepend BaseJob
 
     def initialize(abstract_procedure, argument_typings)

@@ -1,5 +1,5 @@
 module Jobs
-  class ImmediateTyping
+  class ImmediateTypeInference
     prepend BaseJob
 
     def initialize(type)
@@ -12,7 +12,7 @@ module Jobs
     end
 
     def ==(other)
-      other.kind_of?(ImmediateTyping) && type == other.type
+      other.kind_of?(ImmediateTypeInference) && type == other.type
     end
 
     delegate :hash, to: :state
