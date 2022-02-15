@@ -13,6 +13,10 @@ module Jobs
       true
     end
 
+    def type_check
+      ImmediateTypeCheck.success
+    end
+
     def ==(other)
       other.kind_of? self.class && state == other.state
     end

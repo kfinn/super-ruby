@@ -9,12 +9,18 @@ module Jobs
       @super_binding = Workspace.current_workspace.current_super_binding
     end
     attr_reader :ast_node, :type_inference, :super_binding
-    attr_accessor :evaluated, :value
+    attr_accessor :evaluated, :value, :type_check
     alias evaluated? evaluated
     delegate :type, to: :type_inference
 
     def work!
       return unless type_inference.complete?
+      if type_check.nil?
+        self.type_check = type_inference.type_check
+        self.type_check.add_downstream(self)
+      end
+      return unless self.type_check.complete?
+
       self.evaluated = true
       puts "evaluating #{ast_node.s_expression} within #{super_binding.to_s}" if ENV['DEBUG']
       Workspace.current_workspace.with_current_super_binding(super_binding) do

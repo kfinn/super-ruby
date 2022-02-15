@@ -32,6 +32,10 @@ module Jobs
       Types::Type.instance
     end
 
+    def type_check
+      ImmediateTypeCheck.success
+    end
+
     def complete?
       value.present?
     end

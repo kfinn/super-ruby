@@ -21,6 +21,10 @@ module Jobs
       concrete_procedure.return_type
     end
 
+    def type_check
+      @type_check ||= ConcreteProcedureCallTypeCheck.new(concrete_procedure, argument_type_inferences.map(&:type))
+    end
+
     def upstream_type_inferences_complete?
       argument_type_inferences.all?(&:complete?)
     end
