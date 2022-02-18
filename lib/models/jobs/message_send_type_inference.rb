@@ -10,53 +10,29 @@ module Jobs
       @receiver_type_inference.add_downstream(self)
     end
     attr_reader :receiver_type_inference, :message, :argument_ast_nodes
-    attr_accessor :result_type_inference, :argument_type_inferences
+    attr_accessor :result_type_inference
     delegate :type, to: :result_type_inference, allow_nil: true
 
-    def upstream_type_inferences_complete?
-      @upstream_type_inferences_complete ||= receiver_type_inference.complete? && !argument_type_inferences.nil? && argument_type_inferences.all?(&:complete?)
-    end
-
-    def result_type_inference_complete?
-      result_type_inference&.complete?
-    end
-
     def complete?
-      upstream_type_inferences_complete? && result_type_inference_complete?
+      receiver_type_inference.complete? && result_type_inference&.complete?
     end
 
     def type_check
       @type_check ||= Jobs::SequenceTypeCheck.new([
         receiver_type_inference.type_check,
-        *argument_type_inferences.map(&:type_check),
         result_type_inference.type_check
       ])
     end
 
     def work!
-      if receiver_type_inference.complete? && argument_type_inferences.nil?
-        case receiver_type_inference.type.delivery_strategy_for_message(message)
-        when :static
-          self.argument_type_inferences = argument_ast_nodes.map do |argument_ast_node|
-            Evaluation.new(argument_ast_node)
-          end
-        when :dynamic
-          self.argument_type_inferences = argument_ast_nodes.map do |argument_ast_node|
-            Workspace.current_workspace.type_inference_for argument_ast_node
-          end
-        end
-        argument_type_inferences.each do |argument_type_inference|
-          argument_type_inference.add_downstream self
-        end
-      end
-
-      if !argument_type_inferences.nil? && argument_type_inferences.all?(&:complete?)
+      return unless receiver_type_inference.complete?
+      if self.result_type_inference.nil?
         self.result_type_inference =
           receiver_type_inference
           .type
           .message_send_result_type_inference(
             message,
-            argument_type_inferences
+            argument_ast_nodes
           )
         result_type_inference.add_downstream(self)
       end

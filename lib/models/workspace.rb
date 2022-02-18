@@ -51,7 +51,7 @@ class Workspace
     self.current_super_binding = previous_super_binding
   end
 
-  delegate :type_inference_for, to: :type_inferences
+  delegate :type_inference_for, :type_inferences_for, to: :type_inferences
 
   def root_super_binding
     @root_super_binding ||= RootSuperBinding.instance.spawn

@@ -10,52 +10,54 @@ module Types
     end
     attr_reader :argument_names, :body, :workspace, :super_binding
 
-    def delivery_strategy_for_message(message)
-      case message
-      when 'specialize'
-        :static
-      else
-        super
-      end
-    end
-
-    def message_send_result_type_inference(message, argument_type_inferences)
+    def message_send_result_type_inference(message, argument_ast_nodes)
       case message
       when 'call'
-        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_type_inferences.size}" unless argument_type_inferences.size == argument_names.size
-        Jobs::AbstractProcedureCallTypeInference.new(self, argument_type_inferences)
+        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == argument_names.size
+        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.current_workspace.type_inferences_for(argument_ast_nodes))
       when 'specialize'
-        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
-        Jobs::ExplicitProcedureSpecializationTypeInference.new(self, argument_type_inferences.first)
+        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == 1
+        Jobs::ExplicitProcedureSpecializationTypeInference.new(self, Jobs::Evaluation.new(argument_ast_nodes.first))
       else
         super
       end
     end
 
     def build_message_send_bytecode!(type_inference)
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
+
       case type_inference.message
       when 'call'
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
-
         implicit_procedure_specialization = cached_implicit_procedure_specialization_for_argument_types(
-          type_inference.argument_type_inferences.map(&:type)
+          type_inference
+            .result_type_inference
+            .argument_type_inferences
+            .map(&:type)
         )
 
         Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_workspace.current_bytecode_builder << implicit_procedure_specialization.concrete_procedure_instance.bytecode_pointer
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
-        Workspace.current_workspace.current_bytecode_builder << type_inference.argument_type_inferences.size
-      when 'specialize'
-        (type_inference.argument_type_inferences.size + 1).times do
-          Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
+
+        type_inference
+        .argument_ast_nodes
+        .zip(
+          type_inference
+            .result_type_inference
+            .argument_type_inferences
+        ).map do |argument_ast_node, argument_type_inference|
+          argument_ast_node.build_bytecode!(argument_type_inference)
         end
-        
-        implicit_procedure_specialization = cached_implicit_procedure_specialization_for_argument_types(
-          type_inference.argument_type_inferences.first.value.argument_types
-        )
+  
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
+        Workspace.current_workspace.current_bytecode_builder << type_inference.argument_ast_nodes.size
+      when 'specialize'        
+        concrete_procedure_instance =
+          type_inference
+          .result_type_inference
+          .concrete_procedure_instance
 
         Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-        Workspace.current_workspace.current_bytecode_builder << implicit_procedure_specialization.concrete_procedure_instance.bytecode_pointer
+        Workspace.current_workspace.current_bytecode_builder << concrete_procedure_instance.bytecode_pointer
       else
         super
       end

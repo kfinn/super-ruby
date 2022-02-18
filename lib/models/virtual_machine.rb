@@ -31,11 +31,11 @@ class VirtualMachine
         call_frames.last.instruction_pointer = destination if condition
       when Opcodes::CALL
         arguments_count = next_instruction!
-        destination_instruction_pointer = pop!
         argument_values = []
         arguments_count.times do |index|
           argument_values.unshift(pop!)
         end
+        destination_instruction_pointer = pop!
 
         call_frame = CallFrame.new(destination_instruction_pointer, arguments_count)
         argument_values.each_with_index do |value, slot|
@@ -44,24 +44,24 @@ class VirtualMachine
         call_frames << call_frame
 
       when Opcodes::INTEGER_ADD
-        first_argument = pop!
         second_argument = pop!
+        first_argument = pop!
         push!(first_argument + second_argument)
       when Opcodes::INTEGER_SUBTRACT
-        first_argument = pop!
         second_argument = pop!
+        first_argument = pop!
         push!(first_argument - second_argument)
       when Opcodes::INTEGER_LESS_THAN
-        first_argument = pop!
         second_argument = pop!
+        first_argument = pop!
         push!(first_argument < second_argument)
       when Opcodes::INTEGER_GREATER_THAN
-        first_argument = pop!
         second_argument = pop!
+        first_argument = pop!
         push!(first_argument > second_argument)
       when Opcodes::INTEGER_EQUAL
-        first_argument = pop!
         second_argument = pop!
+        first_argument = pop!
         push!(first_argument == second_argument)
       else
         raise "unimplemented opcode: #{opcode}"

@@ -2,14 +2,10 @@ module Types
   module BaseType
     include ActiveSupport::Concern
 
-    def delivery_strategy_for_message(message)
-      :dynamic
-    end
-
-    def message_send_result_type_inference(message, argument_type_inferences)
+    def message_send_result_type_inference(message, argument_ast_nodes)
       case message
       when 'type'
-        raise "invalid arguments count to #{self.class.name}#type. Expected 0, got #{argument_type_inferences}.size" unless argument_type_inferences.empty?
+        raise "invalid arguments count to #{self.class.name}#type. Expected 0, got #{argument_ast_nodes}.size" unless argument_ast_nodes.empty?
         Jobs::ImmediateEvaluation.new(Type.instance, self)
       else
         raise "invalid message: #{self.class.name}##{message}"

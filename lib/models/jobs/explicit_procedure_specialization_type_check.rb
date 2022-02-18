@@ -11,6 +11,7 @@ module Jobs
     attr_reader :abstract_procedure, :concrete_procedure, :implicit_procedure_specialization
     delegate :argument_types, to: :concrete_procedure
     delegate :argument_names, :ast_node, :workspace, :super_binding, to: :abstract_procedure
+    delegate :concrete_procedure_instance, to: :implicit_procedure_specialization
 
     attr_accessor :validated
     alias validated? validated

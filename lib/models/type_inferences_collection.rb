@@ -14,6 +14,12 @@ class TypeInferencesCollection
     storage[ast_node] = type_inference
   end
 
+  def type_inferences_for(ast_nodes)
+    ast_nodes.map do |ast_node|
+      type_inference_for ast_node
+    end
+  end
+
   private
 
   def storage

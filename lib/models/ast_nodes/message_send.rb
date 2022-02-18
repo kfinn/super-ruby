@@ -18,13 +18,8 @@ module AstNodes
     end
 
     def build_bytecode!(type_inference)
-      argument_ast_nodes.zip(type_inference.argument_type_inferences).map do |argument_ast_node, argument_type_inference|
-        argument_ast_node.build_bytecode!(argument_type_inference)
-      end
-
-      receiver_ast_node.build_bytecode!(type_inference.receiver_type_inference)
-      
-      type_inference.receiver_type_inference.type.build_message_send_bytecode!(type_inference)
+      receiver_ast_node.build_bytecode! type_inference.receiver_type_inference
+      type_inference.receiver_type_inference.type.build_message_send_bytecode! type_inference
     end
 
     def receiver_ast_node
