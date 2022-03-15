@@ -22,12 +22,6 @@ class SuperBinding
     parent.fetch_type_inference(name, include_dynamic_locals: inherit_dynamic_locals && include_dynamic_locals)
   end
 
-  def fetch_value(name, include_dynamic_locals: true)
-    return dynamic_local_values[name] if include_dynamic_locals && dynamic_local_values.include?(name)
-    return static_locals[name].value if static_locals.include?(name)
-    parent.fetch_value(name, include_dynamic_locals: inherit_dynamic_locals && include_dynamic_locals)
-  end
-
   def has_dynamic_binding?(name)
     return true if name.in? dynamic_local_type_inferences
     return parent.has_dynamic_binding?(name) if inherit_dynamic_locals

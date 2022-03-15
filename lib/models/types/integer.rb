@@ -47,24 +47,35 @@ module Types
       def initialize(argument_type_inference, return_type)
         @argument_type_inference = argument_type_inference
         @return_type = return_type
-        @argument_type_inference.add_downstream(self)
       end
       attr_reader :argument_type_inference, :return_type
       alias type return_type
-      delegate :complete?, to: :argument_type_inference
 
       def complete?
-        worked? && argument_type_inference.complete?
+        true
       end
+
+      def type_check
+        @type_check ||= BinaryOperatorTypeCheck.new(argument_type_inference)
+      end
+    end
+
+    class BinaryOperatorTypeCheck
+      prepend Jobs::BaseJob
+
+      def initialize(argument_type_inference)
+        @argument_type_inference = argument_type_inference
+        argument_type_inference.add_downstream self
+      end
+      attr_reader :argument_type_inference
+      attr_accessor :validated, :valid
+      alias complete? validated
+      alias valid? valid
 
       def work!
         return unless argument_type_inference.complete?
-        raise "invalid argument to +: expected Integer, got #{argument_type_inference.type}" unless argument_type_inference.type == Integer.instance
-        @worked = true
-      end
-
-      def worked?
-        @worked
+        self.validated = true
+        self.valid = argument_type_inference.type == Integer.instance
       end
     end
   end

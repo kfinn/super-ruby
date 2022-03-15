@@ -9,7 +9,6 @@ module Jobs
     end
     attr_reader :abstract_procedure, :concrete_procedure_evaluation
     attr_accessor :declared
-    alias declared? declared
     alias complete? declared
 
     def concrete_procedure
@@ -24,16 +23,14 @@ module Jobs
     def type_check
       @type_check ||= ExplicitProcedureSpecializationTypeCheck.new(
         abstract_procedure,
-        concrete_procedure
+        concrete_procedure_evaluation
       )
     end
 
     def work!
       return unless concrete_procedure_evaluation.complete?
-      unless declared?
-        self.declared = true
-        abstract_procedure.declare_specialization(argument_types)
-      end
+      self.declared = true
+      abstract_procedure.declare_specialization(argument_types)
     end
 
     def to_s

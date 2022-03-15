@@ -92,7 +92,7 @@ RSpec.describe Workspace do
     expect(workspace.result_value).to eq (100)
   end
 
-  xit 'specializes and calls recursive procedures' do
+  it 'specializes and calls recursive procedures' do
     workspace.add_source_string <<~SUPER
       (
         define

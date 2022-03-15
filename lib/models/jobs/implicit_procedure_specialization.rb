@@ -33,11 +33,10 @@ module Jobs
       return unless argument_type_inferences.all?(&:complete?)
 
       if body_type_inference.nil?
-        self.cached_implicit_procedure_specialization = abstract_procedure.cached_implicit_procedure_specialization_for_argument_types(argument_types)
+        self.cached_implicit_procedure_specialization = abstract_procedure.implicit_procedure_specialization_for_argument_types(argument_types)
         
         if cached_implicit_procedure_specialization == self || cached_implicit_procedure_specialization.nil?
           if cached_implicit_procedure_specialization.nil?
-            # self.cached_implicit_procedure_specialization = self
             abstract_procedure.define_implicit_procedure_specialization(self)
           end
 
@@ -48,12 +47,13 @@ module Jobs
           self.own_body_type_inference = Workspace.current_workspace.with_current_super_binding(own_body_type_inference_super_binding) do
             Workspace.current_workspace.type_inference_for body
           end
-          self.own_body_type_inference.add_downstream(self)
+          own_body_type_inference.add_downstream(self)
         else
           cached_implicit_procedure_specialization.add_downstream(self)
         end
       end
       return unless body_type_inference&.complete?
+      
       self.concrete_procedure = Types::ConcreteProcedure.new(argument_types, body_type_inference.type)
     end
 

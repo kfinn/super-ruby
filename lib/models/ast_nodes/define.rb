@@ -15,7 +15,7 @@ module AstNodes
     def spawn_type_inference
       Workspace.current_workspace.current_super_binding.set_static_type_inference(
         s_expression.children.second.text,
-        Jobs::Evaluation.new(value_ast_node)
+        Jobs::StaticEvaluationTypeInference.new(value_ast_node)
       )
       Jobs::ImmediateTypeInference.new(Types::Void.instance)
     end

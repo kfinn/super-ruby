@@ -15,7 +15,7 @@ module Jobs
     end
 
     def type_check
-      @type_check ||= ConcreteProcedureCallTypeCheck.new(concrete_procedure, argument_type_inferences.map(&:type))
+      @type_check ||= ConcreteProcedureCallTypeCheck.new(concrete_procedure, argument_type_inferences)
     end
 
     def implicit_procedure_specialization

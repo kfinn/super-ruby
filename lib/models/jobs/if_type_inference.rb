@@ -7,7 +7,6 @@ module Jobs
       @then_branch_type_inference = then_branch_type_inference
       @else_branch_type_inference = else_branch_type_inference || ImmediateTypeInference.new(Types::Void.instance)
 
-      @condition_type_inference.add_downstream(self)
       @then_branch_type_inference.add_downstream(self)
       @else_branch_type_inference.add_downstream(self)
     end
@@ -15,7 +14,7 @@ module Jobs
     attr_writer :type
 
     def upstreams_complete?
-      @upstreams_complete ||= [condition_type_inference, then_branch_type_inference, else_branch_type_inference].all?(&:complete?)
+      @upstreams_complete ||= [then_branch_type_inference, else_branch_type_inference].all?(&:complete?)
     end
 
     def complete?
@@ -25,7 +24,12 @@ module Jobs
     def work!; end
 
     def type_check
-      @type_check ||= ImmediateTypeCheck.new(condition_type_inference.type == Types::Boolean.instance)
+      @type_check ||= SequenceTypeCheck.new([
+        condition_type_inference.type_check,
+        TypeConstraint.new(condition_type_inference, Types::Boolean.instance),
+        then_branch_type_inference.type_check, 
+        else_branch_type_inference.type_check,
+      ])
     end
 
     def type

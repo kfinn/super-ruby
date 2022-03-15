@@ -22,10 +22,6 @@ class RootSuperBinding
     end
   end
 
-  def fetch_value(name, **_kwagrgs)
-    fetch_type_inference(name).value
-  end
-
   def has_dynamic_binding?(name)
     false
   end
