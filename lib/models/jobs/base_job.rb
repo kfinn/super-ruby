@@ -5,10 +5,11 @@ module Jobs
     def initialize(*args, **kwargs)
       @workspace = Workspace.current_workspace
       @super_binding = @workspace.current_super_binding
+      @initializing_caller = caller.dup
       super
     end
 
-    attr_reader :workspace, :super_binding
+    attr_reader :workspace, :super_binding, :initializing_caller
 
     def add_downstream(job)
       if complete?
@@ -31,16 +32,22 @@ module Jobs
       job.in?(downstreams) || downstreams.any? { |downstream| downstream.has_transitive_downstream_job? job }
     end
 
+    def in_context
+      Workspace.with_current_workspace(workspace) do
+        Workspace.current_workspace.with_current_super_binding(super_binding) do
+          yield
+        end
+      end
+    end
+
     def work!
       puts "working #{self}" if ENV['DEBUG']
       if incomplete?
-        Workspace.with_current_workspace(workspace) do
-          Workspace.current_workspace.with_current_super_binding(super_binding) do
-            super
-          end
-        end
+        in_context { super }
       end
       downstreams.each(&:enqueue!) if complete?
+    rescue StandardError => e
+      raise BaseJobFailure.new(self)
     end
 
     def incomplete?
@@ -49,6 +56,23 @@ module Jobs
 
     def to_s
       "(#{self.class.to_s}@#{object_id} #{super})"
+    end
+
+    class BaseJobFailure < StandardError
+      def initialize(job)
+        @job = job
+        super
+      end
+      attr_reader :job
+      delegate :initializing_caller, to: :job
+
+      def message
+        "#{job.to_s} initialized by\n#  #{filtered_initializing_caller.join("\n#  ")}"
+      end
+
+      def filtered_initializing_caller
+        @filtered_initializing_caller ||= initializing_caller.reject { |frame| frame.include?('/gems/') || frame.include?('rspec') }
+      end
     end
   end
 end

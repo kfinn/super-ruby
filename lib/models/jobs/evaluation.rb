@@ -2,14 +2,30 @@ module Jobs
   class Evaluation
     prepend BaseJob
 
-    def initialize(ast_node)
+    def initialize(ast_node, type_inference: nil, type_check: nil)
       @ast_node = ast_node
+      self.type_inference = type_inference
+      self.type_check = type_check
+
+      type_inference&.add_downstream(self)
+      type_check&.add_downstream(self)
     end
     attr_reader :ast_node
     attr_accessor :type_inference, :type_check
-    delegate :ast_node, :type, to: :ast_node
-    attr_accessor :evaluated
-    alias complete? evaluated
+    delegate :type, to: :type_inference
+    delegate :complete?, to: :type_check, allow_nil: true
+
+    attr_accessor :value_entered
+    alias value_entered? value_entered
+
+    def value
+      raise "attempting to access the value of #{ast_node.to_s} (#{(type_inference || 'nil').to_s}) before it is type checked" unless complete?
+      raise "infinite loop detected trying to evaluate #{ast_node.to_s}" if value_entered? && !instance_variable_defined?(:@value)
+      self.value_entered = true
+      in_context do
+        @value ||= ast_node.evaluate(type_inference)
+      end
+    end
 
     def work!
       if type_inference.nil?
@@ -19,14 +35,9 @@ module Jobs
       return unless type_inference.complete?
 
       if type_check.nil?
-        self.type_check = ast_node.type_check
+        self.type_check = type_inference.type_check
         type_check.add_downstream self
       end
-      return unless type_check.complete?
-
-      self.evaluated = true
-      puts "evaluating #{ast_node.s_expression} within #{super_binding.to_s}" if ENV['DEBUG']
-      self.value = ast_node.evaluate(ast_node)
     end
 
     def to_s

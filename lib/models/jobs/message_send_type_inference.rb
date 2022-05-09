@@ -18,10 +18,10 @@ module Jobs
     end
 
     def type_check
-      @type_check ||= Jobs::SequenceTypeCheck.new([
-        receiver_type_inference.type_check,
-        result_type_inference.type_check
-      ])
+      @type_check ||= MessageSendTypeCheck.new(
+        receiver_type_inference,
+        result_type_inference
+      )
     end
 
     def work!

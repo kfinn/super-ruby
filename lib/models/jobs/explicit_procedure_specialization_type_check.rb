@@ -11,7 +11,11 @@ module Jobs
     attr_accessor :implicit_procedure_specialization
     delegate :argument_types, to: :concrete_procedure
     delegate :argument_names, :ast_node, :workspace, :super_binding, to: :abstract_procedure
-    delegate :concrete_procedure_instance, to: :implicit_procedure_specialization
+
+    def concrete_procedure_instance
+      raise "attempting to access a concrete procedure before its type check is complete" unless complete?
+      implicit_procedure_specialization.concrete_procedure_instance
+    end
 
     attr_accessor :validated
     alias complete? validated

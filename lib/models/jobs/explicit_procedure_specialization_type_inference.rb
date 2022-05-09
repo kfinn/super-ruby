@@ -17,7 +17,6 @@ module Jobs
     alias type concrete_procedure
 
     delegate :argument_types, to: :concrete_procedure
-
     delegate :concrete_procedure_instance, to: :type_check
 
     def type_check

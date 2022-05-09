@@ -19,9 +19,7 @@ module Types
         raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == 1
         Jobs::ExplicitProcedureSpecializationTypeInference.new(
           self,
-          Jobs::Evaluation.new(
-            Workspace.current_workspace.type_inference_for(argument_ast_nodes.first)
-          )
+          Jobs::Evaluation.new(argument_ast_nodes.first)
         )
       else
         super

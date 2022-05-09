@@ -35,8 +35,7 @@ module Jobs
       concrete_procedure.argument_types.zip(argument_types).each_with_index do |(expected_argument, actual_argument), index|
         mismatched_argument_indices << index if expected_argument != actual_argument
       end
-      call_is_valid ||= mismatched_arguments.empty?
-      self.valid = argument_type_checks.all?(&:valid?) && call_is_valid
+      self.valid = argument_type_checks.all?(&:valid?) && mismatched_arguments.empty?
     end
   end
 end

@@ -11,25 +11,19 @@ module Jobs
       @else_branch_type_inference.add_downstream(self)
     end
     attr_reader :condition_type_inference, :then_branch_type_inference, :else_branch_type_inference
-    attr_writer :type
-
-    def upstreams_complete?
-      @upstreams_complete ||= [then_branch_type_inference, else_branch_type_inference].all?(&:complete?)
-    end
 
     def complete?
-      upstreams_complete?
+      [condition_type_inference, then_branch_type_inference, else_branch_type_inference].all?(&:complete?)
     end
 
     def work!; end
 
     def type_check
-      @type_check ||= SequenceTypeCheck.new([
-        condition_type_inference.type_check,
-        TypeConstraint.new(condition_type_inference, Types::Boolean.instance),
-        then_branch_type_inference.type_check, 
-        else_branch_type_inference.type_check,
-      ])
+      @type_check ||= IfTypeCheck.new(
+        condition_type_inference,
+        then_branch_type_inference, 
+        else_branch_type_inference,
+      )
     end
 
     def type

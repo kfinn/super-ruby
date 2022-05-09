@@ -68,12 +68,17 @@ module Types
         argument_type_inference.add_downstream self
       end
       attr_reader :argument_type_inference
-      attr_accessor :validated, :valid
+      attr_accessor :argument_type_check, :validated, :valid
       alias complete? validated
       alias valid? valid
 
       def work!
         return unless argument_type_inference.complete?
+        if argument_type_check.nil?
+          self.argument_type_check = argument_type_inference.type_check
+          argument_type_check.add_downstream self
+        end
+        return unless argument_type_check.complete?
         self.validated = true
         self.valid = argument_type_inference.type == Integer.instance
       end

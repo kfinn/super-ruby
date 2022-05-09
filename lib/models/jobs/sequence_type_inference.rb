@@ -10,21 +10,23 @@ module Jobs
       end
     end
     attr_reader :child_type_inferences
-    attr_accessor :worked
-    alias worked? worked
 
     def complete?
       child_type_inferences.all?(&:complete?)
     end
 
     def type_check
-      @type_check = SequenceTypeCheck.new(child_type_inferences.map(&:type_check))
+      @type_check = SequenceTypeCheck.new(child_type_inferences)
     end
 
     def work!; end
 
     def type
       child_type_inferences.last.type
+    end
+
+    def to_s
+      "(sequence (#{child_type_inferences.map(&:to_s).join(" ")}))"
     end
   end
 end
