@@ -2,28 +2,37 @@ module Jobs
   class Evaluation
     prepend BaseJob
 
-    def initialize(ast_node)
+    def initialize(ast_node, type_inference: nil, type_check: nil)
       @ast_node = ast_node
-      @typing = Workspace.current_workspace.typing_for(@ast_node)
-      @typing.add_downstream(self)
-      @super_binding = Workspace.current_workspace.current_super_binding
-    end
-    attr_reader :ast_node, :typing, :super_binding
-    attr_accessor :evaluated, :value
-    alias evaluated? evaluated
-    delegate :type, to: :typing
+      self.type_inference = type_inference
+      self.type_check = type_check
 
-    def work!
-      return unless typing.complete?
-      self.evaluated = true
-      puts "evaluating #{ast_node.s_expression} within #{super_binding.to_s}" if ENV['DEBUG']
-      Workspace.current_workspace.with_current_super_binding(super_binding) do
-        self.value = ast_node.evaluate(typing)
+      type_inference&.add_downstream(self)
+      type_check&.add_downstream(self)
+    end
+    attr_reader :ast_node
+    attr_accessor :type_inference, :type_check
+    delegate :type, to: :type_inference
+    delegate :complete?, to: :type_check, allow_nil: true
+
+    def value
+      raise "attempting to access the value of #{ast_node.to_s} (#{(type_inference || 'nil').to_s}) before it is type checked" unless complete?
+      in_context do
+        @value ||= ast_node.evaluate(type_inference)
       end
     end
 
-    def complete?
-      evaluated?
+    def work!
+      if type_inference.nil?
+        self.type_inference = Workspace.current_workspace.type_inference_for ast_node
+        type_inference.add_downstream self
+      end
+      return unless type_inference.complete?
+
+      if type_check.nil?
+        self.type_check = type_inference.type_check
+        type_check.add_downstream self
+      end
     end
 
     def to_s

@@ -10,21 +10,16 @@ module AstNodes
       )
     end
 
-    def spawn_typing
+    def spawn_type_inference
       workspace = Workspace.current_workspace
 
-      receiver_typing = workspace.typing_for(receiver_ast_node)
-      Jobs::MessageSendTypeInference.new(receiver_typing, message, argument_ast_nodes)
+      receiver_type_inference = workspace.type_inference_for(receiver_ast_node)
+      Jobs::MessageSendTypeInference.new(receiver_type_inference, message, argument_ast_nodes)
     end
 
-    def build_bytecode!(typing)
-      argument_ast_nodes.zip(typing.argument_typings).map do |argument_ast_node, argument_typing|
-        argument_ast_node.build_bytecode!(argument_typing)
-      end
-
-      receiver_ast_node.build_bytecode!(typing.receiver_typing)
-      
-      typing.receiver_typing.type.build_message_send_bytecode!(typing)
+    def build_bytecode!(type_inference)
+      receiver_ast_node.build_bytecode! type_inference.receiver_type_inference
+      type_inference.receiver_type_inference.type.build_message_send_bytecode! type_inference
     end
 
     def receiver_ast_node

@@ -11,7 +11,7 @@ module AstNodes
       )
     end
 
-    def spawn_typing
+    def spawn_type_inference
       Workspace
         .current_workspace
         .with_current_super_binding(
@@ -22,18 +22,21 @@ module AstNodes
         ) do
           Jobs::SequenceTypeInference.new(
             child_ast_nodes.map do |child_ast_node|
-              Workspace.current_workspace.typing_for(child_ast_node)
+              Workspace.current_workspace.type_inference_for(child_ast_node)
             end
           )
         end
     end
 
-    def build_bytecode!(typing)
-      Workspace.current_workspace.with_current_super_binding(typing.super_binding) do
-        children_with_typings = child_ast_nodes.zip(typing.child_typings)
-        children_with_typings.each_with_index do |(child_ast_node, child_typing), index|
-          Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD if index > 0
-          child_ast_node.build_bytecode!(child_typing)
+    def build_bytecode!(type_inference)
+      Workspace.current_workspace.with_current_super_binding(type_inference.super_binding) do
+        children_with_type_inferences = child_ast_nodes.zip(type_inference.child_type_inferences)
+        children_with_type_inferences[0..-2].each do |child_ast_node, child_type_inference|
+          child_ast_node.build_bytecode!(child_type_inference)
+          Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
+        end
+        children_with_type_inferences.last.tap do |last_child_ast_node, last_child_type_inference|
+          last_child_ast_node.build_bytecode!(last_child_type_inference)
         end
       end
     end

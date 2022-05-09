@@ -1,7 +1,7 @@
 class RootSuperBinding
   include Singleton
 
-  def fetch_typing(name, **_kwargs)
+  def fetch_type_inference(name, **_kwargs)
     case name
     when 'Integer'
       Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Integer.instance)
@@ -22,19 +22,15 @@ class RootSuperBinding
     end
   end
 
-  def fetch_value(name, **_kwagrgs)
-    fetch_typing(name).value
-  end
-
   def has_dynamic_binding?(name)
     false
   end
 
   def has_static_binding?(name)
-    fetch_typing(name).present?
+    fetch_type_inference(name).present?
   end
   
-  alias fetch_static_typing fetch_typing
+  alias fetch_static_type_inference fetch_type_inference
 
   def spawn(inherit_dynamic_locals: false)
     raise "cannot spawn from root binding when inheriting dynamic locals" if inherit_dynamic_locals

@@ -3,13 +3,13 @@ module Types
     include BaseType
 
     def self.from_types(*types)
-      new(
-        Set.new(
-          types.flat_map do |type|
-            type.try(:types)&.to_a || [type]
-          end
-        )
+      types_set = Set.new(
+        types.flat_map do |type|
+          type.try(:types)&.to_a || [type]
+        end
       )
+      return types_set.first if types_set.size == 1
+      new(types_set)
     end
 
     def initialize(types)
@@ -17,10 +17,10 @@ module Types
     end
     attr_reader :types
 
-    def message_send_result_typing(message, argument_typings)
+    def message_send_result_type_inference(message, argument_ast_nodes)
       self.class.from_types(
         types.map do |type|
-          type.message_send_result_typing(message, argument_typings)
+          type.message_send_result_type_inference(message, argument_ast_nodes)
         end
       )
     end
@@ -39,27 +39,27 @@ module Types
     class IntersectionTyping
       prepend Jobs::BaseJob
 
-      def initialize(typings)
-        @typings = typings
-        @typings.each do |typing|
-          typing.add_downstream(self)
+      def initialize(type_inferences)
+        @type_inferences = type_inferences
+        @type_inferences.each do |type_inference|
+          type_inference.add_downstream(self)
         end
       end
-      attr_reader :typings
+      attr_reader :type_inferences
 
 
       def complete?
-        typings.all?(&:complete?)
+        type_inferences.all?(&:complete?)
       end
 
       def work!; end
 
       def type
         @type ||=
-          if typings.all? { |typing| typing.type == typings.first.type }
-            typings.first.type
+          if type_inferences.all? { |type_inference| type_inference.type == type_inferences.first.type }
+            type_inferences.first.type
           else
-            Intersection.new(typings.map(&:type))
+            Intersection.new(type_inferences.map(&:type))
           end
       end
     end

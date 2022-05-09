@@ -10,59 +10,76 @@ module Types
     end
     attr_reader :argument_names, :body, :workspace, :super_binding
 
-    def delivery_strategy_for_message(message)
+    def message_send_result_type_inference(message, argument_ast_nodes)
       case message
+      when 'call'
+        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == argument_names.size
+        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.current_workspace.type_inferences_for(argument_ast_nodes))
       when 'specialize'
-        :static
+        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == 1
+        Jobs::ExplicitProcedureSpecializationTypeInference.new(
+          self,
+          Jobs::Evaluation.new(argument_ast_nodes.first)
+        )
       else
         super
       end
     end
 
-    def message_send_result_typing(message, argument_typings)
-      case message
-      when 'call'
-        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_typings.size}" unless argument_typings.size == argument_names.size
-        Jobs::AbstractProcedureCallTypeInference.new(self, argument_typings)
-      when 'specialize'
-        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_typings.size}" unless argument_typings.size == 1
-        Jobs::ExplicitProcedureSpecialization.new(self, argument_typings.first)
-      else
-        super
-      end
-    end
+    def build_message_send_bytecode!(type_inference)
+      Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
 
-    def build_message_send_bytecode!(typing)
-      case typing.message
+      case type_inference.message
       when 'call'
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
-
-        implicit_procedure_specialization = cached_implicit_procedure_specialization_for_argument_types(
-          typing.argument_typings.map(&:type)
+        implicit_procedure_specialization = implicit_procedure_specialization_for_argument_types(
+          type_inference
+            .result_type_inference
+            .argument_type_inferences
+            .map(&:type)
         )
 
         Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_workspace.current_bytecode_builder << implicit_procedure_specialization.concrete_procedure_instance.bytecode_pointer
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
-        Workspace.current_workspace.current_bytecode_builder << typing.argument_typings.size
-      when 'specialize'
-        (typing.argument_typings.size + 1).times do
-          Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
+
+        type_inference
+        .argument_ast_nodes
+        .zip(
+          type_inference
+            .result_type_inference
+            .argument_type_inferences
+        ).map do |argument_ast_node, argument_type_inference|
+          argument_ast_node.build_bytecode!(argument_type_inference)
         end
-        
-        implicit_procedure_specialization = cached_implicit_procedure_specialization_for_argument_types(
-          typing.argument_typings.first.value.argument_types
-        )
+  
+        Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
+        Workspace.current_workspace.current_bytecode_builder << type_inference.argument_ast_nodes.size
+      when 'specialize'        
+        concrete_procedure_instance =
+          type_inference
+          .result_type_inference
+          .concrete_procedure_instance
 
         Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-        Workspace.current_workspace.current_bytecode_builder << implicit_procedure_specialization.concrete_procedure_instance.bytecode_pointer
+        Workspace.current_workspace.current_bytecode_builder << concrete_procedure_instance.bytecode_pointer
       else
         super
       end
     end
 
-    def cached_implicit_procedure_specialization_for_argument_types(argument_types)
+    def implicit_procedure_specialization_for_argument_types(argument_types)
       cached_implicit_procedure_specializations_by_argument_types[argument_types]
+    end
+
+    def declare_specialization(argument_types)
+      return if argument_types.in? cached_implicit_procedure_specializations_by_argument_types
+      define_implicit_procedure_specialization(
+        Jobs::ImplicitProcedureSpecialization.new(
+          self,
+          argument_types.map do |argument_type|
+            Jobs::ImmediateTypeInference.new(argument_type)
+          end
+        )
+      )
     end
 
     def define_implicit_procedure_specialization(implicit_procedure_specialization)

@@ -11,22 +11,22 @@ module AstNodes
       )
     end
 
-    def spawn_typing
+    def spawn_type_inference
       workspace = Workspace.current_workspace
 
-      condition_typing = workspace.typing_for(condition_ast_node)
+      condition_type_inference = workspace.type_inference_for(condition_ast_node)
 
-      then_branch_typing =
+      then_branch_type_inference =
         workspace
         .with_current_super_binding(
           workspace
           .current_super_binding
           .spawn(inherit_dynamic_locals: true)
         ) do
-          workspace.typing_for(then_branch_ast_node)
+          workspace.type_inference_for(then_branch_ast_node)
         end
 
-      else_branch_typing = 
+      else_branch_type_inference = 
         if else_branch_ast_node.present?
           workspace
           .with_current_super_binding(
@@ -34,21 +34,21 @@ module AstNodes
             .current_super_binding
             .spawn(inherit_dynamic_locals: true)
           ) do
-            workspace.typing_for(else_branch_ast_node)
+            workspace.type_inference_for(else_branch_ast_node)
           end
         else
           Jobs::ImmediateTypeInference.new(Types::Void.instance)
         end
 
       Jobs::IfTypeInference.new(
-        condition_typing,
-        then_branch_typing,
-        else_branch_typing
+        condition_type_inference,
+        then_branch_type_inference,
+        else_branch_type_inference
       )
     end  
 
-    def build_bytecode!(typing)
-      condition_ast_node.build_bytecode!(typing.condition_typing)
+    def build_bytecode!(type_inference)
+      condition_ast_node.build_bytecode!(type_inference.condition_type_inference)
 
       result_bytecode_builder = BufferBuilder.new
       then_branch_bytecode_builder = BufferBuilder.new
@@ -63,7 +63,7 @@ module AstNodes
       Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
 
       Workspace.current_workspace.with_current_bytecode_builder(then_branch_bytecode_builder) do
-        then_branch_ast_node.build_bytecode!(typing.then_branch_typing)
+        then_branch_ast_node.build_bytecode!(type_inference.then_branch_type_inference)
         Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_workspace.current_bytecode_builder << result_bytecode_builder.pointer
         Workspace.current_workspace.current_bytecode_builder << Opcodes::JUMP
@@ -71,7 +71,7 @@ module AstNodes
 
       Workspace.current_workspace.with_current_bytecode_builder(else_branch_bytecode_builder) do
         if else_branch_ast_node.present?
-          else_branch_ast_node.build_bytecode!(typing.else_branch_typing) 
+          else_branch_ast_node.build_bytecode!(type_inference.else_branch_type_inference) 
         else
           Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
           Workspace.current_workspace.current_bytecode_builder << Types::Void.instance.instance

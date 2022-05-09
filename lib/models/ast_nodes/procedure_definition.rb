@@ -23,7 +23,7 @@ module AstNodes
       )
     end
 
-    def spawn_typing
+    def spawn_type_inference
       Jobs::ImmediateTypeInference.new(
         Types::AbstractProcedure.new(
           arguments_ast_nodes.map(&:name),
@@ -32,9 +32,9 @@ module AstNodes
       )
     end
 
-    def build_bytecode!(typing)
+    def build_bytecode!(type_inference)
       Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-      Workspace.current_workspace.current_bytecode_builder << typing.type
+      Workspace.current_workspace.current_bytecode_builder << type_inference.type
     end
 
     def arguments_ast_nodes

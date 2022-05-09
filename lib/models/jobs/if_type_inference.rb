@@ -2,51 +2,36 @@ module Jobs
   class IfTypeInference
     prepend BaseJob
 
-    def initialize(condition_typing, then_branch_typing, else_branch_typing)
-      @condition_typing = condition_typing
-      @then_branch_typing = then_branch_typing
-      @else_branch_typing = else_branch_typing || ImmediateTypeInference.new(Types::Void.instance)
+    def initialize(condition_type_inference, then_branch_type_inference, else_branch_type_inference)
+      @condition_type_inference = condition_type_inference
+      @then_branch_type_inference = then_branch_type_inference
+      @else_branch_type_inference = else_branch_type_inference || ImmediateTypeInference.new(Types::Void.instance)
 
-      @condition_typing.add_downstream(self)
-      @then_branch_typing.add_downstream(self)
-      @else_branch_typing.add_downstream(self)
+      @then_branch_type_inference.add_downstream(self)
+      @else_branch_type_inference.add_downstream(self)
     end
-    attr_reader :condition_typing, :then_branch_typing, :else_branch_typing
-    attr_writer :type
-
-    def upstreams_complete?
-      @upstreams_complete ||= [condition_typing, then_branch_typing, else_branch_typing].all?(&:complete?)
-    end
+    attr_reader :condition_type_inference, :then_branch_type_inference, :else_branch_type_inference
 
     def complete?
-      upstreams_complete? && checked?
+      [condition_type_inference, then_branch_type_inference, else_branch_type_inference].all?(&:complete?)
     end
 
-    def work!
-      return unless upstreams_complete?
-      check!
-    end
+    def work!; end
 
-    def check!
-      return if checked?
-      raise "invalid if condition: expected Boolean, got #{condition_typing.type}" unless condition_typing.type == Types::Boolean.instance
-      self.checked = true
+    def type_check
+      @type_check ||= IfTypeCheck.new(
+        condition_type_inference,
+        then_branch_type_inference, 
+        else_branch_type_inference,
+      )
     end
-
-    attr_accessor :checked
-    alias checked? checked
 
     def type
-      @type ||=
-        if then_branch_typing.type == else_branch_typing.type
-          then_branch_typing.type
-        else
-          Types::Intersection.from_types(then_branch_typing.type, else_branch_typing.type)
-        end
+      @type ||= Types::Intersection.from_types(then_branch_type_inference.type, else_branch_type_inference.type)
     end
 
     def to_s
-      "(if #{condition_typing.to_s} #{then_branch_typing.to_s} #{else_branch_typing.to_s})"
+      "(if #{condition_type_inference.to_s} #{then_branch_type_inference.to_s} #{else_branch_type_inference.to_s})"
     end
   end
 end
