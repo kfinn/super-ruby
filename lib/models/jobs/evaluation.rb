@@ -15,13 +15,8 @@ module Jobs
     delegate :type, to: :type_inference
     delegate :complete?, to: :type_check, allow_nil: true
 
-    attr_accessor :value_entered
-    alias value_entered? value_entered
-
     def value
       raise "attempting to access the value of #{ast_node.to_s} (#{(type_inference || 'nil').to_s}) before it is type checked" unless complete?
-      raise "infinite loop detected trying to evaluate #{ast_node.to_s}" if value_entered? && !instance_variable_defined?(:@value)
-      self.value_entered = true
       in_context do
         @value ||= ast_node.evaluate(type_inference)
       end

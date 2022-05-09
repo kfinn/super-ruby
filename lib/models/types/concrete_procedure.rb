@@ -75,11 +75,15 @@ module Types
     end
 
     def instance(procedure_specialization)
+      puts "instancing #{to_s} for #{procedure_specialization.to_s}" if ENV["DEBUG"]
+      return instances_by_procedure_specialization[procedure_specialization] if instances_by_procedure_specialization.include? procedure_specialization
+
       buffer_builder = BufferBuilder.new
+      result = Instance.new(buffer_builder)
+      instances_by_procedure_specialization[procedure_specialization] = result
       procedure_specialization.workspace.with_current_super_binding(
         build_body_super_binding(procedure_specialization)
       ) do
-        buffer_builder = BufferBuilder.new
         procedure_specialization.workspace.with_current_bytecode_builder(
           buffer_builder
         ) do
@@ -87,7 +91,14 @@ module Types
           Workspace.current_workspace.current_bytecode_builder << Opcodes::RETURN
         end
       end
-      Instance.new(buffer_builder)
+
+      result
+    end
+
+    private
+
+    def instances_by_procedure_specialization
+      @instances_by_procedure_specialization ||= {}
     end
   end
 end

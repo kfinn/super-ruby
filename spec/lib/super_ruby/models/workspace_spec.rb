@@ -92,7 +92,7 @@ RSpec.describe Workspace do
     expect(workspace.result_value).to eq(100)
   end
 
-  xit 'specializes and calls recursive procedures' do
+  it 'specializes and calls recursive procedures' do
     workspace.add_source_string <<~SUPER
       (
         define
@@ -115,7 +115,7 @@ RSpec.describe Workspace do
     workspace.add_source_string '(fibonacci call 5)'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
-    expect(workspace.result_value).to eq(5)
+    expect(workspace.result_value).to eq(8)
   end
 
   it 'can call concrete procedures passed as function pointers' do
