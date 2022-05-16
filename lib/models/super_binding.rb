@@ -82,7 +82,7 @@ class SuperBinding
   def dynamic_local_slots_by_super_binding_and_name
     @dynamic_local_slots_by_super_binding_and_name ||=
       if inherit_dynamic_locals
-        super
+        parent.dynamic_local_slots_by_super_binding_and_name
       else
         next_slot_index = 0
         all_downstream_dynamic_locals.each_with_object({}) do |super_binding_and_name, acc|

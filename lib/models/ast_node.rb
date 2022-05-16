@@ -1,12 +1,13 @@
 module AstNode
   PRIORITIZED_AST_NODE_CLASSES = [
     AstNodes::Define,
+    AstNodes::Let,
     AstNodes::ProcedureDefinition,
     AstNodes::ConcreteProcedureLiteral,
     AstNodes::If,
     AstNodes::Sequence,
     AstNodes::MessageSend,
-    AstNodes::Identifier    
+    AstNodes::Identifier
   ]
 
   def self.from_s_expression(s_expression)

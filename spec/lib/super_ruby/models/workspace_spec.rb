@@ -217,4 +217,16 @@ RSpec.describe Workspace do
     expect(workspace.result_type).to eq(Types::Integer.instance)
     expect(workspace.result_value).to eq(11)
   end
+
+  it 'allows defining dynamic variables with let' do
+    workspace.add_source_string <<~SUPER
+      (sequence (
+        (let x Integer (12 + 15))
+        (x + 1)
+      ))
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Integer.instance)
+    expect(workspace.result_value).to eq(28)
+  end
 end

@@ -3,6 +3,7 @@ module Opcodes
   RETURN = :return
   LOAD_CONSTANT = :load_constant
   LOAD_LOCAL = :load_local
+  SET_LOCAL = :set_local
   JUMP = :jump
   JUMP_UNLESS_FALSE = :jump_unless_false
   CALL = :call

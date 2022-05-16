@@ -22,6 +22,8 @@ class VirtualMachine
         push! next_instruction!
       when Opcodes::LOAD_LOCAL
         push! call_frames.last[next_instruction!]
+      when Opcodes::SET_LOCAL
+        call_frames.last[next_instruction!] = pop!
 
       when Opcodes::JUMP
         call_frames.last.instruction_pointer = pop!
