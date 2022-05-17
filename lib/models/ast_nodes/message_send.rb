@@ -11,9 +11,7 @@ module AstNodes
     end
 
     def spawn_type_inference
-      workspace = Workspace.current_workspace
-
-      receiver_type_inference = workspace.type_inference_for(receiver_ast_node)
+      receiver_type_inference = Workspace.type_inference_for(receiver_ast_node)
       Jobs::MessageSendTypeInference.new(receiver_type_inference, message, argument_ast_nodes)
     end
 

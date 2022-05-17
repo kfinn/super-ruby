@@ -15,9 +15,9 @@ module Types
     def build_message_send_bytecode!(type_inference)
       case type_inference.message
       when 'type'
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-        Workspace.current_workspace.current_bytecode_builder << self
+        Workspace.current_bytecode_builder << Opcodes::DISCARD
+        Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+        Workspace.current_bytecode_builder << self
       else
         raise "invalid message: #{self.class.name}##{message}"
       end

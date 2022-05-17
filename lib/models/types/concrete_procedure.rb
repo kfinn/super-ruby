@@ -1,6 +1,7 @@
 module Types
   class ConcreteProcedure
     include BaseType
+    include DerivesEquality
 
     class Instance
       def initialize(bytecode)
@@ -16,12 +17,6 @@ module Types
     end
     attr_reader :argument_types, :return_type
 
-    def ==(other)
-      other.kind_of?(ConcreteProcedure) && state == other.state
-    end
-  
-    delegate :hash, to: :state
-  
     def state
       [argument_types, return_type]
     end
@@ -34,7 +29,7 @@ module Types
       case message
       when 'call'
         raise "Invalid arguments count: expected #{argument_types.size}, but got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == argument_types.size
-        Jobs::ConcreteProcedureCallTypeInference.new(self, Workspace.current_workspace.type_inferences_for(argument_ast_nodes))
+        Jobs::ConcreteProcedureCallTypeInference.new(self, Workspace.type_inferences_for(argument_ast_nodes))
       else
         super
       end
@@ -53,8 +48,8 @@ module Types
           argument_ast_node.build_bytecode!(argument_type_inference)
         end
 
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
-        Workspace.current_workspace.current_bytecode_builder << argument_types.size
+        Workspace.current_bytecode_builder << Opcodes::CALL
+        Workspace.current_bytecode_builder << argument_types.size
       else
         super
       end
@@ -88,7 +83,7 @@ module Types
           buffer_builder
         ) do
           procedure_specialization.body.build_bytecode!(procedure_specialization.body_type_inference)
-          Workspace.current_workspace.current_bytecode_builder << Opcodes::RETURN
+          Workspace.current_bytecode_builder << Opcodes::RETURN
         end
       end
 

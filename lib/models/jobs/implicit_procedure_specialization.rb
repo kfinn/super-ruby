@@ -44,8 +44,8 @@ module Jobs
             argument_names.zip(argument_types).each_with_object(super_binding.spawn) do |(argument_name, argument_type), super_binding_builder|
               super_binding_builder.set_dynamic_type_inference(argument_name, Jobs::ImmediateTypeInference.new(argument_type))
             end
-          self.own_body_type_inference = Workspace.current_workspace.with_current_super_binding(own_body_type_inference_super_binding) do
-            Workspace.current_workspace.type_inference_for body
+          self.own_body_type_inference = Workspace.with_current_super_binding(own_body_type_inference_super_binding) do
+            Workspace.type_inference_for body
           end
           own_body_type_inference.add_downstream(self)
         else

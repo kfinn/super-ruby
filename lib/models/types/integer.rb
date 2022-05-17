@@ -4,7 +4,7 @@ module Types
     include BaseType
 
     def message_send_result_type_inference(message, argument_ast_nodes)
-      argument_type_inferences = Workspace.current_workspace.type_inferences_for(argument_ast_nodes)
+      argument_type_inferences = Workspace.type_inferences_for(argument_ast_nodes)
       case message
       when '+', '-'
         raise "Invalid arguments count: expected 1, but got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1

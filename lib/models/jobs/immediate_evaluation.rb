@@ -1,6 +1,7 @@
 module Jobs
   class ImmediateEvaluation
     prepend BaseJob
+    include DerivesEquality
 
     def initialize(type, value)
       @type = type
@@ -17,15 +18,9 @@ module Jobs
       ImmediateTypeCheck.success
     end
 
-    def ==(other)
-      other.kind_of? self.class && state == other.state
-    end
-
     def state
       [type, value]
     end
-
-    delegate :hash, to: :state
 
     def to_s
       "(#{type.to_s} #{value.to_s})"

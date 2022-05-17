@@ -1,6 +1,7 @@
 module Types
   class Intersection
     include BaseType
+    include DerivesEquality
 
     def self.from_types(*types)
       types_set = Set.new(
@@ -29,11 +30,6 @@ module Types
       "(#{types.map(&:to_s).join("|")})"
     end
 
-    def ==(other)
-      other.kind_of?(Intersection) && state == other.state
-    end
-
-    delegate :hash, to: :state
     alias state types
 
     class IntersectionTyping

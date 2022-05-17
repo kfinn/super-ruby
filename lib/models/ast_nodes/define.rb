@@ -14,7 +14,7 @@ module AstNodes
 
     def spawn_type_inference
       value_type_inference = Jobs::StaticEvaluationTypeInference.new(value_ast_node)
-      Workspace.current_workspace.current_super_binding.set_static_type_inference(
+      Workspace.current_super_binding.set_static_type_inference(
         s_expression.children.second.text,
         value_type_inference
       )
@@ -26,8 +26,8 @@ module AstNodes
     end
 
     def build_bytecode!(_type_inference)
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-      Workspace.current_workspace.current_bytecode_builder << Types::Void.instance.instance
+      Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+      Workspace.current_bytecode_builder << Types::Void.instance.instance
     end
   end
 end

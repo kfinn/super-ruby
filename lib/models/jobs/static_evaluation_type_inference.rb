@@ -13,7 +13,7 @@ module Jobs
 
     def work!
       if ast_node_type_inference.nil?
-        self.ast_node_type_inference = Workspace.current_workspace.type_inference_for ast_node
+        self.ast_node_type_inference = Workspace.type_inference_for ast_node
         ast_node_type_inference.add_downstream self
       end
       return unless ast_node_type_inference.complete?

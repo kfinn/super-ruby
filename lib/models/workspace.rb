@@ -9,6 +9,24 @@ class Workspace
     ensure
       self.current_workspace = previous_workspace
     end
+
+    delegate(
+      :current_super_binding,
+      :with_current_super_binding,
+      :current_bytecode_builder,
+      :current_bytecode_builder=,
+      :with_current_bytecode_builder,
+      :virtual_machine,
+      :type_inference_for,
+      :type_inferences_for,
+      :work_queue,
+      to: :current_workspace
+    )
+
+    delegate(
+      :evaluate,
+      to: :virtual_machine
+    )
   end
 
   def add_source_string(text)

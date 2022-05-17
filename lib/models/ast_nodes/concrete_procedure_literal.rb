@@ -23,8 +23,8 @@ module AstNodes
     end
 
     def build_bytecode!(type_inference)
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-      Workspace.current_workspace.current_bytecode_builder << type_inference.value
+      Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+      Workspace.current_bytecode_builder << type_inference.value
     end
 
     def argument_ast_nodes

@@ -4,7 +4,7 @@ module Jobs
 
     def initialize(*args, **kwargs)
       @workspace = Workspace.current_workspace
-      @super_binding = @workspace.current_super_binding
+      @super_binding = Workspace.current_super_binding
       @initializing_caller = caller.dup
       super
     end
@@ -21,7 +21,7 @@ module Jobs
     end
 
     def enqueue!
-      Workspace.current_workspace.work_queue << self
+      Workspace.work_queue << self
     end
 
     def downstreams
@@ -34,7 +34,7 @@ module Jobs
 
     def in_context
       Workspace.with_current_workspace(workspace) do
-        Workspace.current_workspace.with_current_super_binding(super_binding) do
+        Workspace.with_current_super_binding(super_binding) do
           yield
         end
       end

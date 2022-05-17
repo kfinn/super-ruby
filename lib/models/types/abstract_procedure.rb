@@ -14,7 +14,7 @@ module Types
       case message
       when 'call'
         raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == argument_names.size
-        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.current_workspace.type_inferences_for(argument_ast_nodes))
+        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.type_inferences_for(argument_ast_nodes))
       when 'specialize'
         raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == 1
         Jobs::ExplicitProcedureSpecializationTypeInference.new(
@@ -27,7 +27,7 @@ module Types
     end
 
     def build_message_send_bytecode!(type_inference)
-      Workspace.current_workspace.current_bytecode_builder << Opcodes::DISCARD
+      Workspace.current_bytecode_builder << Opcodes::DISCARD
 
       case type_inference.message
       when 'call'
@@ -38,8 +38,8 @@ module Types
             .map(&:type)
         )
 
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-        Workspace.current_workspace.current_bytecode_builder << implicit_procedure_specialization.concrete_procedure_instance.bytecode_pointer
+        Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+        Workspace.current_bytecode_builder << implicit_procedure_specialization.concrete_procedure_instance.bytecode_pointer
 
         type_inference
         .argument_ast_nodes
@@ -51,16 +51,16 @@ module Types
           argument_ast_node.build_bytecode!(argument_type_inference)
         end
   
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::CALL
-        Workspace.current_workspace.current_bytecode_builder << type_inference.argument_ast_nodes.size
+        Workspace.current_bytecode_builder << Opcodes::CALL
+        Workspace.current_bytecode_builder << type_inference.argument_ast_nodes.size
       when 'specialize'        
         concrete_procedure_instance =
           type_inference
           .result_type_inference
           .concrete_procedure_instance
 
-        Workspace.current_workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-        Workspace.current_workspace.current_bytecode_builder << concrete_procedure_instance.bytecode_pointer
+        Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+        Workspace.current_bytecode_builder << concrete_procedure_instance.bytecode_pointer
       else
         super
       end
