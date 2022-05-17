@@ -10,6 +10,8 @@ module Jobs
     end
 
     attr_reader :workspace, :super_binding, :initializing_caller
+    attr_accessor :working
+    alias working? working
 
     def add_downstream(job)
       if complete?
@@ -21,6 +23,15 @@ module Jobs
     end
 
     def enqueue!
+      if incomplete? && !working?
+        begin
+          self.working = true
+          work!
+        ensure
+          self.working = false
+        end
+      end
+      return if complete?
       Workspace.work_queue << self
     end
 

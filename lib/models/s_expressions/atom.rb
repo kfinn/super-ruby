@@ -1,5 +1,13 @@
 module SExpressions
-  Atom = Struct.new(:token) do
+  class Atom
+    include BaseSExpression
+    include DerivesEquality
+    def initialize(token)
+      @token = token
+    end
+    attr_reader :token
+    alias state token
+
     def self.from_tokens(tokens)
       new(tokens.next)
     end

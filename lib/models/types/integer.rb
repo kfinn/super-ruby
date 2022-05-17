@@ -3,8 +3,8 @@ module Types
     include Singleton
     include BaseType
 
-    def message_send_result_type_inference(message, argument_ast_nodes)
-      argument_type_inferences = Workspace.type_inferences_for(argument_ast_nodes)
+    def message_send_result_type_inference(message, argument_s_expressions)
+      argument_type_inferences = Workspace.type_inferences_for(argument_s_expressions.map(&:ast_node))
       case message
       when '+', '-'
         raise "Invalid arguments count: expected 1, but got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
@@ -65,14 +65,17 @@ module Types
 
       def initialize(argument_type_inference)
         @argument_type_inference = argument_type_inference
-        argument_type_inference.add_downstream self
       end
       attr_reader :argument_type_inference
-      attr_accessor :argument_type_check, :validated, :valid
+      attr_accessor :added_downstreams, :argument_type_check, :validated, :valid
       alias complete? validated
       alias valid? valid
 
       def work!
+        if !added_downstreams
+          self.added_downstreams = true
+          argument_type_inference.add_downstream self
+        end
         return unless argument_type_inference.complete?
         if argument_type_check.nil?
           self.argument_type_check = argument_type_inference.type_check

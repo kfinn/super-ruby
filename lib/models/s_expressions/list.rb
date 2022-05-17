@@ -4,10 +4,18 @@ module SExpressions
     "(" => ")",
     "[" => "]"
   }.freeze
-
-  List = Struct.new(:children) do
+  
+  class List
+    include BaseSExpression
     include Enumerable
+    include DerivesEquality
     delegate :each, :[], :first, :second, :third, :fourth, :size, to: :children
+
+    def initialize(children)
+      @children = children
+    end
+    attr_reader :children
+    alias state children
 
     def self.from_tokens(tokens)
       list_start = tokens.next

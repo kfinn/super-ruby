@@ -5,10 +5,9 @@ module Jobs
     def initialize(abstract_procedure, concrete_procedure_evaluation)
       @abstract_procedure = abstract_procedure
       @concrete_procedure_evaluation = concrete_procedure_evaluation
-      concrete_procedure_evaluation.add_downstream(self)
     end
     attr_reader :abstract_procedure, :concrete_procedure_evaluation
-    attr_accessor :declared
+    attr_accessor :added_downstreams, :declared
     alias complete? declared
 
     def concrete_procedure
@@ -27,6 +26,10 @@ module Jobs
     end
 
     def work!
+      if !added_downstreams
+        self.added_downstreams = true
+        concrete_procedure_evaluation.add_downstream self
+      end
       return unless concrete_procedure_evaluation.complete?
       self.declared = true
       abstract_procedure.declare_specialization(argument_types)

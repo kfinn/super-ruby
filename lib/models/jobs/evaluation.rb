@@ -6,12 +6,9 @@ module Jobs
       @ast_node = ast_node
       self.type_inference = type_inference
       self.type_check = type_check
-
-      type_inference&.add_downstream(self)
-      type_check&.add_downstream(self)
     end
     attr_reader :ast_node
-    attr_accessor :type_inference, :type_check
+    attr_accessor :type_inference, :added_type_inference_downstream, :type_check, :added_type_check_downstream
     delegate :type, to: :type_inference
     delegate :complete?, to: :type_check, allow_nil: true
 
@@ -25,12 +22,18 @@ module Jobs
     def work!
       if type_inference.nil?
         self.type_inference = Workspace.type_inference_for ast_node
+      end
+      if !added_type_inference_downstream
+        self.added_type_inference_downstream = true
         type_inference.add_downstream self
       end
       return unless type_inference.complete?
 
       if type_check.nil?
         self.type_check = type_inference.type_check
+      end
+      if !added_type_check_downstream
+        self.added_type_check_downstream = true
         type_check.add_downstream self
       end
     end

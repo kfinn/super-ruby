@@ -5,12 +5,9 @@ module Jobs
     def initialize(concrete_procedure, argument_type_inferences)
       @concrete_procedure = concrete_procedure
       @argument_type_inferences = argument_type_inferences
-      argument_type_inferences.each do |argument_type_inference|
-        argument_type_inference.add_downstream(self)
-      end
     end
     attr_reader :concrete_procedure, :argument_type_inferences
-    attr_accessor :argument_type_checks, :validated, :valid
+    attr_accessor :added_downstreams, :argument_type_checks, :validated, :valid
 
     def argument_types
       @argument_types ||= argument_type_inferences.map(&:type)
@@ -20,6 +17,11 @@ module Jobs
     alias complete? validated
 
     def work!
+      if !added_downstreams
+        argument_type_inferences.each do |argument_type_inference|
+          argument_type_inference.add_downstream(self)
+        end  
+      end
       return unless argument_type_inferences.all?(&:complete?)
 
       if argument_type_checks.nil?

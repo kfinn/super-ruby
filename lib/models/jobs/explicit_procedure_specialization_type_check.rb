@@ -5,10 +5,9 @@ module Jobs
     def initialize(abstract_procedure, concrete_procedure_evaluation)
       @abstract_procedure = abstract_procedure
       @concrete_procedure_evaluation = concrete_procedure_evaluation
-      @concrete_procedure_evaluation.add_downstream(self)
     end
     attr_reader :abstract_procedure, :concrete_procedure_evaluation
-    attr_accessor :implicit_procedure_specialization
+    attr_accessor :added_downstreams, :implicit_procedure_specialization
     delegate :argument_types, to: :concrete_procedure
     delegate :argument_names, :ast_node, :workspace, :super_binding, to: :abstract_procedure
 
@@ -28,6 +27,10 @@ module Jobs
     end
 
     def work!
+      if !added_downstreams
+        self.added_downstreams = true
+        concrete_procedure_evaluation.add_downstream(self)
+      end
       return unless concrete_procedure_evaluation.complete?
 
       if implicit_procedure_specialization.nil?

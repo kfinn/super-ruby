@@ -6,17 +6,22 @@ module Jobs
       @condition_type_inference = condition_type_inference
       @then_branch_type_inference = then_branch_type_inference
       @else_branch_type_inference = else_branch_type_inference || ImmediateTypeInference.new(Types::Void.instance)
-
-      @then_branch_type_inference.add_downstream(self)
-      @else_branch_type_inference.add_downstream(self)
     end
     attr_reader :condition_type_inference, :then_branch_type_inference, :else_branch_type_inference
+    attr_accessor :added_downstreams
 
     def complete?
       [condition_type_inference, then_branch_type_inference, else_branch_type_inference].all?(&:complete?)
     end
 
-    def work!; end
+    def work!
+      if !added_downstreams
+        self.added_downstreams = true
+        condition_type_inference.add_downstream(self)
+        then_branch_type_inference.add_downstream(self)
+        else_branch_type_inference.add_downstream(self)
+      end
+    end
 
     def type_check
       @type_check ||= IfTypeCheck.new(

@@ -5,21 +5,23 @@ module Jobs
     def initialize(argument_evaluations, return_evaluation)
       @argument_evaluations = argument_evaluations
       @return_evaluation = return_evaluation
-
-      @argument_evaluations.each do |argument_typed_evaluation|
-        argument_typed_evaluation.add_downstream(self)
-      end
-      @return_evaluation.add_downstream(self)
     end
 
     attr_reader :argument_evaluations, :return_evaluation
-    attr_accessor :value
+    attr_accessor :added_downstreams, :value
 
     def upstreams_complete?
       argument_evaluations.all?(&:complete?) && return_evaluation.complete?
     end
 
     def work!
+      if !added_downstreams
+        self.added_downstreams = true
+        argument_evaluations.each do |argument_typed_evaluation|
+          argument_typed_evaluation.add_downstream(self)
+        end
+        return_evaluation.add_downstream(self)
+      end
       return unless upstreams_complete?
 
       self.value = Types::ConcreteProcedure.new(

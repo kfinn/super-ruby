@@ -16,6 +16,8 @@ class SuperBinding
   attr_reader :parent, :inherit_dynamic_locals, :static_locals, :dynamic_local_type_inferences, :dynamic_local_values
   alias inherit_dynamic_locals? inherit_dynamic_locals
 
+  delegate :super_respond_to?, :receiver_type_inference_for, :receiver_type_inference_for!, :build_receiver_bytecode_for!, to: :parent
+
   def fetch_type_inference(name, include_dynamic_locals: true)
     return dynamic_local_type_inferences[name] if include_dynamic_locals && dynamic_local_type_inferences.include?(name)
     return static_locals[name] if static_locals.include?(name)

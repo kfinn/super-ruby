@@ -10,16 +10,16 @@ module Types
     end
     attr_reader :argument_names, :body, :workspace, :super_binding
 
-    def message_send_result_type_inference(message, argument_ast_nodes)
+    def message_send_result_type_inference(message, argument_s_expressions)
       case message
       when 'call'
-        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == argument_names.size
-        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.type_inferences_for(argument_ast_nodes))
+        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_s_expressions.size}" unless argument_s_expressions.size == argument_names.size
+        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.type_inferences_for(argument_s_expressions.map(&:ast_node)))
       when 'specialize'
-        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == 1
+        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_s_expressions.size}" unless argument_s_expressions.size == 1
         Jobs::ExplicitProcedureSpecializationTypeInference.new(
           self,
-          Jobs::Evaluation.new(argument_ast_nodes.first)
+          Jobs::Evaluation.new(argument_s_expressions.first.ast_node)
         )
       else
         super

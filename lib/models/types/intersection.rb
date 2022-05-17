@@ -18,10 +18,10 @@ module Types
     end
     attr_reader :types
 
-    def message_send_result_type_inference(message, argument_ast_nodes)
+    def message_send_result_type_inference(message, argument_s_expressions)
       self.class.from_types(
         types.map do |type|
-          type.message_send_result_type_inference(message, argument_ast_nodes)
+          type.message_send_result_type_inference(message, argument_s_expressions)
         end
       )
     end
@@ -37,18 +37,23 @@ module Types
 
       def initialize(type_inferences)
         @type_inferences = type_inferences
-        @type_inferences.each do |type_inference|
-          type_inference.add_downstream(self)
-        end
       end
       attr_reader :type_inferences
+      attr_accessor :added_downstreams
 
 
       def complete?
         type_inferences.all?(&:complete?)
       end
 
-      def work!; end
+      def work!
+        if !added_downstreams
+          self.added_downstreams = true
+          type_inferences.each do |type_inference|
+            type_inference.add_downstream(self)
+          end  
+        end
+      end
 
       def type
         @type ||=

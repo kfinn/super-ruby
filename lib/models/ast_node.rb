@@ -1,5 +1,6 @@
 module AstNode
   PRIORITIZED_AST_NODE_CLASSES = [
+    AstNodes::ImplicitSelfMessageSend,
     AstNodes::Define,
     AstNodes::Let,
     AstNodes::ProcedureDefinition,

@@ -1,6 +1,33 @@
 class RootSuperBinding
   include Singleton
 
+  def super_respond_to?(message)
+    receiver_type_inference_for(message).present?
+  end
+
+  def receiver_type_inference_for!(message)
+    receiver_type_inference_for(message).tap do |receiver_type_inference|
+      raise "programmer error: no receiver type inference for #{message}" unless receiver_type_inference.present?
+    end
+  end
+
+  def receiver_type_inference_for(message)
+    case message
+    when 'define'
+      Jobs::ImmediateTypeInference.new(
+        Types::SuperBinding.new(Workspace.current_super_binding)
+      )
+    end
+  end
+
+  def build_receiver_bytecode_for!(message)
+    case message
+    when 'define'
+      Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+      Workspace.current_bytecode_builder << Types::Void.instance.instance
+    end
+  end
+
   def fetch_type_inference(name, **_kwargs)
     case name
     when 'Integer'
