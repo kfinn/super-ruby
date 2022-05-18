@@ -10,7 +10,7 @@ module Jobs
       @receiver_type_inference.add_downstream(self)
     end
     attr_reader :receiver_type_inference, :message, :argument_s_expressions
-    attr_accessor :result_type_inference
+    attr_accessor :decorated_receiver_type_inference, :result_type_inference
     delegate :type, to: :result_type_inference, allow_nil: true
 
     def complete?
@@ -26,13 +26,19 @@ module Jobs
 
     def work!
       return unless receiver_type_inference.complete?
-      if self.result_type_inference.nil?
+
+      if decorated_receiver_type_inference.nil?
+        self.decorated_receiver_type_inference = receiver_type_inference.type.decorate_message_send_receiver_type_inference(self)
+        decorated_receiver_type_inference.add_downstream self
+      end
+      return unless decorated_receiver_type_inference.complete?
+
+      if result_type_inference.nil?
         self.result_type_inference =
           receiver_type_inference
           .type
           .message_send_result_type_inference(
-            message,
-            argument_s_expressions
+            self
           )
         result_type_inference.add_downstream(self)
       end

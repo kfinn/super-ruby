@@ -34,5 +34,9 @@ module Jobs
       self.validated = true
       self.valid = type_checks.all?(&:valid?) && condition_type_inference.type == Types::Boolean.instance
     end
+
+    def to_s
+      ''
+    end
   end
 end

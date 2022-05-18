@@ -10,16 +10,16 @@ module Types
     end
     attr_reader :argument_names, :body, :workspace, :super_binding
 
-    def message_send_result_type_inference(message, argument_s_expressions)
-      case message
+    def message_send_result_type_inference(message_send_type_inference)
+      case message_send_type_inference.message
       when 'call'
-        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{argument_s_expressions.size}" unless argument_s_expressions.size == argument_names.size
-        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.type_inferences_for(argument_s_expressions.map(&:ast_node)))
+        raise "invalid arguments count to AbstractProceudure#call. Expected #{argument_names.size}, got #{message_send_type_inference.argument_s_expressions.size}" unless message_send_type_inference.argument_s_expressions.size == argument_names.size
+        Jobs::AbstractProcedureCallTypeInference.new(self, Workspace.type_inferences_for(message_send_type_inference.argument_s_expressions.map(&:ast_node)))
       when 'specialize'
-        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{argument_s_expressions.size}" unless argument_s_expressions.size == 1
+        raise "invalid arguments count to AbstractProcedure#specialize. Expected 1, got #{message_send_type_inference.argument_s_expressions.size}" unless message_send_type_inference.argument_s_expressions.size == 1
         Jobs::ExplicitProcedureSpecializationTypeInference.new(
           self,
-          Jobs::Evaluation.new(argument_s_expressions.first.ast_node)
+          Jobs::Evaluation.new(message_send_type_inference.argument_s_expressions.first.ast_node)
         )
       else
         super
@@ -52,7 +52,7 @@ module Types
           argument_ast_node.build_bytecode!(argument_type_inference)
         end
   
-        Workspace.current_bytecode_builder << Opcodes::CALL
+        Workspace.current_bytecode_builder << Opcodes::CALL_PROCEDURE
         Workspace.current_bytecode_builder << type_inference.argument_s_expressions.size
       when 'specialize'        
         concrete_procedure_instance =

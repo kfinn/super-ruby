@@ -48,5 +48,9 @@ module Jobs
       end
       self.incomplete_child_type_inferences.subtract(newly_completed_child_type_inferences)
     end
+
+    def to_s
+      ''
+    end
   end
 end

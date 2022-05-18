@@ -229,4 +229,18 @@ RSpec.describe Workspace do
     expect(workspace.result_type).to eq(Types::Integer.instance)
     expect(workspace.result_value).to eq(28)
   end
+
+  it 'allows defining and calling methods on types' do
+    workspace.add_source_string <<~SUPER
+      (sequence(
+        (define MyInteger Integer)
+        (MyInteger define_method foo () self)
+        (let x MyInteger 13)
+        (x foo)
+      ))
+    SUPER
+    workspace.evaluate!
+    expect(workspace.result_type).to eq(Types::Integer.instance)
+    expect(workspace.result_value).to eq 13
+  end
 end

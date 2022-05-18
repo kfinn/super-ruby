@@ -3,15 +3,15 @@ module Types
     include Singleton
     include BaseType
 
-    def message_send_result_type_inference(message, argument_s_expressions)
-      argument_type_inferences = Workspace.type_inferences_for(argument_s_expressions.map(&:ast_node))
-      case message
+    def message_send_result_type_inference(type_inference)
+      argument_type_inferences = Workspace.type_inferences_for(type_inference.argument_s_expressions.map(&:ast_node))
+      case type_inference.message
       when '+', '-'
         raise "Invalid arguments count: expected 1, but got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
-        BinaryOperatorTyping.new(*argument_type_inferences, self)
+        BinaryOperatorTypeInference.new(*argument_type_inferences, self)
       when '>', '<', '=='
         raise "Invalid arguments count: expected 1, but got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
-        BinaryOperatorTyping.new(*argument_type_inferences, Boolean.instance)
+        BinaryOperatorTypeInference.new(*argument_type_inferences, Boolean.instance)
       else
         super
       end
@@ -48,7 +48,7 @@ module Types
       end
     end
 
-    class BinaryOperatorTyping
+    class BinaryOperatorTypeInference
       prepend Jobs::BaseJob
 
       def initialize(argument_type_inference, return_type)
@@ -64,6 +64,10 @@ module Types
 
       def type_check
         @type_check ||= BinaryOperatorTypeCheck.new(argument_type_inference)
+      end
+
+      def to_s
+        ''
       end
     end
 
@@ -88,6 +92,10 @@ module Types
         return unless argument_type_check.complete?
         self.validated = true
         self.valid = argument_type_inference.type == Integer.instance
+      end
+
+      def to_s
+        ''
       end
     end
   end

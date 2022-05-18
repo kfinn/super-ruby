@@ -31,5 +31,9 @@ module Jobs
         result_type_check.add_downstream self
       end
     end
+
+    def to_s
+      ''
+    end
   end
 end

@@ -18,5 +18,9 @@ module Jobs
     def type_check
       @type_check ||= DefineTypeCheck.new(value_type_inference)
     end
+
+    def to_s
+      ''
+    end
   end
 end

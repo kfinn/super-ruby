@@ -62,7 +62,8 @@ module Jobs
     end
 
     def to_s
-      "(#{abstract_procedure.to_s} implicitly_specialize (#{argument_type_inferences.map { |argument_type_inference| " #{argument_type_inference.to_s}" }.join}))"
+      # "(#{abstract_procedure.to_s} implicitly_specialize (#{argument_type_inferences.map { |argument_type_inference| " #{argument_type_inference.to_s}" }.join}))"
+      ""
     end
   end
 end

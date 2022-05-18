@@ -2,31 +2,20 @@ module AstNodes
   class ProcedureDefinition
     include BaseAstNode
 
-    Argument = Struct.new(:s_expression) do
-      def self.match?(s_expression)
-        s_expression.atom?
-      end
-
-      def name
-        s_expression.text
-      end
-    end
-
     def self.match?(s_expression)
       (
         s_expression.list? &&
         s_expression.size == 3 &&
         s_expression.first.atom? &&
         s_expression.first.text == 'procedure' &&
-        s_expression.second.list? &&
-        s_expression.second.all? { |argument_s_expression| Argument.match? argument_s_expression }
+        ArgumentListDefinition.match?(s_expression.second)
       )
     end
 
     def spawn_type_inference
       Jobs::ImmediateTypeInference.new(
         Types::AbstractProcedure.new(
-          arguments_ast_nodes.map(&:name),
+          argument_list_definition.map(&:name),
           body_ast_node
         )
       )
@@ -37,10 +26,8 @@ module AstNodes
       Workspace.current_bytecode_builder << type_inference.type
     end
 
-    def arguments_ast_nodes
-      @arguments_ast_nodes ||= s_expression.second.map do |argument_s_expression|
-        Argument.new(argument_s_expression)
-      end
+    def argument_list_definition
+      @argument_list_definition ||= ArgumentListDefinition.new(s_expression.second)
     end
 
     def body_ast_node

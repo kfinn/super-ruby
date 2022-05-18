@@ -24,5 +24,9 @@ module Jobs
     end
 
     delegate :value, to: :evaluation
+
+    def to_s
+      ''
+    end
   end
 end
