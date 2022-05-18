@@ -2,10 +2,10 @@ module Types
   module BaseType
     include ActiveSupport::Concern
 
-    def message_send_result_type_inference(message, argument_ast_nodes)
+    def message_send_result_type_inference(message, argument_s_expressions)
       case message
       when 'type'
-        raise "invalid arguments count to #{self.class.name}#type. Expected 0, got #{argument_ast_nodes}.size" unless argument_ast_nodes.empty?
+        raise "invalid arguments count to #{self.class.name}#type. Expected 0, got #{argument_s_expressions}.size" unless argument_s_expressions.empty?
         Jobs::ImmediateEvaluation.new(Type.instance, self)
       else
         raise "invalid message: #{self.class.name}##{message}"

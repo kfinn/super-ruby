@@ -25,11 +25,11 @@ module Types
       "(ConcreteProcedure (#{argument_types.map(&:to_s).join(", ")}) #{return_type.to_s})"
     end
 
-    def message_send_result_type_inference(message, argument_ast_nodes)
+    def message_send_result_type_inference(message, argument_s_expressions)
       case message
       when 'call'
-        raise "Invalid arguments count: expected #{argument_types.size}, but got #{argument_ast_nodes.size}" unless argument_ast_nodes.size == argument_types.size
-        Jobs::ConcreteProcedureCallTypeInference.new(self, Workspace.type_inferences_for(argument_ast_nodes))
+        raise "Invalid arguments count: expected #{argument_types.size}, but got #{argument_s_expressions.size}" unless argument_s_expressions.size == argument_types.size
+        Jobs::ConcreteProcedureCallTypeInference.new(self, Workspace.type_inferences_for(argument_s_expressions.map(&:ast_node)))
       else
         super
       end
@@ -39,7 +39,8 @@ module Types
       case type_inference.message
       when 'call'
         type_inference
-        .argument_ast_nodes
+        .argument_s_expressions
+        .map(&:ast_node)
         .zip(
           type_inference
             .result_type_inference

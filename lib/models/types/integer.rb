@@ -3,8 +3,8 @@ module Types
     include Singleton
     include BaseType
 
-    def message_send_result_type_inference(message, argument_ast_nodes)
-      argument_type_inferences = Workspace.type_inferences_for(argument_ast_nodes)
+    def message_send_result_type_inference(message, argument_s_expressions)
+      argument_type_inferences = Workspace.type_inferences_for(argument_s_expressions.map(&:ast_node))
       case message
       when '+', '-'
         raise "Invalid arguments count: expected 1, but got #{argument_type_inferences.size}" unless argument_type_inferences.size == 1
@@ -20,7 +20,14 @@ module Types
     def build_message_send_bytecode!(type_inference)
       case type_inference.message
       when '+', '-', '<', '>', '=='
-        type_inference.argument_ast_nodes.first.build_bytecode! type_inference.result_type_inference.argument_type_inference
+        type_inference
+          .argument_s_expressions
+          .first
+          .ast_node.build_bytecode!(
+            type_inference
+              .result_type_inference
+              .argument_type_inference
+          )
         
         Workspace
           .current_workspace

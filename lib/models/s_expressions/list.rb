@@ -1,13 +1,21 @@
 module SExpressions
-  LIST_END_TEXTS_BY_LIST_START = {
-    "{" => "}",
-    "(" => ")",
-    "[" => "]"
-  }.freeze
+  class List
+    LIST_END_TEXTS_BY_LIST_START = {
+      "{" => "}",
+      "(" => ")",
+      "[" => "]"
+    }.freeze
 
-  List = Struct.new(:children) do
+    include BaseSExpression
+    include DerivesEquality
     include Enumerable
     delegate :each, :[], :first, :second, :third, :fourth, :size, to: :children
+
+    def initialize(children)
+      @children = children
+    end
+    attr_reader :children
+    alias state children
 
     def self.from_tokens(tokens)
       list_start = tokens.next

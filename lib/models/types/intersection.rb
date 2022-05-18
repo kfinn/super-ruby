@@ -18,10 +18,10 @@ module Types
     end
     attr_reader :types
 
-    def message_send_result_type_inference(message, argument_ast_nodes)
+    def message_send_result_type_inference(message, argument_s_expressions)
       self.class.from_types(
         types.map do |type|
-          type.message_send_result_type_inference(message, argument_ast_nodes)
+          type.message_send_result_type_inference(message, argument_s_expressions)
         end
       )
     end
