@@ -15,5 +15,9 @@ module Jobs
     def complete?
       true
     end
+
+    def to_s
+      ''
+    end
   end
 end

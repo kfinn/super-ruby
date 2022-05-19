@@ -18,10 +18,10 @@ module Types
     end
     attr_reader :types
 
-    def message_send_result_type_inference(message, argument_s_expressions)
+    def message_send_result_type_inference(type_inference)
       self.class.from_types(
         types.map do |type|
-          type.message_send_result_type_inference(message, argument_s_expressions)
+          type.message_send_result_type_inference(type_inference)
         end
       )
     end
@@ -62,6 +62,10 @@ module Types
           else
             Intersection.new(type_inferences.map(&:type))
           end
+      end
+
+      def to_s
+        ''
       end
     end
   end

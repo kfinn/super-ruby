@@ -1,14 +1,14 @@
 module SExpressions
-  LIST_END_TEXTS_BY_LIST_START = {
-    "{" => "}",
-    "(" => ")",
-    "[" => "]"
-  }.freeze
-  
   class List
+    LIST_END_TEXTS_BY_LIST_START = {
+      "{" => "}",
+      "(" => ")",
+      "[" => "]"
+    }.freeze
+
     include BaseSExpression
-    include Enumerable
     include DerivesEquality
+    include Enumerable
     delegate :each, :[], :first, :second, :third, :fourth, :size, to: :children
 
     def initialize(children)

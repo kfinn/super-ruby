@@ -7,7 +7,7 @@ module Jobs
 
       @type_static_evaluation_type_inference = StaticEvaluationTypeInference.new(type_ast_node)
       @type_type_inference = TypeInferenceGivenByEvaluation.new(type_static_evaluation_type_inference)
-      @value_type_inference = value_ast_node && Workspace.type_inference_for(value_ast_node)
+      @value_type_inference = Workspace.type_inference_for(value_ast_node) if value_ast_node.present?
     end
     attr_reader :ast_node, :type_static_evaluation_type_inference, :type_type_inference, :value_type_inference
     delegate :type_ast_node, :value_ast_node, to: :ast_node

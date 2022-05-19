@@ -31,13 +31,27 @@ class VirtualMachine
         destination = pop!
         condition = pop!
         call_frames.last.instruction_pointer = destination if condition
-      when Opcodes::CALL
+      when Opcodes::CALL_PROCEDURE
         arguments_count = next_instruction!
         argument_values = []
         arguments_count.times do |index|
           argument_values.unshift(pop!)
         end
         destination_instruction_pointer = pop!
+
+        call_frame = CallFrame.new(destination_instruction_pointer, arguments_count)
+        argument_values.each_with_index do |value, slot|
+          call_frame[slot] = value
+        end
+        call_frames << call_frame
+      when Opcodes::CALL_METHOD
+        arguments_count = next_instruction!
+        argument_values = []
+        (arguments_count - 1).times do |index|
+          argument_values.unshift(pop!)
+        end
+        destination_instruction_pointer = pop!
+        argument_values.unshift(pop!)
 
         call_frame = CallFrame.new(destination_instruction_pointer, arguments_count)
         argument_values.each_with_index do |value, slot|

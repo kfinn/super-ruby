@@ -6,7 +6,8 @@ module Opcodes
   SET_LOCAL = :set_local
   JUMP = :jump
   JUMP_UNLESS_FALSE = :jump_unless_false
-  CALL = :call
+  CALL_PROCEDURE = :call_procedure
+  CALL_METHOD = :call_method
 
   INTEGER_ADD = :integer_add
   INTEGER_SUBTRACT = :integer_subtract

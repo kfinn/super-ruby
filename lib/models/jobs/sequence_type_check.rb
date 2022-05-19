@@ -33,5 +33,9 @@ module Jobs
         end
       end
     end
+
+    def to_s
+      ''
+    end
   end
 end
