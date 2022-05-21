@@ -20,14 +20,7 @@ module Jobs
     def work!
       if child_type_inferences.nil?
         self.child_type_inferences =
-          Workspace
-            .current_workspace
-            .with_current_super_binding(
-              Workspace
-                .current_workspace
-                .current_super_binding
-                .spawn(inherit_dynamic_locals: true)
-            ) do
+          Workspace.with_current_super_binding(children_super_binding) do
               child_ast_nodes.map do |child_ast_node|
                 Workspace.type_inference_for(child_ast_node)
               end
@@ -42,6 +35,10 @@ module Jobs
 
     def to_s
       "(sequence (#{child_type_inferences&.map(&:to_s)&.join(" ")}))"
+    end
+
+    def children_super_binding
+      @children_super_binding ||= super_binding.spawn(inherit_dynamic_locals: true)
     end
   end
 end

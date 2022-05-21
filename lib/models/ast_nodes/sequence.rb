@@ -16,7 +16,7 @@ module AstNodes
     end
 
     def build_bytecode!(type_inference)
-      Workspace.with_current_super_binding(type_inference.super_binding) do
+      Workspace.with_current_super_binding(type_inference.children_super_binding) do
         children_with_type_inferences = child_ast_nodes.zip(type_inference.child_type_inferences)
         children_with_type_inferences[0..-2].each do |child_ast_node, child_type_inference|
           child_ast_node.build_bytecode!(child_type_inference)
