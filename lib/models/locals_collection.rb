@@ -39,6 +39,7 @@ class LocalsCollection
     )
   end
 
+  include Enumerable
   delegate :each, to: :locals
   delegate :keys, to: :locals_index_by_name
 end

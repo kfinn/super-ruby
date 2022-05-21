@@ -1,5 +1,6 @@
 module AstNode
   PRIORITIZED_AST_NODE_CLASSES = [
+    AstNodes::ImplicitSelfMessageSendThunk,
     AstNodes::ImplicitSelfMessageSend,
     AstNodes::Define,
     AstNodes::Let,
@@ -7,8 +8,7 @@ module AstNode
     AstNodes::ConcreteProcedureLiteral,
     AstNodes::If,
     AstNodes::Sequence,
-    AstNodes::MessageSend,
-    AstNodes::Identifier
+    AstNodes::MessageSend
   ]
 
   def self.from_s_expression(s_expression)

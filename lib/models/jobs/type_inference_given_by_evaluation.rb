@@ -6,13 +6,22 @@ module Jobs
       @evaluation = evaluation
     end
     attr_reader :evaluation
-    attr_accessor :added_downstream
-    delegate :complete?, to: :evaluation
+    attr_accessor :added_downstream, :added_second_downstream
+
+    def complete?
+      added_downstream && evaluation.complete? && evaluation.evaluation.complete?
+    end
 
     def work!
       if !added_downstream
         self.added_downstream = true
         evaluation.add_downstream self
+      end
+      return unless evaluation.complete?
+
+      if !added_second_downstream
+        self.added_second_downstream = true
+        evaluation.evaluation.add_downstream self
       end
     end
     

@@ -63,10 +63,6 @@ module Types
             Intersection.new(type_inferences.map(&:type))
           end
       end
-
-      def to_s
-        ''
-      end
     end
   end
 end

@@ -38,11 +38,7 @@ module AstNodes
           Jobs::ImmediateTypeInference.new(Types::Void.instance)
         end
 
-      Jobs::IfTypeInference.new(
-        condition_type_inference,
-        then_branch_type_inference,
-        else_branch_type_inference
-      )
+      Jobs::IfTypeInference.new(self)
     end  
 
     def build_bytecode!(type_inference)

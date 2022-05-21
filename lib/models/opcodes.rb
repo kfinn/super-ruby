@@ -9,6 +9,8 @@ module Opcodes
   CALL_PROCEDURE = :call_procedure
   CALL_METHOD = :call_method
 
+  EXTRACT_VALUE = :extract_value
+
   INTEGER_ADD = :integer_add
   INTEGER_SUBTRACT = :integer_subtract
   INTEGER_LESS_THAN = :integer_less_than

@@ -11,8 +11,7 @@ module AstNodes
     end
 
     def spawn_type_inference
-      receiver_type_inference = Workspace.type_inference_for(receiver_ast_node)
-      Jobs::MessageSendTypeInference.new(receiver_type_inference, message, argument_s_expressions)
+      Jobs::MessageSendTypeInference.new(self)
     end
 
     def build_bytecode!(type_inference)
@@ -30,6 +29,10 @@ module AstNodes
 
     def argument_s_expressions
       @argument_s_expressions ||= s_expression[2..]
+    end
+
+    def receiver_type_inference
+      @receiver_type_inference ||= Workspace.type_inference_for(receiver_ast_node)
     end
   end
 end

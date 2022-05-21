@@ -2,13 +2,13 @@ module Types
   class AbstractProcedure
     include BaseType
 
-    def initialize(argument_names, body)
+    def initialize(argument_names, body_s_expression)
       @argument_names = argument_names
-      @body = body
+      @body_s_expression = body_s_expression
       @workspace = Workspace.current_workspace
       @super_binding = @workspace.current_super_binding
     end
-    attr_reader :argument_names, :body, :workspace, :super_binding
+    attr_reader :argument_names, :body_s_expression, :workspace, :super_binding
 
     def message_send_result_type_inference(message_send_type_inference)
       case message_send_type_inference.message

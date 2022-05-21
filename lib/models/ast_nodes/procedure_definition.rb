@@ -16,7 +16,7 @@ module AstNodes
       Jobs::ImmediateTypeInference.new(
         Types::AbstractProcedure.new(
           argument_list_definition.map(&:name),
-          body_ast_node
+          body_s_expression
         )
       )
     end
@@ -30,8 +30,8 @@ module AstNodes
       @argument_list_definition ||= ArgumentListDefinition.new(s_expression.second)
     end
 
-    def body_ast_node
-      @body_ast_node ||= AstNode.from_s_expression(s_expression.third)
+    def body_s_expression
+      @body_s_expression ||= s_expression.third
     end
   end
 end

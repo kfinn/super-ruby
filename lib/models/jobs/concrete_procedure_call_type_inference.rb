@@ -24,9 +24,5 @@ module Jobs
     end
 
     def work!; end
-
-    def to_s
-      ''
-    end
   end
 end

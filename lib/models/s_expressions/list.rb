@@ -28,8 +28,12 @@ module SExpressions
       new(children)
     end
 
-    def to_s
-      "(#{map(&:to_s).join(" ")})"
+    def to_s(depth=0)
+      if depth >= 3
+        "..."
+      else
+        "(#{map { |child| child.to_s(depth + 1) }.join(" ")})"
+      end
     end
 
     def list?

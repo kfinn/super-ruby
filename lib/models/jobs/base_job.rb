@@ -10,8 +10,6 @@ module Jobs
     end
 
     attr_reader :workspace, :super_binding, :initializing_caller
-    attr_accessor :working
-    alias working? working
 
     def add_downstream(job)
       if complete?
@@ -23,15 +21,6 @@ module Jobs
     end
 
     def enqueue!
-      if incomplete? && !working?
-        begin
-          self.working = true
-          work!
-        ensure
-          self.working = false
-        end
-      end
-      return if complete?
       Workspace.work_queue << self
     end
 
@@ -58,7 +47,7 @@ module Jobs
       end
       downstreams.each(&:enqueue!) if complete?
     rescue StandardError => e
-      raise BaseJobFailure.new(self)
+      raise BaseJobFailure.new(self, e)
     end
 
     def incomplete?
@@ -70,19 +59,30 @@ module Jobs
     end
 
     class BaseJobFailure < StandardError
-      def initialize(job)
+      def initialize(job, cause)
         @job = job
-        super
+        @cause = cause
+        super "BaseJobFailure"
       end
-      attr_reader :job
+      attr_reader :job, :cause
       delegate :initializing_caller, to: :job
 
       def message
-        "#{job.to_s} initialized by\n#  #{filtered_initializing_caller.join("\n#  ")}"
+        <<~TXT
+          #  #{job.to_s}
+          #  caused by #{cause.message}
+          #  #{filtered_cause_backtrace.join("\n#  ")}
+          #  initialized by
+          #  #  #{filtered_initializing_caller.join("\n#  #  ")}
+        TXT
       end
 
       def filtered_initializing_caller
         @filtered_initializing_caller ||= initializing_caller.reject { |frame| frame.include?('/gems/') || frame.include?('rspec') }
+      end
+
+      def filtered_cause_backtrace
+        @filtered_cause_backtrace ||= cause.backtrace.reject { |frame| frame.include?('/gems/') || frame.include?('rspec') }
       end
     end
   end

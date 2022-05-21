@@ -2,24 +2,51 @@ module Jobs
   class IfTypeInference
     prepend BaseJob
 
-    def initialize(condition_type_inference, then_branch_type_inference, else_branch_type_inference)
-      @condition_type_inference = condition_type_inference
-      @then_branch_type_inference = then_branch_type_inference
-      @else_branch_type_inference = else_branch_type_inference || ImmediateTypeInference.new(Types::Void.instance)
+    def initialize(ast_node)
+      @ast_node = ast_node
     end
-    attr_reader :condition_type_inference, :then_branch_type_inference, :else_branch_type_inference
-    attr_accessor :added_downstreams
+    attr_reader :ast_node
+    attr_accessor :condition_type_inference, :then_branch_type_inference, :else_branch_type_inference
+    delegate :condition_ast_node, :then_branch_ast_node, :else_branch_ast_node, to: :ast_node
 
     def complete?
-      [condition_type_inference, then_branch_type_inference, else_branch_type_inference].all?(&:complete?)
+      [condition_type_inference, then_branch_type_inference, else_branch_type_inference].all? { |type_inference| type_inference&.complete? }
     end
 
     def work!
-      if !added_downstreams
-        self.added_downstreams = true
-        condition_type_inference.add_downstream(self)
-        then_branch_type_inference.add_downstream(self)
-        else_branch_type_inference.add_downstream(self)
+      if condition_type_inference.nil?
+        self.condition_type_inference = Workspace.type_inference_for(condition_ast_node)
+        condition_type_inference.add_downstream self
+      end
+
+      if then_branch_type_inference.nil?
+        self.then_branch_type_inference =
+          Workspace
+            .with_current_super_binding(
+              Workspace
+              .current_super_binding
+              .spawn(inherit_dynamic_locals: true)
+            ) do
+              Workspace.type_inference_for(then_branch_ast_node)
+            end
+        then_branch_type_inference.add_downstream self
+      end
+
+      if else_branch_type_inference.nil?
+        self.else_branch_type_inference =
+          if else_branch_ast_node.present?
+            Workspace
+              .with_current_super_binding(
+                Workspace
+                .current_super_binding
+                .spawn(inherit_dynamic_locals: true)
+              ) do
+                Workspace.type_inference_for(else_branch_ast_node)
+              end
+          else
+            Jobs::ImmediateTypeInference.new(Types::Void.instance)
+          end
+        else_branch_type_inference.add_downstream self
       end
     end
 

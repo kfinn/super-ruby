@@ -42,9 +42,5 @@ module Jobs
       self.validated = true
       self.valid = implicit_procedure_specialization.type == concrete_procedure
     end
-
-    def to_s
-      ''
-    end
   end
 end

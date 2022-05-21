@@ -27,15 +27,11 @@ module Jobs
       return unless child_type_inferences.all?(&:complete?)
 
       if !child_type_checks
-        self.child_type_checks = child_Type_inferences.map(&:type_check)
+        self.child_type_checks = child_type_inferences.map(&:type_check)
         child_type_checks.each do |child_type_check|
           child_type_check.add_downstream self
         end
       end
-    end
-
-    def to_s
-      ''
     end
   end
 end

@@ -65,10 +65,6 @@ module Types
       def type_check
         @type_check ||= BinaryOperatorTypeCheck.new(argument_type_inference)
       end
-
-      def to_s
-        ''
-      end
     end
 
     class BinaryOperatorTypeCheck
@@ -95,10 +91,6 @@ module Types
         return unless argument_type_check.complete?
         self.validated = true
         self.valid = argument_type_inference.type == Integer.instance
-      end
-
-      def to_s
-        ''
       end
     end
   end

@@ -22,9 +22,5 @@ module Jobs
       self.validated = true
       self.valid = value_type_inference.nil? || value_type_inference.type == type_type_inference.type
     end
-
-    def to_s
-      ''
-    end
   end
 end

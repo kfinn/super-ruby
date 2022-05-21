@@ -12,20 +12,7 @@ module AstNodes
     end
 
     def spawn_type_inference
-      Workspace
-        .current_workspace
-        .with_current_super_binding(
-          Workspace
-            .current_workspace
-            .current_super_binding
-            .spawn(inherit_dynamic_locals: true)
-        ) do
-          Jobs::SequenceTypeInference.new(
-            child_ast_nodes.map do |child_ast_node|
-              Workspace.type_inference_for(child_ast_node)
-            end
-          )
-        end
+      Jobs::SequenceTypeInference.new(self)
     end
 
     def build_bytecode!(type_inference)

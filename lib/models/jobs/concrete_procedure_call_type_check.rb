@@ -39,9 +39,5 @@ module Jobs
       end
       self.valid = argument_type_checks.all?(&:valid?) && mismatched_arguments.empty?
     end
-
-    def to_s
-      ""
-    end
   end
 end

@@ -5,6 +5,7 @@ class VirtualMachine
     while call_frames.any?
       if ENV['DEBUG']
         puts "registers: [#{registers.map(&:to_s).join(",")}]"
+        puts "locals: #{call_frames.last.slots}"
         puts "instructions: #{upcoming_instructions.map(&:to_s).join(",")}"
       end
       opcode = next_instruction!

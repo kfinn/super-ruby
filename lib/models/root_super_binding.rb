@@ -1,63 +1,26 @@
 class RootSuperBinding
   include Singleton
 
-  def super_respond_to?(message)
-    receiver_type_inference_for(message).present?
-  end
-
-  def receiver_type_inference_for!(message)
-    receiver_type_inference_for(message).tap do |receiver_type_inference|
-      raise "programmer error: no receiver type inference for #{message}" unless receiver_type_inference.present?
+  def receiver_type_inference_for(message_send)
+    case message_send.message
+    when 'Integer', 'Boolean', 'Void', 'Type', 'true', 'false', /^(0|-?[1-9](\d)*)$/
+      if message_send.argument_s_expressions.size == 0
+        Jobs::ImmediateEvaluation.new(Types::RootSuperBinding.new(Workspace.current_super_binding, include_dynamic_locals: false), Workspace.current_super_binding)
+      end
     end
   end
 
-  def receiver_type_inference_for(message)
-    case message
-    when 'define'
-      Jobs::ImmediateTypeInference.new(
-        Types::SuperBinding.new(Workspace.current_super_binding)
-      )
-    end
-  end
-
-  def build_receiver_bytecode_for!(message)
-    case message
-    when 'define'
+  def build_receiver_bytecode_for!(message_send)
+    case message_send.message
+    when 'Integer', 'Boolean', 'Void', 'Type', 'true', 'false', /^(0|-?[1-9](\d)*)$/
       Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
-      Workspace.current_bytecode_builder << Types::Void.instance.instance
+      Workspace.current_bytecode_builder << Types::SuperBinding.new(Workspace.current_super_binding, include_dynamic_locals: false)
     end
   end
 
-  def fetch_type_inference(name, **_kwargs)
-    case name
-    when 'Integer'
-      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Integer.instance)
-    when 'Boolean'
-      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Boolean.instance)
-    when 'Void'
-      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Void.instance)
-    when 'Type'
-      Jobs::ImmediateEvaluation.new(Types::Type.instance, Types::Type.instance)
-    when /^(0|-?[1-9](\d)*)$/
-      Jobs::ImmediateEvaluation.new(Types::Integer.instance, name.to_i)
-    when 'true'
-      Jobs::ImmediateEvaluation.new(Types::Boolean.instance, true)
-    when 'false'
-      Jobs::ImmediateEvaluation.new(Types::Boolean.instance, false)
-    else
-      raise "unknown identifier: #{name}"
-    end
+  def static_responder_chain
+    @static_responder_chain ||= [Types::RootSuperBinding.new(self)]
   end
-
-  def has_dynamic_binding?(name)
-    false
-  end
-
-  def has_static_binding?(name)
-    fetch_type_inference(name).present?
-  end
-  
-  alias fetch_static_type_inference fetch_type_inference
 
   def spawn(inherit_dynamic_locals: false)
     raise "cannot spawn from root binding when inheriting dynamic locals" if inherit_dynamic_locals
@@ -71,13 +34,5 @@ class RootSuperBinding
 
   def to_s
     "<root super binding>"
-  end
-
-  def static_locals
-    []
-  end
-
-  def parent
-    nil
   end
 end

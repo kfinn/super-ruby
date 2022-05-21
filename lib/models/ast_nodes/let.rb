@@ -21,16 +21,19 @@ module AstNodes
     end
 
     def value_ast_node
-      @value_ast_node ||= s_expression.fourth.present? && AstNode.from_s_expression(s_expression.fourth)
+      unless instance_variable_defined?(:@value_ast_node)
+        @value_ast_node = s_expression.fourth.present? ? AstNode.from_s_expression(s_expression.fourth) : nil
+      end
+      @value_ast_node
     end
 
     def spawn_type_inference
-      type_inference = Jobs::LetTypeInference.new(self)
-      Workspace.current_super_binding.set_dynamic_type_inference(
-        name,
-        type_inference.type_type_inference
-      )
-      type_inference
+      Jobs::LetTypeInference.new(self).tap do |type_inference|
+        Workspace.current_super_binding.set_dynamic_type_inference(
+          name,
+          type_inference.type_type_inference
+        )
+      end
     end
 
     def build_bytecode!(type_inference)

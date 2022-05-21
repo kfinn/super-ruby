@@ -8,7 +8,7 @@ RSpec.describe Workspace do
     expect(workspace.result_value).to eq 12
   end
 
-  it 'can define a specialized procedure with no arguments and call it' do
+  it 'calls a defined specialized procedure with no arguments' do
     workspace.add_source_string '(sequence((define sp ((procedure () 13) specialize (ConcreteProcedure () Integer))) (sp call)))'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
@@ -43,7 +43,7 @@ RSpec.describe Workspace do
     expect(workspace.result_value).to eq(true)
   end
 
-  it 'correctly calls a procedure referencing a static variable' do
+  it 'calls a procedure referencing a static variable in an outer scope' do
     workspace.add_source_string '(sequence ((define x 12) (((procedure () (x + 1)) specialize (ConcreteProcedure () Integer)) call)))'
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
@@ -84,12 +84,16 @@ RSpec.describe Workspace do
   end
 
   it 'returns the value of a conditional expression inside of a procedure' do
-    workspace.add_source_string '(define quantize (procedure (x) (if (x > 50) 100 0)))'
-    workspace.add_source_string '(define quantize_integer (quantize specialize (ConcreteProcedure (Integer) Integer)))'
-    workspace.add_source_string '(quantize_integer call 51)'
-    workspace.evaluate!
-    expect(workspace.result_type).to eq(Types::Integer.instance)
-    expect(workspace.result_value).to eq(100)
+    begin
+      workspace.add_source_string '(define quantize (procedure (x) (if (x > 50) 100 0)))'
+      workspace.add_source_string '(define quantize_integer (quantize specialize (ConcreteProcedure (Integer) Integer)))'
+      workspace.add_source_string '(quantize_integer call 51)'
+      workspace.evaluate!
+      expect(workspace.result_type).to eq(Types::Integer.instance)
+      expect(workspace.result_value).to eq(100)
+    rescue => e
+      binding.irb
+    end
   end
 
   it 'specializes and calls recursive procedures' do

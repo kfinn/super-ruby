@@ -2,29 +2,25 @@ module Jobs
   class MessageSendTypeInference
     prepend BaseJob
 
-    def initialize(receiver_type_inference, message, argument_s_expressions)
-      @receiver_type_inference = receiver_type_inference
-      @message = message
-      @argument_s_expressions = argument_s_expressions
+    def initialize(ast_node)
+      @ast_node = ast_node
     end
-    attr_reader :receiver_type_inference, :message, :argument_s_expressions
-    attr_accessor :added_downstream, :decorated_receiver_type_inference, :result_type_inference
+    attr_reader :ast_node
+    delegate :message, :argument_s_expressions, to: :ast_node
+    attr_accessor :receiver_type_inference, :decorated_receiver_type_inference, :result_type_inference, :argument_type_inferences
     delegate :type, to: :result_type_inference, allow_nil: true
 
     def complete?
-      receiver_type_inference.complete? && result_type_inference&.complete?
+      receiver_type_inference&.complete? && result_type_inference&.complete?  && argument_type_inferences&.all?(&:complete?)
     end
 
     def type_check
-      @type_check ||= MessageSendTypeCheck.new(
-        receiver_type_inference,
-        result_type_inference
-      )
+      @type_check ||= MessageSendTypeCheck.new(self)
     end
 
     def work!
-      if !added_downstream
-        self.added_downstream = true
+      if !receiver_type_inference
+        self.receiver_type_inference = ast_node.receiver_type_inference
         receiver_type_inference.add_downstream(self)
       end
       return unless receiver_type_inference.complete?
@@ -34,6 +30,12 @@ module Jobs
         decorated_receiver_type_inference.add_downstream self
       end
       return unless decorated_receiver_type_inference.complete?
+
+      if argument_type_inferences.nil?
+        self.argument_type_inferences = receiver_type_inference.type.message_send_argument_type_inferences(self)
+        argument_type_inferences.each { |argument_type_inference| argument_type_inference.add_downstream self }
+      end
+      return unless argument_type_inferences.all?(&:complete?)
 
       if result_type_inference.nil?
         self.result_type_inference =

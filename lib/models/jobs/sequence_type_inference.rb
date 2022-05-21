@@ -2,14 +2,15 @@ module Jobs
   class SequenceTypeInference
     prepend BaseJob
 
-    def initialize(child_type_inferences)
-      @child_type_inferences = child_type_inferences
+    def initialize(ast_node)
+      @ast_node = ast_node
     end
-    attr_reader :child_type_inferences
-    attr_accessor :added_downstreams
+    attr_reader :ast_node
+    attr_accessor :child_type_inferences
+    delegate :child_ast_nodes, to: :ast_node
 
     def complete?
-      child_type_inferences.all?(&:complete?)
+      child_type_inferences&.all?(&:complete?)
     end
 
     def type_check
@@ -17,11 +18,21 @@ module Jobs
     end
 
     def work!
-      if !added_downstreams
-        self.added_downstreams = true
-        child_type_inferences.each do |child_type_inference|
-          child_type_inference.add_downstream self
-        end
+      if child_type_inferences.nil?
+        self.child_type_inferences =
+          Workspace
+            .current_workspace
+            .with_current_super_binding(
+              Workspace
+                .current_workspace
+                .current_super_binding
+                .spawn(inherit_dynamic_locals: true)
+            ) do
+              child_ast_nodes.map do |child_ast_node|
+                Workspace.type_inference_for(child_ast_node)
+              end
+            end
+        child_type_inferences.each { |child_type_inference| child_type_inference.add_downstream self }
       end
     end
 
@@ -30,7 +41,7 @@ module Jobs
     end
 
     def to_s
-      "(sequence (#{child_type_inferences.map(&:to_s).join(" ")}))"
+      "(sequence (#{child_type_inferences&.map(&:to_s)&.join(" ")}))"
     end
   end
 end

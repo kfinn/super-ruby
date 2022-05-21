@@ -14,7 +14,7 @@ module SExpressions
 
     delegate :text, to: :token
 
-    def to_s
+    def to_s(depth=0)
       text
     end
 

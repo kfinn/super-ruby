@@ -19,7 +19,7 @@ module Types
         raise "Invalid name: expected identifier, but got #{type_inference.argument_s_expressions.first}" unless type_inference.argument_s_expressions.first.atom?
         raise "Invalid arguments: expected arguments list, but got #{type_inference.argument_s_expressions.second}" unless AstNodes::ArgumentListDefinition.match?(type_inference.argument_s_expressions.second)
 
-        type_inference.receiver_type_inference.value.add_method_definition(
+        type_inference.decorated_receiver_type_inference.value.add_method_definition(
           type_inference.argument_s_expressions.first.text,
           AstNodes::ArgumentListDefinition.new(type_inference.argument_s_expressions.second).map(&:name),
           type_inference.argument_s_expressions.third.ast_node

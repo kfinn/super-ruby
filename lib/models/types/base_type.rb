@@ -6,6 +6,10 @@ module Types
       message_send_type_inference.receiver_type_inference
     end
 
+    def message_send_argument_type_inferences(message_send_type_inference)
+      Workspace.type_inferences_for message_send_type_inference.argument_ast_nodes
+    end
+
     def message_send_result_type_inference(message_send_type_inference)
       if message_send_type_inference.message.in? abstract_methods_by_name
         abstract_method = abstract_methods_by_name[message_send_type_inference.message]

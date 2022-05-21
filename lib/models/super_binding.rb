@@ -16,18 +16,43 @@ class SuperBinding
   attr_reader :parent, :inherit_dynamic_locals, :static_locals, :dynamic_local_type_inferences, :dynamic_local_values
   alias inherit_dynamic_locals? inherit_dynamic_locals
 
-  delegate :super_respond_to?, :receiver_type_inference_for, :receiver_type_inference_for!, :build_receiver_bytecode_for!, to: :parent
-
-  def fetch_type_inference(name, include_dynamic_locals: true)
-    return dynamic_local_type_inferences[name] if include_dynamic_locals && dynamic_local_type_inferences.include?(name)
-    return static_locals[name] if static_locals.include?(name)
-    parent.fetch_type_inference(name, include_dynamic_locals: inherit_dynamic_locals && include_dynamic_locals)
+  def super_respond_to?(message_send)
+    receiver_type_inference_for(message_send).present?
   end
 
-  def has_dynamic_binding?(name)
-    return true if name.in? dynamic_local_type_inferences
-    return parent.has_dynamic_binding?(name) if inherit_dynamic_locals
-    false
+  def receiver_type_inference_for!(message_send)
+    receiver_type_inference_for(message_send).tap do |receiver_type_inference|
+      raise "programmer error: no receiver type inference for #{message_send}" unless receiver_type_inference.present?
+    end
+  end
+
+  def receiver_type_inference_for(message_send)
+    puts "searching for type_inference for #{message_send.message} within #{to_s}" if ENV['DEBUG']
+
+    return nil if message_send.argument_s_expressions.any?
+    responder = responder_chain.find do |responder|
+      responder.super_respond_to? message_send
+    end
+    responder&.job
+  end
+
+  def responder_chain
+    @responder_chain ||= dynamic_responder_chain + static_responder_chain
+  end
+
+  def dynamic_responder_chain
+    @dynamic_responder_chain ||= (
+      [Types::DynamicSuperBinding.new(self)] +
+      (inherit_dynamic_locals? ? parent.dynamic_responder_chain : [])
+    )
+  end
+
+  def static_responder_chain
+    @static_responder_chain ||= ([Types::StaticSuperBinding.new(self)] + parent.static_responder_chain)
+  end
+
+  def build_receiver_bytecode_for!(message_send)
+    message_send.receiver_type_inference.type.build_receiver_bytecode!(message_send)
   end
 
   def has_static_binding?(name)
@@ -98,28 +123,18 @@ class SuperBinding
     dynamic_local_type_inferences.keys.map { |name| [self, name] } + downstream_super_bindings.flat_map(&:all_downstream_dynamic_locals)
   end
 
+  def inspect
+    to_s
+  end
+
   def to_s
-    flattened_bindings = {}
-
-    current_super_binding_for_dynamics = self
-    while current_super_binding_for_dynamics.present?
-      current_super_binding_for_dynamics.dynamic_local_type_inferences.each do |local|
-        next if local.name.in? flattened_bindings
-        flattened_bindings[local.name] = local.value.complete? ? local.value.type.to_s : "?"
-      end
-      current_super_binding_for_dynamics =
-        current_super_binding_for_dynamics.inherit_dynamic_locals? ? current_super_binding_for_dynamics.parent : nil
-    end
-
-    current_super_binding_for_statics = self
-    while current_super_binding_for_statics.present?
-      current_super_binding_for_statics.static_locals.each do |local|
-        next if local.name.in? flattened_bindings
-        flattened_bindings[local.name] = local.value.complete? ? local.value.type.to_s : "?"
-      end
-      current_super_binding_for_statics = current_super_binding_for_statics.parent
-    end
-
-    flattened_bindings.to_s
+    "<super binding>"
+    # <<~TXT.squish
+    #   ( 
+    #     dynamics: #{dynamic_local_type_inferences.keys.join(", ")},
+    #     statics: #{static_locals.keys.join(", ")},
+    #     parent: #{parent.to_s}
+    #   )
+    # TXT
   end
 end

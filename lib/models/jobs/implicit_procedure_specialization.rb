@@ -19,7 +19,7 @@ module Jobs
       concrete_procedure.present?
     end
 
-    attr_accessor :cached_implicit_procedure_specialization, :own_body_type_inference
+    attr_accessor :cached_implicit_procedure_specialization, :own_body_type_inference, :body
 
     def body_type_inference
       cached_implicit_procedure_specialization&.own_body_type_inference || own_body_type_inference
@@ -45,7 +45,7 @@ module Jobs
               super_binding_builder.set_dynamic_type_inference(argument_name, Jobs::ImmediateTypeInference.new(argument_type))
             end
           self.own_body_type_inference = Workspace.with_current_super_binding(own_body_type_inference_super_binding) do
-            Workspace.type_inference_for body
+            Workspace.type_inference_for(AstNode.from_s_expression(abstract_procedure.body_s_expression))
           end
           own_body_type_inference.add_downstream(self)
         else
@@ -55,15 +55,11 @@ module Jobs
       return unless body_type_inference&.complete?
       
       self.concrete_procedure = Types::ConcreteProcedure.new(argument_types, body_type_inference.type)
-    end
-
-    def body
-      @body ||= abstract_procedure.body.dup
+      self.body = body_type_inference.ast_node
     end
 
     def to_s
-      # "(#{abstract_procedure.to_s} implicitly_specialize (#{argument_type_inferences.map { |argument_type_inference| " #{argument_type_inference.to_s}" }.join}))"
-      ""
+      "(#{abstract_procedure.to_s} implicitly_specialize (#{argument_type_inferences.map { |argument_type_inference| " #{argument_type_inference.to_s}" }.join}))"
     end
   end
 end
