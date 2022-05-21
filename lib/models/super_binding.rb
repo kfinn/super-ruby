@@ -56,9 +56,7 @@ class SuperBinding
   end
 
   def has_static_binding?(name)
-    return true if name.in? static_locals
-    return parent.has_static_binding?(name)
-    false
+    name.in? static_locals
   end
   
   def set_static_type_inference(name, type_inference)
@@ -69,27 +67,12 @@ class SuperBinding
     dynamic_local_type_inferences[name] = type_inference
   end
 
-  def set_dynamic_value(name, value)
-    raise "attempting to set dynamic value for unbound name #{name}" unless name.in? dynamic_local_type_inferences
-    raise "attempting to redefine dynamic value for #{name}" unless name.in? dynamic_local_type_inferences
-    dynamic_local_values[name] = value
-  end
-
   def fetch_dynamic_slot_index(name)
     dynamic_local_slots_by_super_binding_and_name.fetch([self, name])
   end
 
   def fetch_static_type_inference(name)
-    static_locals.fetch(name) { parent.fetch_static_type_inference(name) }
-  end
-
-  def validate_name(name)
-    raise "attempting to redefine #{name}" if name.in? static_locals
-    current_super_binding = self
-    while current_super_binding.inherit_dynamic_locals
-      raise "attempting to redefine #{name}" if name.in? dynamic_local_type_inferences
-      current_super_binding = current_super_binding.parent
-    end
+    static_locals[name]
   end
 
   def spawn(inherit_dynamic_locals: false)
@@ -129,12 +112,5 @@ class SuperBinding
 
   def to_s
     "<super binding>"
-    # <<~TXT.squish
-    #   ( 
-    #     dynamics: #{dynamic_local_type_inferences.keys.join(", ")},
-    #     statics: #{static_locals.keys.join(", ")},
-    #     parent: #{parent.to_s}
-    #   )
-    # TXT
   end
 end

@@ -253,9 +253,8 @@ RSpec.describe Workspace do
         (define method_definer
           (procedure (t) (t define_method my_method () (self + 1)))
         )
-        (define MyInteger Integer)
-        (method_definer call MyInteger)
-        (let my_integer MyInteger 7)
+        (method_definer call Integer)
+        (let my_integer Integer 7)
         (my_integer my_method)
       ))
     SUPER

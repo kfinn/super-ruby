@@ -10,7 +10,7 @@ module Types
     alias state super_binding_value
 
     def super_respond_to?(message_send)
-      message_send.argument_s_expressions.empty? && message_send.message.in?(super_binding_value.static_locals)
+      message_send.argument_s_expressions.empty? && super_binding_value.has_static_binding?(message_send.message)
     end
 
     def message_send_result_type_inference(type_inference)
