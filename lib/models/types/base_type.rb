@@ -75,10 +75,10 @@ module Types
       self.class.name.split("::").last
     end
 
-    def add_method_definition(name, argument_names, body)
+    def add_method_definition(name, argument_names, body_s_expression)
       abstract_methods_by_name[name] = AbstractProcedure.new(
         ['self'] + argument_names,
-        body
+        body_s_expression
       )
     end
 

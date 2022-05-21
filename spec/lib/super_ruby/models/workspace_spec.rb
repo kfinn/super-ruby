@@ -237,9 +237,8 @@ RSpec.describe Workspace do
   it 'allows defining and calling methods on types' do
     workspace.add_source_string <<~SUPER
       (sequence(
-        (define MyInteger Integer)
-        (MyInteger define_method foo () self)
-        (let x MyInteger 13)
+        (Integer define_method foo () self)
+        (let x Integer 13)
         (x foo)
       ))
     SUPER

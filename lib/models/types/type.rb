@@ -12,6 +12,15 @@ module Types
       end
     end
 
+    def message_send_argument_type_inferences(message_send_type_inference)
+      case message_send_type_inference.message
+      when 'define_method'
+        []
+      else
+        super
+      end
+    end
+
     def message_send_result_type_inference(type_inference)
       case type_inference.message
       when 'define_method'
@@ -22,7 +31,7 @@ module Types
         type_inference.decorated_receiver_type_inference.value.add_method_definition(
           type_inference.argument_s_expressions.first.text,
           AstNodes::ArgumentListDefinition.new(type_inference.argument_s_expressions.second).map(&:name),
-          type_inference.argument_s_expressions.third.ast_node
+          type_inference.argument_s_expressions.third
         )
 
         Jobs::ImmediateTypeInference.new(Types::Void.instance)
