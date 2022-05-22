@@ -2,22 +2,27 @@ module Jobs
   class LetTypeInference
     prepend BaseJob
 
-    def initialize(ast_node)
-      @ast_node = ast_node
-
-      @type_static_evaluation_type_inference = StaticEvaluationTypeInference.new(type_ast_node)
-      @type_type_inference = TypeInferenceGivenByEvaluation.new(type_static_evaluation_type_inference)
-      @value_type_inference = Workspace.type_inference_for(value_ast_node) if value_ast_node.present?
+    def initialize(message_send_type_inference, type_type_inference)
+      @message_send_type_inference = message_send_type_inference
+      @type_type_inference = type_type_inference
     end
-    attr_reader :ast_node, :type_static_evaluation_type_inference, :type_type_inference, :value_type_inference
-    delegate :type_ast_node, :value_ast_node, to: :ast_node
+    attr_reader :message_send_type_inference, :type_type_inference
+    attr_accessor :value_ast_node, :value_type_inference
+    delegate :argument_s_expressions, to: :message_send_type_inference
 
-    def type
-      Types::Void.instance
+    def work!
+      unless instance_variable_defined?(:@value_type_inference)
+        self.value_ast_node = argument_s_expressions.size == 3 ? AstNode.from_s_expression(argument_s_expressions.third) : nil
+        self.value_type_inference = value_ast_node.present? ? Workspace.type_inference_for(value_ast_node) : nil
+      end
     end
 
     def complete?
-      true
+      instance_variable_defined?(:@value_type_inference)
+    end
+
+    def type
+      Types::Void.instance
     end
 
     def type_check

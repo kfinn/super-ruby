@@ -10,13 +10,39 @@ module Types
     alias state super_binding_value
 
     def super_respond_to?(message_send)
-      message_send.argument_s_expressions.empty? && message_send.message.in?(super_binding_value.dynamic_local_type_inferences)
+      if message_send.argument_s_expressions.empty? && message_send.message.in?(super_binding_value.dynamic_local_type_inferences)
+        true
+      elsif message_send.message == 'let'
+        if !message_send.argument_s_expressions.size.in?(2..3) || !message_send.argument_s_expressions.first.atom?
+          raise "Invalid let: expected (let <name> <Type> [<initial  value>]), got (let #{message_send.argument_s_expressions.join(" ")})" 
+        end
+  
+        super_binding_value.set_dynamic_type_inference( 
+          message_send.argument_s_expressions.first.text,
+          Jobs::TypeInferenceGivenByEvaluation.new(
+            Jobs::StaticEvaluationTypeInference.new(
+              AstNode.from_s_expression(
+                message_send.argument_s_expressions.second
+              )
+            )
+          )
+        )
+
+        true
+      end
     end
 
     def message_send_result_type_inference(type_inference)
-      if type_inference.message.in?(super_binding_value.dynamic_local_type_inferences)
+      if type_inference.message == 'let'
+        Jobs::LetTypeInference.new(
+          type_inference,
+          super_binding_value.fetch_dynamic_type_inference(
+            type_inference.argument_s_expressions.first.text
+          )
+        )
+      elsif type_inference.message.in?(super_binding_value.dynamic_local_type_inferences)
         raise "Invalid define: expected 0 arguments, but got #{type_inference.argument_s_expressions.size}" unless type_inference.argument_s_expressions.size == 0
-        super_binding_value.dynamic_local_type_inferences[type_inference.message]
+        super_binding_value.fetch_dynamic_type_inference(type_inference.message)
       else
         super
       end
@@ -28,7 +54,18 @@ module Types
     end
 
     def build_message_send_bytecode!(type_inference)
-      if type_inference.message.in?(super_binding_value.dynamic_local_type_inferences)
+      if type_inference.message == 'let'
+        Workspace.current_bytecode_builder << Opcodes::DISCARD
+        if type_inference.result_type_inference.value_ast_node.present?
+          type_inference.result_type_inference.value_ast_node.build_bytecode!(
+            type_inference.result_type_inference.value_type_inference
+          )
+          Workspace.current_bytecode_builder << Opcodes::SET_LOCAL
+          Workspace.current_bytecode_builder << super_binding_value.fetch_dynamic_slot_index(type_inference.argument_s_expressions.first.text)
+        end
+        Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
+        Workspace.current_bytecode_builder << Types::Void.instance  
+      elsif type_inference.message.in?(super_binding_value.dynamic_local_type_inferences)
         Workspace.current_bytecode_builder << Opcodes::DISCARD
         Workspace.current_bytecode_builder << Opcodes::LOAD_LOCAL
         Workspace.current_bytecode_builder << super_binding_value.fetch_dynamic_slot_index(type_inference.message)

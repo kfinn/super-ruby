@@ -3,7 +3,6 @@ module AstNode
     AstNodes::ImplicitSelfMessageSendThunk,
     AstNodes::ImplicitSelfMessageSend,
     AstNodes::Define,
-    AstNodes::Let,
     AstNodes::ProcedureDefinition,
     AstNodes::ConcreteProcedureLiteral,
     AstNodes::If,

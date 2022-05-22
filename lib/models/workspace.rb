@@ -44,7 +44,7 @@ class Workspace
       end
       sources_awaiting_static_pass.clear
 
-      work_queue.pump! while work_queue.any?
+      work_queue.pump! while result.incomplete?
     end
   end
 

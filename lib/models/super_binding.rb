@@ -29,7 +29,6 @@ class SuperBinding
   def receiver_type_inference_for(message_send)
     puts "searching for type_inference for #{message_send.message} within #{to_s}" if ENV['DEBUG']
 
-    return nil if message_send.argument_s_expressions.any?
     responder = responder_chain.find do |responder|
       responder.super_respond_to? message_send
     end
@@ -69,6 +68,10 @@ class SuperBinding
 
   def fetch_dynamic_slot_index(name)
     dynamic_local_slots_by_super_binding_and_name.fetch([self, name])
+  end
+
+  def fetch_dynamic_type_inference(name)
+    dynamic_local_type_inferences[name]
   end
 
   def fetch_static_type_inference(name)

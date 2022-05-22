@@ -15,7 +15,7 @@ module AstNodes
     end
 
     def build_bytecode!(type_inference)
-      Workspace.current_super_binding.build_receiver_bytecode_for!(type_inference.message)
+      Workspace.current_super_binding.build_receiver_bytecode_for!(type_inference)
       type_inference.receiver_type_inference.type.build_message_send_bytecode! type_inference
     end
 
