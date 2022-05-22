@@ -62,8 +62,15 @@ class SuperBinding
     static_locals[name] = type_inference
   end
 
-  def set_dynamic_type_inference(name, type_inference)
+  def set_dynamic_type_inference(name, type_inference, mutable: false)
     dynamic_local_type_inferences[name] = type_inference
+    if mutable
+      setter_names << "#{name}="
+    end
+  end
+
+  def setter_names
+    @setter_names ||= []
   end
 
   def fetch_dynamic_slot_index(name)

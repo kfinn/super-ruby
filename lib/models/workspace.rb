@@ -34,13 +34,13 @@ class Workspace
   end
 
   def evaluate!
-    self.class.with_current_workspace(self) do
+    as_current_workspace do
       sources_awaiting_static_pass.each do |source|
         root_s_expressions = SExpression.from_tokens(Lexer.new(source).each_token)
         root_s_expressions.each do |root_s_expression|
-          root_ast_node = AstNode.from_s_expression(root_s_expression)
-          self.result = Jobs::Evaluation.new(root_ast_node).tap(&:enqueue!)
+          type_inference_for(root_s_expression.ast_node)
         end
+        self.result = Jobs::Evaluation.new(root_s_expressions.last.ast_node).tap(&:enqueue!)
       end
       sources_awaiting_static_pass.clear
 

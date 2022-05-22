@@ -33,7 +33,7 @@ module Jobs
     end
 
     def in_context
-      Workspace.with_current_workspace(workspace) do
+      workspace.as_current_workspace do
         Workspace.with_current_super_binding(super_binding) do
           yield
         end

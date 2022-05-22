@@ -1,5 +1,5 @@
 class WorkQueue
-  delegate :any?, to: :jobs_list
+  delegate :any?, :size, to: :jobs_set
 
   def pump!
     job = jobs_list.shift
