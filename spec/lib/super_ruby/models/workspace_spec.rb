@@ -246,14 +246,14 @@ RSpec.describe Workspace do
   it 'allows defining and calling methods on types' do
     workspace.add_source_string <<~SUPER
       (sequence(
-        (Integer define_method foo () self)
+        (Integer define_method foo () 14)
         (let x Integer 13)
         (x foo)
       ))
     SUPER
     workspace.evaluate!
     expect(workspace.result_type).to eq(Types::Integer.instance)
-    expect(workspace.result_value).to eq 13
+    expect(workspace.result_value).to eq 14
   end
 
   it 'allows calling a procedure which defines a variable' do
