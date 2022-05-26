@@ -23,10 +23,6 @@ module Jobs
       @evaluation ||= Evaluation.new(ast_node, type_inference: ast_node_type_inference, type_check: type_check)
     end
 
-    delegate :value, to: :evaluation
-
-    def build_static_value_llvm!
-      type.build_static_value_llvm!(value)
-    end
+    delegate :value, :build_static_value_llvm!, to: :evaluation
   end
 end

@@ -13,7 +13,7 @@ module Jobs
     end
     attr_reader :condition_type_inference, :then_branch_type_inference, :else_branch_type_inference
     attr_accessor :type_checks
-    attr_accessor :validated, :valid
+    attr_accessor :validated, :valid, :errors
     alias valid? valid
     alias complete? validated
 
@@ -33,6 +33,7 @@ module Jobs
 
       self.validated = true
       self.valid = type_checks.all?(&:valid?) && condition_type_inference.type == Types::Boolean.instance
+      self.errors = type_checks.flat_map(&:errors) + (condition_type_inference.type == Types::Boolean.instance ? [] : ["Expected #{Types::Boolean.instance.to_s}, actual: #{condition_type_inference.type.to_s}"])
     end
   end
 end

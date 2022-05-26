@@ -17,6 +17,10 @@ module Jobs
       child_type_checks.all?(&:valid?)
     end
 
+    def errors
+      child_type_checks.flat_map(&:errors)
+    end
+
     def work!
       if !added_downstreams
         self.added_downstreams = true

@@ -64,8 +64,10 @@ class Workspace
   def evaluate!
     as_current_workspace do
       result_s_expression = process_sources_awaiting_static_pass!
-      self.result = Jobs::Evaluation.new(result_s_expression.ast_node).tap(&:enqueue!)
+      result = Jobs::Evaluation.new(result_s_expression.ast_node).tap(&:enqueue!)
       work_queue.pump! while (result.incomplete? && work_queue.any?)
+      self.result_type = result.type
+      self.result_value = result.value
     end
   end
 
@@ -86,8 +88,7 @@ class Workspace
     end
   end
 
-  attr_accessor :result
-  delegate :type, :value, to: :result, prefix: true
+  attr_accessor :result_type, :result_value
 
   def current_super_binding
     @current_super_binding ||= global_super_binding

@@ -5,7 +5,7 @@ module Jobs
       @let_type_inference = let_type_inference
     end
     attr_reader :let_type_inference
-    attr_accessor :added_downstreams, :value_type_check, :type_type_check, :valid, :validated
+    attr_accessor :added_downstreams, :value_type_check, :type_type_check, :valid, :validated, :errors
     delegate :type_type_inference, :value_type_inference, to: :let_type_inference
     alias valid? valid
     alias complete? validated
@@ -38,6 +38,13 @@ module Jobs
         type_type_check.valid? &&
         (value_type_check.nil? || value_type_check.valid?) &&
         (value_type_inference.nil? || value_type_inference.type == type_type_inference.type)
+      )
+      self.errors = (
+        type_type_check.errors +
+        (value_type_check&.errors || []) +
+        (
+          value_type_inference.nil? || value_type_inference.type == type_type_inference.type ? [] : ["Expected: #{type_type_inference.type.to_s}, actual: #{value_type_inference.type.to_s}"]
+        )
       )
     end
   end

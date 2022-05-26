@@ -7,7 +7,7 @@ module Jobs
       @argument_type_inferences = argument_type_inferences
     end
     attr_reader :concrete_procedure, :argument_type_inferences
-    attr_accessor :added_downstreams, :argument_type_checks, :validated, :valid
+    attr_accessor :added_downstreams, :argument_type_checks, :validated, :valid, :errors
 
     def argument_types
       @argument_types ||= argument_type_inferences.map(&:type)
@@ -33,11 +33,12 @@ module Jobs
       return unless argument_type_checks.all?(&:complete?)
 
       self.validated = true
-      mismatched_arguments = []
+      mismatched_argument_errors = []
       concrete_procedure.argument_types.zip(argument_types).each_with_index do |(expected_argument, actual_argument), index|
-        mismatched_argument_indices << index if expected_argument != actual_argument
+        mismatched_argument_errors << "Expected: #{expected_argument.to_s}, got: #{actual_argument.to_s}" if expected_argument != actual_argument
       end
-      self.valid = argument_type_checks.all?(&:valid?) && mismatched_arguments.empty?
+      self.valid = argument_type_checks.all?(&:valid?) && mismatched_argument_errors.empty?
+      self.errors = argument_type_checks.flat_map(&:errors) + mismatched_argument_errors
     end
   end
 end

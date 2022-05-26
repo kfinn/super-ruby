@@ -115,7 +115,7 @@ module Types
         @argument_type_inference = argument_type_inference
       end
       attr_reader :argument_type_inference
-      attr_accessor :added_downstreams, :argument_type_check, :validated, :valid
+      attr_accessor :added_downstreams, :argument_type_check, :validated, :valid, :errors
       alias complete? validated
       alias valid? valid
 
@@ -132,6 +132,7 @@ module Types
         return unless argument_type_check.complete?
         self.validated = true
         self.valid = argument_type_inference.type == Integer.instance
+        self.errors = argument_type_inference.type == Integer.instance ? [] : ["Expected: #{Integer.instance.to_s}, actual: #{argument_type_inference.type}"]
       end
     end
   end

@@ -41,7 +41,7 @@ module Jobs
         type_inference.add_downstream self
       end
       attr_reader :type_inference
-      attr_accessor :valid, :validated
+      attr_accessor :valid, :validated, :errors
       alias valid? valid
       alias complete? validated
 
@@ -49,7 +49,8 @@ module Jobs
         return unless type_inference.complete?
 
         self.validated = true
-        self.valid = type_inference.type == Types::Type.instance
+        self.valid = type_inference.evaluation.type == Types::Type.instance
+        self.errors = type_inference.evaluation.type == Types::Type.instance ? [] : ["Expected: #{Types::Type.instance.to_s}, actual: #{type_inference.type.to_s}"]
       end
     end
 

@@ -12,6 +12,10 @@ module Jobs
     attr_reader :valid
     alias valid? valid
 
+    def errors
+      []
+    end
+
     def complete?
       true
     end

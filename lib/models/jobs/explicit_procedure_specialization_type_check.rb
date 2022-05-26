@@ -16,10 +16,8 @@ module Jobs
       implicit_procedure_specialization.concrete_procedure_instance
     end
 
-    attr_accessor :validated
+    attr_accessor :validated, :valid, :errors
     alias complete? validated
-
-    attr_accessor :valid
     alias valid? valid
 
     def concrete_procedure
@@ -47,6 +45,7 @@ module Jobs
 
       self.validated = true
       self.valid = implicit_procedure_specialization_type_check.valid? && implicit_procedure_specialization.type == concrete_procedure
+      self.errors = implicit_procedure_specialization_type_check.errors + (implicit_procedure_specialization.type == concrete_procedure ? [] : ["Expected: #{implicit_procedure_specialization.type.to_s}, actual: #{concrete_procedure.to_s}"])
     end
   end
 end

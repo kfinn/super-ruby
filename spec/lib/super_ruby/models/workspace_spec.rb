@@ -121,6 +121,22 @@ RSpec.describe Workspace do
       expect(workspace.result_value).to eq(8)
     end
 
+    xit 'specializes and calls a simpler recursive procedure' do
+      workspace.add_source_string <<~SUPER
+        (define sumtorial
+          (
+            (procedure (x) (if (x == 0) x (x + (sumtorial call (x - 1)))))
+            specialize
+            (ConcreteProcedure (Integer) Integer)
+          )
+        )
+        (sumtorial call 4)
+      SUPER
+      workspace.evaluate!
+      expect(workspace.result_type).to eq(Types::Integer.instance)
+      expect(workspace.result_value).to eq(10)
+    end
+
     it 'can call concrete procedures passed as function pointers' do
       workspace.add_source_string <<~SUPER
         (

@@ -8,7 +8,7 @@ module Jobs
     attr_reader :value_type_inference
     attr_accessor :added_downstreams, :value_type_check
 
-    delegate :complete?, :valid?, to: :value_type_check, allow_nil: true
+    delegate :complete?, :valid?, :errors, to: :value_type_check, allow_nil: true
 
     def work!
       if !added_downstreams

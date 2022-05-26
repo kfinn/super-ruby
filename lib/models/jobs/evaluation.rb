@@ -10,10 +10,11 @@ module Jobs
     attr_reader :ast_node
     attr_accessor :type_inference, :added_type_inference_downstream, :type_check, :added_type_check_downstream
     delegate :type, to: :type_inference
-    delegate :complete?, to: :type_check, allow_nil: true
+    delegate :complete?, :valid?, :errors, to: :type_check, allow_nil: true
 
     def value
       raise "attempting to access the value of #{ast_node.to_s} (#{(type_inference || 'nil').to_s}) before it is type checked" unless complete?
+      raise "attempting to access the value of #{ast_node.to_s} (#{(type_inference || 'nil').to_s}) but its type check failed: #{errors}" unless valid?
       in_context do
         @value ||= ast_node.evaluate(type_inference)
       end
@@ -40,6 +41,10 @@ module Jobs
 
     def to_s
       ast_node.s_expression.to_s
+    end
+
+    def build_static_value_llvm!
+      type.build_static_value_llvm!(value)
     end
   end
 end

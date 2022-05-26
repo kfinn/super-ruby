@@ -17,6 +17,10 @@ module Jobs
       receiver_type_check&.valid? && result_type_check&.valid? && argument_type_checks.all?(&:valid?)
     end
 
+    def errors
+      receiver_type_check.errors + result_type_check.errors + argument_type_checks.flat_map(&:errors)
+    end
+
     def work!
       if !added_downstream
         self.added_downstream = true
@@ -38,6 +42,10 @@ module Jobs
         self.argument_type_checks = argument_type_inferences.map(&:type_check)
         argument_type_checks.each { |argument_type_check| argument_type_check.add_downstream self }
       end
+    end
+
+    def to_s
+      "#{receiver_type_inference.type.to_s}##{message_send_type_inference.message}"
     end
   end
 end
