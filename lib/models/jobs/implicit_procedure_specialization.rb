@@ -52,10 +52,14 @@ module Jobs
           cached_implicit_procedure_specialization.add_downstream(self)
         end
       end
-      return unless body_type_inference&.complete?
-      
+      return unless body_type_inference.complete?
+
       self.concrete_procedure = Types::ConcreteProcedure.new(argument_types, body_type_inference.type)
       self.body = body_type_inference.ast_node
+    end
+
+    def type_check
+      @type_check ||= body_type_inference.type_check
     end
 
     def to_s

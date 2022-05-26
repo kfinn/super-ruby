@@ -69,20 +69,24 @@ module Types
           Workspace.current_basic_block <<
             case type_inference.message
             when '+'
-              "#{register.to_s} = add i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+              "#{register.to_s} = add #{build_llvm!} #{receiver_llvm_value}, #{argument_llvm_value}"
             when '-'
-              "#{register.to_s} = sub i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+              "#{register.to_s} = sub #{build_llvm!} #{receiver_llvm_value}, #{argument_llvm_value}"
             when '<'
-              "#{register.to_s} = icmp slt i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+              "#{register.to_s} = icmp slt #{build_llvm!} #{receiver_llvm_value}, #{argument_llvm_value}"
             when '>'
-              "#{register.to_s} = icmp sgt i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+              "#{register.to_s} = icmp sgt #{build_llvm!} #{receiver_llvm_value}, #{argument_llvm_value}"
             when '=='
-              "#{register.to_s} = icmp eq i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+              "#{register.to_s} = icmp eq #{build_llvm!} #{receiver_llvm_value}, #{argument_llvm_value}"
             end
         end
       else
         super
       end
+    end
+
+    def build_static_value_llvm!(value)
+      value
     end
 
     class BinaryOperatorTypeInference

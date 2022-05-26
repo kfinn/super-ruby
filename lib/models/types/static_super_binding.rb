@@ -47,6 +47,8 @@ module Types
       Workspace.current_bytecode_builder << self
     end
 
+    def build_receiver_llvm!(type_inference); end
+
     def build_message_send_bytecode!(type_inference)
       if type_inference.message == 'define'
         Workspace.current_bytecode_builder << Opcodes::DISCARD
@@ -56,6 +58,15 @@ module Types
         Workspace.current_bytecode_builder << Opcodes::DISCARD
         Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_bytecode_builder << super_binding_value.fetch_static_type_inference(type_inference.message).value
+      else
+        super
+      end
+    end
+
+    def build_message_send_llvm!(receiver_llvm_value, type_inference)
+      if type_inference.message == 'define'
+      elsif super_binding_value.has_static_binding?(type_inference.message)
+        super_binding_value.fetch_static_type_inference(type_inference.message).build_static_value_llvm!
       else
         super
       end

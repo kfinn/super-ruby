@@ -24,5 +24,9 @@ module Jobs
     end
 
     delegate :value, to: :evaluation
+
+    def build_static_value_llvm!
+      type.build_static_value_llvm!(value)
+    end
   end
 end

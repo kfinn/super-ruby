@@ -2,12 +2,12 @@ module Llvm
   class Register
     class << self
       def next_register_index
-        @next_register_index ||= 0
+        @next_register_index ||= 1
       end
       attr_writer :next_register_index
       
       def create!
-        new(next_register_index.to_s).tap do |created|
+        new("r#{next_register_index}").tap do |created|
           self.next_register_index += 1
           yield created if block_given?
         end

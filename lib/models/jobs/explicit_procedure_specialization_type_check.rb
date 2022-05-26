@@ -7,7 +7,7 @@ module Jobs
       @concrete_procedure_evaluation = concrete_procedure_evaluation
     end
     attr_reader :abstract_procedure, :concrete_procedure_evaluation
-    attr_accessor :added_downstreams, :implicit_procedure_specialization
+    attr_accessor :added_downstreams, :implicit_procedure_specialization, :implicit_procedure_specialization_type_check
     delegate :argument_types, to: :concrete_procedure
     delegate :argument_names, :ast_node, :workspace, :super_binding, to: :abstract_procedure
 
@@ -39,8 +39,14 @@ module Jobs
       end
       return unless implicit_procedure_specialization.complete?
 
+      if implicit_procedure_specialization_type_check.nil?
+        self.implicit_procedure_specialization_type_check = implicit_procedure_specialization.type_check
+        implicit_procedure_specialization_type_check.add_downstream(self)
+      end
+      return unless implicit_procedure_specialization_type_check.complete?
+
       self.validated = true
-      self.valid = implicit_procedure_specialization.type == concrete_procedure
+      self.valid = implicit_procedure_specialization_type_check.valid? && implicit_procedure_specialization.type == concrete_procedure
     end
   end
 end
