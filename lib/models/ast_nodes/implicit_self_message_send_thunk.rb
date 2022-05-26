@@ -18,6 +18,11 @@ module AstNodes
       type_inference.receiver_type_inference.type.build_message_send_bytecode! type_inference
     end
 
+    def build_llvm!(type_inference)
+      receiver_llvm_value = Workspace.current_super_binding.build_receiver_llvm_for!(type_inference)
+      type_inference.receiver_type_inference.type.build_message_send_llvm!(receiver_llvm_value, type_inference)
+    end
+
     def message
       s_expression.text
     end

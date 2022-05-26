@@ -46,6 +46,7 @@ module Jobs
         in_context { super }
       end
       downstreams.each(&:enqueue!) if complete?
+      puts "done working #{self}" if ENV['DEBUG']
     rescue StandardError => e
       raise BaseJobFailure.new(self, e)
     end

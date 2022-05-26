@@ -1,0 +1,7 @@
+(define main
+  (
+    (procedure () 3)
+    specialize
+    (ConcreteProcedure () Integer)
+  )
+)

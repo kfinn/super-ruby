@@ -20,5 +20,9 @@ module AstNodes
     def build_bytecode!(type_inference)
       raise "unimplemented: #{s_expression}"
     end
+
+    def build_llvm!(type_inference)
+      raise "unimplemented: #{s_expression} (#{self.class.to_s})"
+    end
   end
 end

@@ -44,7 +44,6 @@ module Types
         Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_bytecode_builder << implicit_procedure_specialization.concrete_procedure_instance.bytecode_pointer
 
-
         type_inference
           .argument_s_expressions
           .map(&:ast_node)
@@ -69,6 +68,10 @@ module Types
       else
         raise "invalid message: #{self.class.name}##{type_inference.message}"
       end
+    end
+
+    def build_message_send_llvm!(receiver_llvm_value, type_inference)
+      raise "invalid message: #{self.class.name}##{type_inference.message}"
     end
 
     def to_s

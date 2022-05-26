@@ -54,6 +54,10 @@ class SuperBinding
     message_send.receiver_type_inference.type.build_receiver_bytecode!(message_send)
   end
 
+  def build_receiver_llvm_for!(message_send)
+    message_send.receiver_type_inference.type.build_receiver_llvm!(message_send)
+  end
+
   def has_static_binding?(name)
     name.in? static_locals
   end

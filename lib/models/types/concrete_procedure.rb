@@ -4,11 +4,57 @@ module Types
     include DerivesEquality
 
     class Instance
-      def initialize(bytecode)
-        @bytecode = bytecode
+      def initialize(type, procedure_specialization)
+        @type = type
+        @procedure_specialization = procedure_specialization
       end
-      attr_reader :bytecode
+      attr_reader :type, :procedure_specialization
+      attr_accessor :started_bytecode_generation
+      alias started_bytecode_generation? started_bytecode_generation
+      attr_accessor :started_llvm_function_generation
+      alias started_llvm_function_generation? started_llvm_function_generation
+      delegate :build_body_super_binding, to: :type
       delegate :pointer, to: :bytecode, prefix: true
+
+      def bytecode
+        @bytecode ||= BufferBuilder.new
+        unless started_bytecode_generation?
+          self.started_bytecode_generation = true
+
+          in_procedure_specialization_context do
+            Workspace.with_current_bytecode_builder(@bytecode) do
+              procedure_specialization.body.build_bytecode!(procedure_specialization.body_type_inference)
+              Workspace.current_bytecode_builder << Opcodes::RETURN
+            end
+          end
+        end
+        @bytecode
+      end
+
+      def llvm_function
+        @llvm_function ||= Workspace.current_compilation.create_function!(type)
+        unless started_llvm_function_generation?
+          self.started_llvm_function_generation = true
+
+          in_procedure_specialization_context do
+            Workspace.with_current_basic_block(@llvm_function.entry_basic_block) do
+              return_llvm_value = procedure_specialization.body.build_llvm!(procedure_specialization.body_type_inference)
+              Workspace.current_basic_block << "ret #{return_llvm_value}"
+            end
+          end
+        end
+        @llvm_function
+      end
+
+      def in_procedure_specialization_context
+        procedure_specialization.workspace.as_current_workspace do
+          Workspace.with_current_super_binding(
+            build_body_super_binding(procedure_specialization)
+          ) do
+            yield
+          end
+        end
+      end
     end
 
     def initialize(argument_types, return_type)
@@ -73,22 +119,9 @@ module Types
     def instance(procedure_specialization)
       puts "instancing #{to_s} for #{procedure_specialization.to_s}" if ENV["DEBUG"]
       return instances_by_procedure_specialization[procedure_specialization] if instances_by_procedure_specialization.include? procedure_specialization
-
-      buffer_builder = BufferBuilder.new
-      result = Instance.new(buffer_builder)
-      instances_by_procedure_specialization[procedure_specialization] = result
-      procedure_specialization.workspace.with_current_super_binding(
-        build_body_super_binding(procedure_specialization)
-      ) do
-        procedure_specialization.workspace.with_current_bytecode_builder(
-          buffer_builder
-        ) do
-          procedure_specialization.body.build_bytecode!(procedure_specialization.body_type_inference)
-          Workspace.current_bytecode_builder << Opcodes::RETURN
-        end
+      Instance.new(self, procedure_specialization).tap do |instance|
+        instances_by_procedure_specialization[procedure_specialization] = instance
       end
-
-      result
     end
 
     private

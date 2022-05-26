@@ -48,6 +48,10 @@ module Types
       end
     end
 
+    def build_llvm!
+      'i64'
+    end
+
     class BinaryOperatorTypeInference
       prepend Jobs::BaseJob
 

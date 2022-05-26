@@ -44,6 +44,8 @@ module Types
       Workspace.current_bytecode_builder << self
     end
 
+    def build_receiver_llvm!(type_inference); end
+
     def build_message_send_bytecode!(type_inference)
       case type_inference.message
       when 'Integer'
@@ -70,6 +72,15 @@ module Types
         Workspace.current_bytecode_builder << Opcodes::DISCARD
         Workspace.current_bytecode_builder << Opcodes::LOAD_CONSTANT
         Workspace.current_bytecode_builder << (type_inference.message == 'true')  
+      else
+        super
+      end
+    end
+
+    def build_message_send_llvm!(receiver_llvm_value, type_inference)
+      case type_inference.message
+      when /^(0|-?[1-9](\d)*)$/
+        "i64 #{type_inference.message}"
       else
         super
       end
