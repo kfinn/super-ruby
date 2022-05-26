@@ -301,7 +301,6 @@ RSpec.describe Workspace do
       Tempfile.open("test.ll") do |file|
         workspace.compile!(file)
         file.rewind
-        puts file.path
         result = `/usr/local/opt/llvm/bin/lli #{file.path}`
       end
       expect(result).to eq("13\n")
