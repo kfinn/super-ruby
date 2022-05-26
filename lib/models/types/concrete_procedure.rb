@@ -39,7 +39,7 @@ module Types
           in_procedure_specialization_context do
             Workspace.with_current_basic_block(@llvm_function.entry_basic_block) do
               return_llvm_value = procedure_specialization.body.build_llvm!(procedure_specialization.body_type_inference)
-              Workspace.current_basic_block << "ret #{return_llvm_value}"
+              Workspace.current_basic_block << "ret #{type.return_type.build_llvm!} #{return_llvm_value}"
             end
           end
         end

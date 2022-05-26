@@ -29,20 +29,19 @@ module Types
               .argument_type_inference
           )
         
-        Workspace
-          .current_workspace
-          .current_bytecode_builder << case type_inference.message
-            when '+'
-              Opcodes::INTEGER_ADD
-            when '-'
-              Opcodes::INTEGER_SUBTRACT
-            when '<'
-              Opcodes::INTEGER_LESS_THAN
-            when '>'
-              Opcodes::INTEGER_GREATER_THAN
-            when '=='
-              Opcodes::INTEGER_EQUAL
-            end
+        Workspace.current_bytecode_builder <<
+          case type_inference.message
+          when '+'
+            Opcodes::INTEGER_ADD
+          when '-'
+            Opcodes::INTEGER_SUBTRACT
+          when '<'
+            Opcodes::INTEGER_LESS_THAN
+          when '>'
+            Opcodes::INTEGER_GREATER_THAN
+          when '=='
+            Opcodes::INTEGER_EQUAL
+          end
       else
         super
       end
@@ -50,6 +49,40 @@ module Types
 
     def build_llvm!
       'i64'
+    end
+
+    def build_message_send_llvm!(receiver_llvm_value, type_inference)
+      case type_inference.message
+      when '+', '-', '<', '>', '=='
+        argument_llvm_value =
+          type_inference
+            .argument_s_expressions
+            .first
+            .ast_node
+            .build_llvm!(
+              type_inference
+                .result_type_inference
+                .argument_type_inference
+            )
+          
+        Llvm::Register.create! do |register|
+          Workspace.current_basic_block <<
+            case type_inference.message
+            when '+'
+              "#{register.to_s} = add i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+            when '-'
+              "#{register.to_s} = sub i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+            when '<'
+              "#{register.to_s} = icmp slt i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+            when '>'
+              "#{register.to_s} = icmp sgt i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+            when '=='
+              "#{register.to_s} = icmp eq i64 #{receiver_llvm_value}, #{argument_llvm_value}"
+            end
+        end
+      else
+        super
+      end
     end
 
     class BinaryOperatorTypeInference

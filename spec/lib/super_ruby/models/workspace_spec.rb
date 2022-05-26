@@ -287,7 +287,7 @@ RSpec.describe Workspace do
   end
 
   describe "compile!" do
-    it 'allows compiling a simple program' do
+    it 'compiles an Integer constant' do
       workspace.add_source_string <<~SUPER
         (define main
           (
@@ -304,6 +304,26 @@ RSpec.describe Workspace do
         result = `/usr/local/opt/llvm/bin/lli #{file.path}`
       end
       expect(result).to eq("13\n")
+    end
+
+    it 'compiles addition between two Integer constants' do
+      workspace.add_source_string <<~SUPER
+        (define main
+          (
+            (procedure () (13 + 14))
+            specialize
+            (ConcreteProcedure () Integer)
+          )
+        )      
+      SUPER
+      result = nil
+      Tempfile.open("test.ll") do |file|
+        workspace.compile!(file)
+        file.flush
+        result = `/usr/local/opt/llvm/bin/lli #{file.path}`
+      end
+      expect($?.success?).to eq(true)
+      expect(result).to eq("27\n")
     end
   end
 end

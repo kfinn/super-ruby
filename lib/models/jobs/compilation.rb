@@ -43,6 +43,7 @@ module Jobs
 
       globals.each do |global|
         output << "#{global.to_s}\n"
+        puts "#{global.to_s}\n" if ENV['DEBUG']
       end
 
       self.complete = true

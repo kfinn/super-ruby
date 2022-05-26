@@ -19,6 +19,11 @@ module AstNodes
       type_inference.receiver_type_inference.type.build_message_send_bytecode! type_inference
     end
 
+    def build_llvm!(type_inference)
+      receiver_llvm_value = receiver_ast_node.build_llvm! type_inference.receiver_type_inference
+      type_inference.receiver_type_inference.type.build_message_send_llvm! receiver_llvm_value, type_inference
+    end
+
     def receiver_ast_node
       @receiver_ast_node ||= AstNode.from_s_expression(s_expression.first)
     end

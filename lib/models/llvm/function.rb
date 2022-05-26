@@ -26,7 +26,7 @@ module Llvm
     def to_s
       <<~LLVM
         define #{concrete_procedure.return_type.build_llvm!} @#{name}(#{arguments.map(&:to_s).join(', ')}) {
-          #{basic_blocks.map(&:to_s).join("\n")}
+        #{basic_blocks.map(&:to_s).join("\n")}
         }
       LLVM
     end

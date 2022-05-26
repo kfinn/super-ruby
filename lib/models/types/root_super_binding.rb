@@ -80,7 +80,7 @@ module Types
     def build_message_send_llvm!(receiver_llvm_value, type_inference)
       case type_inference.message
       when /^(0|-?[1-9](\d)*)$/
-        "i64 #{type_inference.message}"
+        "#{type_inference.message}"
       else
         super
       end
