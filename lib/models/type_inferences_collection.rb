@@ -1,10 +1,4 @@
 class TypeInferencesCollection
-  def initialize(workspace)
-    @workspace = workspace
-  end
-
-  attr_reader :workspace
-
   def type_inference_for(ast_node)
     return storage[ast_node] if ast_node.in? storage
 

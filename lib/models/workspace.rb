@@ -108,7 +108,7 @@ class Workspace
     self.current_super_binding = previous_super_binding
   end
 
-  delegate :type_inference_for, :type_inferences_for, to: :type_inferences
+  delegate :type_inference_for, :type_inferences_for, to: :current_super_binding
 
   def global_super_binding
     @global_super_binding ||= RootSuperBinding.instance.spawn
@@ -146,9 +146,5 @@ class Workspace
   
   def sources_awaiting_static_pass
     @sources_awaiting_static_pass ||= []
-  end
-
-  def type_inferences
-    @type_inferences ||= TypeInferencesCollection.new(self)
   end
 end

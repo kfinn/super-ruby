@@ -29,7 +29,7 @@ module SExpressions
     end
 
     def to_s(depth=0)
-      if depth >= 3
+      if depth >= 4
         "..."
       else
         "(#{map { |child| child.to_s(depth + 1) }.join(" ")})"

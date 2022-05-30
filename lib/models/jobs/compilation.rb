@@ -6,28 +6,27 @@ module Jobs
       @output = output
     end
     attr_reader :output
-    attr_accessor :main_procedure_type_inference, :main_procedure_type_check, :complete
+    attr_accessor :main_procedure_call_type_inference, :main_procedure_call_type_check, :complete
     alias complete? complete
 
     def work!
-      if main_procedure_type_inference.nil?
-        raise "no main procedure defined" unless Workspace.current_super_binding.has_static_binding? 'main'
-        self.main_procedure_type_inference = Workspace.current_super_binding.fetch_static_type_inference('main')
-        main_procedure_type_inference.add_downstream self
+      if main_procedure_call_type_inference.nil?
+        self.main_procedure_call_type_inference = Workspace.type_inference_for(SExpression.from_tokens(Lexer.new('(main call)').each_token).first.ast_node)
+        main_procedure_call_type_inference.add_downstream self
       end
-      return unless main_procedure_type_inference.complete?
+      return unless main_procedure_call_type_inference.complete?
 
-      if main_procedure_type_check.nil?
-        self.main_procedure_type_check = main_procedure_type_inference.type_check
-        main_procedure_type_check.add_downstream self
+      if main_procedure_call_type_check.nil?
+        self.main_procedure_call_type_check = main_procedure_call_type_inference.type_check
+        main_procedure_call_type_check.add_downstream self
       end
-      return unless main_procedure_type_check.complete?
+      return unless main_procedure_call_type_check.complete?
 
-      raise "main procedure failed typecheck" unless main_procedure_type_check.valid? && main_procedure_type_inference.type == Types::ConcreteProcedure.new([], Types::Integer.instance)
+      raise "main procedure failed typecheck: #{main_procedure_call_type_check.errors.join("\n")}" unless main_procedure_call_type_check.valid? && main_procedure_call_type_inference.type == Types::Integer.instance
       
       main_procedure_llvm_function = 
         as_current_compilation do
-          main_procedure_type_check.result_type_inference.concrete_procedure_instance.llvm_function
+          main_procedure_call_type_check.receiver_type_check.result_type_check.static_evaluation_type_inference.build_static_value_llvm!
         end
 
       globals <<  '@.output_format_string = private unnamed_addr constant [4 x i8] c"%d\0A\00"'

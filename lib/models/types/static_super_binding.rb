@@ -3,11 +3,17 @@ module Types
     include BaseType
     include DerivesEquality
 
-    def initialize(super_binding_value)
+    def initialize(super_binding_value, deferred_static_type_check: nil)
       @super_binding_value = super_binding_value
+      @deferred_static_type_check = deferred_static_type_check
     end
-    attr_reader :super_binding_value
+    attr_reader :super_binding_value, :deferred_static_type_check
     alias state super_binding_value
+
+    def with_deferred_static_type_check(new_deferred_static_type_check)
+      return self if deferred_static_type_check.present? || new_deferred_static_type_check.nil?
+      self.class.new(super_binding_value, deferred_static_type_check: new_deferred_static_type_check)
+    end
 
     def super_respond_to?(message_send)
       if message_send.argument_s_expressions.empty? && super_binding_value.has_static_binding?(message_send.message)
@@ -16,7 +22,7 @@ module Types
         if !message_send.argument_s_expressions.size == 2 || !message_send.argument_s_expressions.first.atom?
           raise "Invalid define: expected (define <name> <value>), got (define #{message_send.argument_s_expressions.join(" ")})" 
         end
-  
+
         super_binding_value.set_static_type_inference( 
           message_send.argument_s_expressions.first.text,
           Jobs::StaticEvaluationTypeInference.new(
@@ -36,7 +42,13 @@ module Types
           )
         )
       elsif super_binding_value.has_static_binding?(type_inference.message)
-        super_binding_value.static_locals[type_inference.message]
+        static_binding_value = super_binding_value.static_locals[type_inference.message]
+
+        if deferred_static_type_check.present?
+          Jobs::TypeInferenceWithDeferredTypeCheck.new(static_binding_value, deferred_static_type_check)
+        else
+          static_binding_value
+        end
       else
         super
       end

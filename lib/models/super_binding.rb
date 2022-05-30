@@ -2,18 +2,20 @@ class SuperBinding
   def initialize(
     parent:,
     inherit_dynamic_locals: false,
+    deferred_static_type_check: nil,
     static_locals: LocalsCollection.new,
     dynamic_local_type_inferences: LocalsCollection.new,
     dynamic_local_values: LocalsCollection.new
   )
     @parent = parent
     @inherit_dynamic_locals = inherit_dynamic_locals
+    @deferred_static_type_check = deferred_static_type_check
     @static_locals = static_locals
     @dynamic_local_type_inferences = dynamic_local_type_inferences
     @dynamic_local_values = dynamic_local_values
   end
 
-  attr_reader :parent, :inherit_dynamic_locals, :static_locals, :dynamic_local_type_inferences, :dynamic_local_values
+  attr_reader :parent, :inherit_dynamic_locals, :deferred_static_type_check, :static_locals, :dynamic_local_type_inferences, :dynamic_local_values
   alias inherit_dynamic_locals? inherit_dynamic_locals
 
   def super_respond_to?(message_send)
@@ -47,7 +49,12 @@ class SuperBinding
   end
 
   def static_responder_chain
-    @static_responder_chain ||= ([Types::StaticSuperBinding.new(self)] + parent.static_responder_chain)
+    @static_responder_chain ||= 
+      (
+        [Types::StaticSuperBinding.new(self)] + parent.static_responder_chain
+      ).map do |static_responder|
+        static_responder.with_deferred_static_type_check(deferred_static_type_check)
+      end
   end
 
   def build_receiver_bytecode_for!(message_send)
@@ -89,11 +96,12 @@ class SuperBinding
     static_locals[name]
   end
 
-  def spawn(inherit_dynamic_locals: false)
+  def spawn(inherit_dynamic_locals: false, deferred_static_type_check: nil)
     SuperBinding.
       new(
         parent: self,
-        inherit_dynamic_locals: inherit_dynamic_locals
+        inherit_dynamic_locals: inherit_dynamic_locals,
+        deferred_static_type_check: deferred_static_type_check
     ).tap do |spawned|
       downstream_super_bindings << spawned
     end
@@ -126,5 +134,11 @@ class SuperBinding
 
   def to_s
     "<super binding>"
+  end
+
+  delegate :type_inference_for, :type_inferences_for, to: :type_inferences
+
+  def type_inferences
+    @type_inferences ||= TypeInferencesCollection.new
   end
 end

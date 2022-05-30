@@ -17,7 +17,7 @@ module Types
       delegate :pointer, to: :bytecode, prefix: true
 
       def bytecode
-        @bytecode ||= BufferBuilder.new
+        @bytecode ||= BufferBuilder.new(self)
         unless started_bytecode_generation?
           self.started_bytecode_generation = true
 
@@ -122,6 +122,10 @@ module Types
       Instance.new(self, procedure_specialization).tap do |instance|
         instances_by_procedure_specialization[procedure_specialization] = instance
       end
+    end
+
+    def build_static_value_llvm!(value)
+      value.buffer_builder.owner.llvm_function
     end
 
     private

@@ -95,7 +95,7 @@ RSpec.describe Workspace do
       expect(workspace.result_value).to eq(100)
     end
 
-    xit 'specializes and calls recursive procedures' do
+    it 'specializes and calls recursive procedures' do
       workspace.add_source_string <<~SUPER
         (
           define
@@ -121,7 +121,7 @@ RSpec.describe Workspace do
       expect(workspace.result_value).to eq(8)
     end
 
-    xit 'specializes and calls a simpler recursive procedure' do
+    it 'specializes and calls a simpler recursive procedure' do
       workspace.add_source_string <<~SUPER
         (define sumtorial
           (

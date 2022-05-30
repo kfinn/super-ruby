@@ -1,4 +1,9 @@
 class BufferBuilder
+  def initialize(owner=nil)
+    @owner = owner
+  end
+  attr_reader :owner
+
   delegate :<<, :[], to: :storage
 
   def pointer

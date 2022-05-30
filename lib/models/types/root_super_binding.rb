@@ -11,6 +11,10 @@ module Types
     attr_reader :super_binding_value
     alias state super_binding_value
 
+    def with_deferred_static_type_check(new_deferred_static_type_check)
+      self
+    end
+
     def super_respond_to?(message_send)
       (
         message_send.argument_s_expressions.empty? &&
