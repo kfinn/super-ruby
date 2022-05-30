@@ -363,5 +363,21 @@ RSpec.describe Workspace do
       expect($?.success?).to eq(true)
       expect(result).to eq("24\n")
     end
+
+    it 'compiles a program that evaluates a conditional' do
+      workspace.add_source_string <<~SUPER
+        (define main ((procedure ()
+          (if (1 > 0) (if (1 > 2) 1 2) 3)
+        ) specialize (ConcreteProcedure () Integer)))
+      SUPER
+      result = nil
+      Tempfile.open("test.ll") do |file|
+        workspace.compile!(file)
+        file.flush
+        result = `/usr/local/opt/llvm/bin/lli #{file.path}`
+      end
+      expect($?.success?).to eq(true)
+      expect(result).to eq("2\n")
+    end
   end
 end

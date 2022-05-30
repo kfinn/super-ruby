@@ -35,6 +35,12 @@ module Llvm
       @basic_blocks ||= [entry_basic_block]
     end
 
+    def add_basic_block!
+      BasicBlock.new(self).tap do |basic_block|
+        basic_blocks << basic_block
+      end
+    end
+
     def entry_basic_block
       @entry_basic_block ||= BasicBlock.new(self)
     end

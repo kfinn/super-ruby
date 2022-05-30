@@ -79,6 +79,37 @@ module AstNodes
       Workspace.current_bytecode_builder = result_bytecode_builder
     end
 
+    def build_llvm!(type_inference)
+      condition_llvm_value = condition_ast_node.build_llvm!(type_inference.condition_type_inference)
+
+      then_entry_basic_block = Workspace.current_function.add_basic_block!
+      else_entry_basic_block = Workspace.current_function.add_basic_block!
+      result_basic_block = Workspace.current_function.add_basic_block!
+
+      Workspace.current_basic_block << "br i1 #{condition_llvm_value}, label %#{then_entry_basic_block.name}, label %#{else_entry_basic_block.name}"
+
+      then_llvm_value = nil
+      then_exit_basic_block = nil
+      Workspace.with_current_basic_block(then_entry_basic_block) do
+        then_llvm_value = then_branch_ast_node.build_llvm!(type_inference.then_branch_type_inference)
+        Workspace.current_basic_block << "br label %#{result_basic_block.name}"
+        then_exit_basic_block = Workspace.current_basic_block
+      end
+
+      else_llvm_value = nil
+      else_exit_basic_block = nil
+      Workspace.with_current_basic_block(else_entry_basic_block) do
+        else_llvm_value = else_branch_ast_node.build_llvm!(type_inference.else_branch_type_inference)
+        Workspace.current_basic_block << "br label %#{result_basic_block.name}"
+        else_exit_basic_block = Workspace.current_basic_block
+      end
+
+      result_llvm_value = Llvm::Register.create!
+      Workspace.current_basic_block = result_basic_block
+      Workspace.current_basic_block << "#{result_llvm_value} = phi #{type_inference.type.build_llvm!} [#{then_llvm_value}, %#{then_exit_basic_block.name}], [#{else_llvm_value}, %#{else_exit_basic_block.name}]"
+      result_llvm_value
+    end
+
     def condition_ast_node
       @condition_ast_node ||= AstNode.from_s_expression(s_expression.second)
     end

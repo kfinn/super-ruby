@@ -32,8 +32,10 @@ class Workspace
 
     delegate(
       :current_basic_block,
+      :current_basic_block=,
       :with_current_basic_block,
       :previous_value_register,
+      :current_function,
       to: :current_compilation
     )
   end
